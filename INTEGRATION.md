@@ -25,6 +25,8 @@ The host flow is the public `HVN games` gallery. A visitor opens the gallery, ch
 - Experiment rule: one clearly named variable per game at a time, stable assignment per browser, and variant results kept separate. Treat the results as directional for one player until a consented multi-player data path exists.
 - Adoption point: `site/src/play-intelligence.js` is the shared client layer. New games call `createGameTracker` and register one experiment only when the change is meaningful.
 
+The current shelf has three intentionally different loops: Phasebound (movement and phase matching), Skyhook (one-button altitude and gate threading), and Last Call (timed precision shots). New games should add a new verb or decision, not another skin for an existing loop.
+
 ## Proof run
 
 The proof run must build the site, boot it through the intended local or Pages route, click Play, exercise the primary verbs, complete or fail a run, and verify the restart and back-to-shelf paths. Browser screenshots cover the gallery, active play, and result states on desktop and narrow mobile.

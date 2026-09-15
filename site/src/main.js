@@ -1,11 +1,13 @@
 import "./styles.css";
 import { createGameTracker, getExperimentAssignment, getPlayReport, recordGalleryView, resetPlayReport } from "./play-intelligence.js";
+import { startSkyhook } from "../../games/skyhook/skyhook.js";
+import { startLastcall } from "../../games/lastcall/lastcall.js";
 
 const app = document.querySelector("#app");
 const base = import.meta.env.BASE_URL;
 const params = new URLSearchParams(window.location.search);
 
-if (params.get("game") === "phasebound") {
+if (params.get("game")) {
   renderGame();
 } else {
   renderGallery();
@@ -62,6 +64,16 @@ function renderGallery() {
             </div>
           </div>
         </article>
+        <div class="game-shelf-grid">
+          <article class="mini-game-card mini-game-card-skyhook">
+            <div class="mini-game-art"><span>02</span><b>SKYHOOK</b></div>
+            <div class="mini-game-copy"><h3>Skyhook</h3><p>Tap to climb. Thread the gap. The sky gets faster.</p><a class="text-link" href="${base}?game=skyhook">Play Skyhook <span aria-hidden="true">→</span></a></div>
+          </article>
+          <article class="mini-game-card mini-game-card-lastcall">
+            <div class="mini-game-art"><span>03</span><b>LAST CALL</b></div>
+            <div class="mini-game-copy"><h3>Last Call</h3><p>Hit the pink window ten times before the clock turns on you.</p><a class="text-link" href="${base}?game=lastcall">Play Last Call <span aria-hidden="true">→</span></a></div>
+          </article>
+        </div>
       </section>
 
       <section class="insights page-width" id="my-data" aria-labelledby="insights-title">
@@ -172,7 +184,54 @@ async function startShelfPreview() {
   return startPhasebound({ parent: "shelf-preview-root", preview: true, pacing: "steady" });
 }
 
+async function renderArcadeGame(gameId) {
+  const games = {
+    skyhook: { title: "Skyhook", heading: "Keep your head up.", blurb: "Tap to climb through the gaps. The sky does not wait.", detail: "Space, W, or tap to rise · P to pause · R to restart", action: "Flap", start: startSkyhook },
+    lastcall: { title: "Last Call", heading: "Do not miss the window.", blurb: "A tiny pink window. Ten chances. Make the clock nervous.", detail: "Space, Enter, or tap when the hand hits pink · R to restart", action: "Take shot", start: startLastcall },
+  };
+  const game = games[gameId];
+  if (!game) return renderGallery();
+  document.body.className = `game-page game-${gameId}`;
+  app.innerHTML = `
+    <header class="game-header page-width"><a class="wordmark" href="${base}">HVN games</a><a class="back-link" href="${base}">Back to shelf <span aria-hidden="true">↖</span></a></header>
+    <main class="game-main page-width"><div class="game-heading"><div><h1>${game.heading}</h1></div><p class="game-blurb">${game.blurb}</p></div>
+      <section class="game-frame" aria-label="${game.title} game"><div class="hud" aria-live="polite"><div class="hud-group"><span class="hud-label">STATE</span><strong id="hud-phase">READY</strong></div><div class="hud-group"><span class="hud-label">SCORE</span><strong id="hud-score">0000</strong></div><div class="hud-group"><span class="hud-label">STREAK</span><strong id="hud-streak">0</strong></div><div class="hud-group hud-time"><span class="hud-label">TIME</span><strong id="hud-time">45</strong></div></div><div id="game-root"></div><div class="energy-wrap"><span class="hud-label">NERVE</span><div class="energy-track"><span id="hud-energy"></span></div></div><div id="game-overlay" class="game-overlay"><h2 id="overlay-title">${game.title} is waiting.</h2><p id="overlay-copy">${game.blurb}</p><button id="overlay-action" class="button button-primary" type="button">Start run <span aria-hidden="true">→</span></button><p id="overlay-detail" class="overlay-detail">${game.detail}</p><div id="overlay-feedback" class="overlay-feedback" hidden><span>How did that run feel?</span><div><button type="button" data-feedback="keep">Keep it</button><button type="button" data-feedback="hard">Too hard</button><button type="button" data-feedback="skip">Not for me</button></div></div></div></section>
+      <div class="game-notes"><span><b>Action</b> ${game.action}</span><span><b>Restart</b> R</span><span><b>Pause</b> P</span></div>
+    </main>`;
+  const startGame = game.start;
+  const overlay = document.querySelector("#game-overlay");
+  const frame = document.querySelector(".game-frame");
+  const title = document.querySelector("#overlay-title");
+  const copy = document.querySelector("#overlay-copy");
+  const detail = document.querySelector("#overlay-detail");
+  const actionButton = document.querySelector("#overlay-action");
+  const feedback = document.querySelector("#overlay-feedback");
+  const experiment = getExperimentAssignment(gameId, "opening-load", ["steady", "busy"]);
+  const tracker = createGameTracker(gameId, "opening-load", experiment);
+  let api;
+  let previousMode = "menu";
+  const show = (nextTitle, nextCopy, nextDetail, nextLabel, nextAction) => { title.textContent = nextTitle; copy.textContent = nextCopy; detail.textContent = nextDetail; actionButton.innerHTML = `${nextLabel} <span aria-hidden="true">→</span>`; actionButton.onclick = nextAction; feedback.hidden = true; overlay.classList.remove("is-hidden"); };
+  const update = (state) => {
+    if (state.mode === "active" && previousMode !== "active") tracker.start();
+    if (state.mode === "result" && previousMode !== "result") tracker.finish(state);
+    document.querySelector("#hud-phase").textContent = state.phase.toUpperCase();
+    document.querySelector("#hud-score").textContent = String(state.score).padStart(4, "0");
+    document.querySelector("#hud-streak").textContent = String(state.streak);
+    document.querySelector("#hud-time").textContent = String(Math.max(0, Math.ceil(state.timeLeft))).padStart(2, "0");
+    document.querySelector("#hud-energy").style.transform = `scaleX(${Math.max(0, state.energy) / 100})`;
+    frame.classList.toggle("is-active", state.mode === "active");
+    if (state.mode === "active") overlay.classList.add("is-hidden");
+    if (state.mode === "pause") show("Catch your breath.", "The run is paused. Your score is safe.", "Press P or choose resume to return to the game.", "Resume run", () => api.resume?.());
+    if (state.mode === "result") { const won = state.result === "won"; show(won ? "That was clean." : "The window closed.", won ? `${state.score} points. You found the rhythm.` : `${state.score} points. One more run knows more than this one did.`, game.detail, "Run it again", () => api.start()); feedback.hidden = false; }
+    previousMode = state.mode;
+  };
+  api = startGame({ parent: "game-root", onState: update, preview: false, pacing: experiment });
+  actionButton.onclick = () => api.start();
+  for (const button of feedback.querySelectorAll("[data-feedback]")) button.addEventListener("click", () => { tracker.feedback(button.dataset.feedback); button.closest(".overlay-feedback").querySelectorAll("button").forEach((item) => { item.disabled = true; }); button.textContent = "Saved"; });
+}
+
 async function renderGame() {
+  if (params.get("game") !== "phasebound") return renderArcadeGame(params.get("game"));
   document.body.className = "game-page";
   app.innerHTML = `
     <header class="game-header page-width">

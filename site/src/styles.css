@@ -126,6 +126,10 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .insight-row strong { font-size: 1rem; text-transform: capitalize; }
 .insight-row span { color: var(--muted); font-size: 0.8rem; }
 .insight-badge { border: 1px solid var(--accent); border-radius: 999px; color: var(--accent-strong) !important; padding: 5px 9px; font: 0.62rem "SFMono-Regular", Consolas, monospace; letter-spacing: 0.06em; text-transform: uppercase; }
+.experiment-report { border-top: 1px solid var(--line); padding: 18px 0 4px; }
+.report-label { color: var(--muted); font: 0.62rem "SFMono-Regular", Consolas, monospace; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 9px; }
+.experiment-row { display: flex; justify-content: space-between; gap: 16px; padding: 7px 0; color: var(--muted); font: 0.75rem "SFMono-Regular", Consolas, monospace; }
+.experiment-row span:last-child { color: var(--ink); }
 .insights-empty { color: var(--muted); padding-block: 22px; margin: 0; }
 .run-local { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 80px; padding-block: 72px 106px; border-top: 1px solid var(--line); }
 .run-copy h2 { font-size: clamp(2rem, 3.5vw, 3.6rem); }

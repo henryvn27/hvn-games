@@ -26,7 +26,6 @@ function renderGallery() {
     <main>
       <section class="hero page-width" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow">FEATURED GAME / 01</p>
           <h1 id="hero-title">Phasebound</h1>
           <p class="hero-lede">Match your phase. Grab the packet. Do not touch the static. One hit ends the run.</p>
           <div class="hero-meta"><span>60 SEC RUN</span><span>SOLO</span><span>KEYBOARD + TOUCH</span></div>
@@ -81,7 +80,6 @@ function renderGallery() {
 
       <section class="run-local page-width" id="run-local" aria-labelledby="run-title">
         <div class="run-copy">
-          <p class="eyebrow">OPEN SOURCE, LOCAL FIRST</p>
           <h2 id="run-title">Run the shelf on your machine.</h2>
           <p>Clone the one shared repo, install its single dependency set, and play the same build locally.</p>
         </div>
@@ -144,12 +142,16 @@ function setupPlayInsights() {
       report.innerHTML = `<p class="insights-empty">No runs recorded yet. Pick a game and the shelf will remember the useful bits locally.</p>`;
       return;
     }
-    report.innerHTML = data.games.map((game) => {
+    const gameRows = data.games.map((game) => {
       const label = game.gameId.replaceAll("-", " ");
       const favorite = data.favorite === game.gameId ? `<span class="insight-badge">Most played</span>` : "";
       const runs = `${game.starts} start${game.starts === 1 ? "" : "s"} · ${game.minutes} min · ${game.wins} win${game.wins === 1 ? "" : "s"}`;
       return `<div class="insight-row"><div><strong>${label}</strong><span>${runs}</span></div>${favorite}</div>`;
     }).join("");
+    const experimentRows = data.experiments.flatMap((experiment) => experiment.variants.map((variant) => `
+      <div class="experiment-row"><span>${experiment.experimentId} / ${variant.variant}</span><span>${variant.starts} start${variant.starts === 1 ? "" : "s"} · ${variant.wins} win${variant.wins === 1 ? "" : "s"}</span></div>
+    `)).join("");
+    report.innerHTML = `${gameRows}${experimentRows ? `<div class="experiment-report"><div class="report-label">LOCAL TEST GROUPS</div>${experimentRows}</div>` : ""}`;
   };
   render();
   copyButton.addEventListener("click", async () => {
@@ -179,7 +181,7 @@ async function renderGame() {
     </header>
     <main class="game-main page-width">
       <div class="game-heading">
-        <div><p class="eyebrow">01 / PHASEBOUND</p><h1>Catch the right signal.</h1></div>
+        <div><h1>Catch the right signal.</h1></div>
         <p class="game-blurb">Switch phase, hold your streak, and leave the relay before it collapses.</p>
       </div>
       <section class="game-frame" aria-label="Phasebound game">
@@ -192,7 +194,6 @@ async function renderGame() {
         <div id="game-root"></div>
         <div class="energy-wrap"><span class="hud-label">SIGNAL</span><div class="energy-track"><span id="hud-energy"></span></div></div>
         <div id="game-overlay" class="game-overlay">
-          <p class="eyebrow">PHASEBOUND / 01</p>
           <h2 id="overlay-title">The relay is live.</h2>
           <p id="overlay-copy">Match your phase to incoming packets. Switch with Space, dash with Shift, and keep moving.</p>
           <button id="overlay-action" class="button button-primary" type="button">Start run <span aria-hidden="true">→</span></button>

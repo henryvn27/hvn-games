@@ -1,23 +1,23 @@
 {
   "version": 1,
   "mode": "experience",
-  "world": "split-flap game concourse",
+  "world": "black-hole observatory game shelf",
   "dials": {
     "designVariance": 8,
     "motionIntensity": 5,
     "visualDensity": 4
   },
   "tokens": {
-    "pageAccent": "#1e7169",
-    "lightBackground": "#eef1ee",
-    "darkBackground": "#0d1317",
-    "surfaceRadius": "18px",
-    "controlRadius": "999px",
+    "pageAccent": "#d78b2b",
+    "lightBackground": "#f3f0e8",
+    "darkBackground": "#090a0c",
+    "surfaceRadius": "0px",
+    "controlRadius": "3px",
     "displayTracking": "-0.04em"
   },
   "rules": [
     "real runtime before marketing copy",
-    "one live preview instead of a fake screenshot",
+    "every game proves its verb in a real live preview",
     "one page accent with game state colors reserved for the game",
     "local play data is visible, resettable, and never sent elsewhere"
   ]

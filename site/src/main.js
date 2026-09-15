@@ -18,7 +18,7 @@ function renderGallery() {
   recordGalleryView();
   app.innerHTML = `
     <header class="site-header page-width">
-      <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
+      <a class="wordmark" href="${base}" aria-label="HVN games home">HVN / GAMES</a>
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="#shelf">The shelf</a>
         <a href="#my-data">My data</a>
@@ -35,24 +35,20 @@ function renderGallery() {
         </div>
         <div class="hero-art" aria-label="Live Phasebound game preview">
           <div id="shelf-preview-root"></div>
-          <div class="art-caption"><span class="signal-mark" aria-hidden="true"></span> LIVE RUN / PHASEBOUND</div>
+          <div class="art-caption"><span class="signal-mark" aria-hidden="true"></span> PLAYING NOW / PHASEBOUND</div>
         </div>
       </section>
 
       <section class="shelf page-width" id="shelf" aria-labelledby="shelf-title">
         <div class="section-intro">
           <div>
-            <h2 id="shelf-title">All games.</h2>
+            <h2 id="shelf-title">Choose your bad idea.</h2>
           </div>
-          <p class="section-note">One live. It stays until something better earns the slot.</p>
+          <p class="section-note">Three small machines. Pick one, send the result to a friend.</p>
         </div>
         <article class="game-card">
-          <div class="game-card-art">
-            <div class="orbit orbit-one"></div>
-            <div class="orbit orbit-two"></div>
-            <div class="packet packet-cyan"></div>
-            <div class="packet packet-amber"></div>
-            <div class="card-label">01 / PHASEBOUND</div>
+          <div class="game-card-art" aria-label="Live Phasebound game preview">
+            <div id="phasebound-card-preview-root"></div>
           </div>
           <div class="game-card-copy">
             <div class="card-kicker"><span>60 SEC RUN</span><span>KEYBOARD + TOUCH</span></div>
@@ -66,11 +62,11 @@ function renderGallery() {
         </article>
         <div class="game-shelf-grid">
           <article class="mini-game-card mini-game-card-skyhook">
-            <div class="mini-game-art"><span>02</span><b>SKYHOOK</b></div>
+            <div class="mini-game-art" aria-label="Live Skyhook game preview"><div id="skyhook-preview-root"></div><b>SKYHOOK</b></div>
             <div class="mini-game-copy"><h3>Skyhook</h3><p>Tap to climb. Thread the gap. The sky gets faster.</p><a class="text-link" href="${base}?game=skyhook">Play Skyhook <span aria-hidden="true">→</span></a></div>
           </article>
           <article class="mini-game-card mini-game-card-lastcall">
-            <div class="mini-game-art"><span>03</span><b>LAST CALL</b></div>
+            <div class="mini-game-art" aria-label="Live Last Call game preview"><div id="lastcall-preview-root"></div><b>LAST CALL</b></div>
             <div class="mini-game-copy"><h3>Last Call</h3><p>Hit the pink window ten times before the clock turns on you.</p><a class="text-link" href="${base}?game=lastcall">Play Last Call <span aria-hidden="true">→</span></a></div>
           </article>
         </div>
@@ -180,14 +176,17 @@ function setupPlayInsights() {
 }
 
 async function startShelfPreview() {
-  const { startPhasebound } = await import("../../games/phasebound/phasebound.js");
-  return startPhasebound({ parent: "shelf-preview-root", preview: true, pacing: "steady" });
+  const [{ startPhasebound }] = await Promise.all([import("../../games/phasebound/phasebound.js")]);
+  startPhasebound({ parent: "shelf-preview-root", preview: true, pacing: "steady" });
+  startPhasebound({ parent: "phasebound-card-preview-root", preview: true, pacing: "steady" });
+  startSkyhook({ parent: "skyhook-preview-root", preview: true, pacing: "steady" });
+  startLastcall({ parent: "lastcall-preview-root", preview: true, pacing: "steady" });
 }
 
 async function renderArcadeGame(gameId) {
   const games = {
-    skyhook: { title: "Skyhook", heading: "Keep your head up.", blurb: "Tap to climb through the gaps. The sky does not wait.", detail: "Space, W, or tap to rise · P to pause · R to restart", action: "Flap", start: startSkyhook },
-    lastcall: { title: "Last Call", heading: "Do not miss the window.", blurb: "A tiny pink window. Ten chances. Make the clock nervous.", detail: "Space, Enter, or tap when the hand hits pink · R to restart", action: "Take shot", start: startLastcall },
+    skyhook: { title: "Skyhook", heading: "Keep your head up.", blurb: "Tap to climb through the gaps. The sky does not wait.", detail: "Space, W, or tap to rise · P to pause · R to restart", action: "Flap", stateLabel: "ALTITUDE", resourceLabel: "NERVE", start: startSkyhook },
+    lastcall: { title: "Last Call", heading: "Do not miss the window.", blurb: "A tiny pink window. Ten chances. Make the clock nervous.", detail: "Space, Enter, or tap when the hand hits pink · R to restart", action: "Take shot", stateLabel: "WINDOW", resourceLabel: "FOCUS", start: startLastcall },
   };
   const game = games[gameId];
   if (!game) return renderGallery();
@@ -195,7 +194,7 @@ async function renderArcadeGame(gameId) {
   app.innerHTML = `
     <header class="game-header page-width"><a class="wordmark" href="${base}">HVN games</a><a class="back-link" href="${base}">Back to shelf <span aria-hidden="true">↖</span></a></header>
     <main class="game-main page-width"><div class="game-heading"><div><h1>${game.heading}</h1></div><p class="game-blurb">${game.blurb}</p></div>
-      <section class="game-frame" aria-label="${game.title} game"><div class="hud" aria-live="polite"><div class="hud-group"><span class="hud-label">STATE</span><strong id="hud-phase">READY</strong></div><div class="hud-group"><span class="hud-label">SCORE</span><strong id="hud-score">0000</strong></div><div class="hud-group"><span class="hud-label">STREAK</span><strong id="hud-streak">0</strong></div><div class="hud-group hud-time"><span class="hud-label">TIME</span><strong id="hud-time">45</strong></div></div><div id="game-root"></div><div class="energy-wrap"><span class="hud-label">NERVE</span><div class="energy-track"><span id="hud-energy"></span></div></div><div id="game-overlay" class="game-overlay"><h2 id="overlay-title">${game.title} is waiting.</h2><p id="overlay-copy">${game.blurb}</p><button id="overlay-action" class="button button-primary" type="button">Start run <span aria-hidden="true">→</span></button><p id="overlay-detail" class="overlay-detail">${game.detail}</p><div id="overlay-feedback" class="overlay-feedback" hidden><span>How did that run feel?</span><div><button type="button" data-feedback="keep">Keep it</button><button type="button" data-feedback="hard">Too hard</button><button type="button" data-feedback="skip">Not for me</button></div></div></div></section>
+      <section class="game-frame" aria-label="${game.title} game"><div class="hud" aria-live="polite"><div class="hud-group"><span class="hud-label">${game.stateLabel}</span><strong id="hud-phase">READY</strong></div><div class="hud-group"><span class="hud-label">SCORE</span><strong id="hud-score">0000</strong></div><div class="hud-group"><span class="hud-label">STREAK</span><strong id="hud-streak">0</strong></div><div class="hud-group hud-time"><span class="hud-label">TIME</span><strong id="hud-time">45</strong></div></div><div id="game-root"></div><div class="energy-wrap"><span class="hud-label">${game.resourceLabel}</span><div class="energy-track"><span id="hud-energy"></span></div></div><button id="game-action" class="game-action-button" type="button">${game.action}</button><div id="game-overlay" class="game-overlay"><h2 id="overlay-title">${game.title} is waiting.</h2><p id="overlay-copy">${game.blurb}</p><button id="overlay-action" class="button button-primary" type="button">Start run <span aria-hidden="true">→</span></button><p id="overlay-detail" class="overlay-detail">${game.detail}</p><div id="overlay-feedback" class="overlay-feedback" hidden><span>How did that run feel?</span><div><button type="button" data-feedback="keep">Keep it</button><button type="button" data-feedback="hard">Too hard</button><button type="button" data-feedback="skip">Not for me</button></div></div></div></section>
       <div class="game-notes"><span><b>Action</b> ${game.action}</span><span><b>Restart</b> R</span><span><b>Pause</b> P</span></div>
     </main>`;
   const startGame = game.start;
@@ -206,6 +205,7 @@ async function renderArcadeGame(gameId) {
   const detail = document.querySelector("#overlay-detail");
   const actionButton = document.querySelector("#overlay-action");
   const feedback = document.querySelector("#overlay-feedback");
+  const gameAction = document.querySelector("#game-action");
   const experiment = getExperimentAssignment(gameId, "opening-load", ["steady", "busy"]);
   const tracker = createGameTracker(gameId, "opening-load", experiment);
   let api;
@@ -220,6 +220,7 @@ async function renderArcadeGame(gameId) {
     document.querySelector("#hud-time").textContent = String(Math.max(0, Math.ceil(state.timeLeft))).padStart(2, "0");
     document.querySelector("#hud-energy").style.transform = `scaleX(${Math.max(0, state.energy) / 100})`;
     frame.classList.toggle("is-active", state.mode === "active");
+    gameAction.hidden = state.mode !== "active";
     if (state.mode === "active") overlay.classList.add("is-hidden");
     if (state.mode === "pause") show("Catch your breath.", "The run is paused. Your score is safe.", "Press P or choose resume to return to the game.", "Resume run", () => api.resume?.());
     if (state.mode === "result") { const won = state.result === "won"; show(won ? "That was clean." : "The window closed.", won ? `${state.score} points. You found the rhythm.` : `${state.score} points. One more run knows more than this one did.`, game.detail, "Run it again", () => api.start()); feedback.hidden = false; }
@@ -227,6 +228,7 @@ async function renderArcadeGame(gameId) {
   };
   api = startGame({ parent: "game-root", onState: update, preview: false, pacing: experiment });
   actionButton.onclick = () => api.start();
+  gameAction.onclick = () => api[gameId === "skyhook" ? "flap" : "shoot"]?.();
   for (const button of feedback.querySelectorAll("[data-feedback]")) button.addEventListener("click", () => { tracker.feedback(button.dataset.feedback); button.closest(".overlay-feedback").querySelectorAll("button").forEach((item) => { item.disabled = true; }); button.textContent = "Saved"; });
 }
 

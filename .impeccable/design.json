@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "mode": "experience",
+  "world": "split-flap game concourse",
+  "dials": {
+    "designVariance": 8,
+    "motionIntensity": 5,
+    "visualDensity": 4
+  },
+  "tokens": {
+    "pageAccent": "#1e7169",
+    "lightBackground": "#eef1ee",
+    "darkBackground": "#0d1317",
+    "surfaceRadius": "18px",
+    "controlRadius": "999px",
+    "displayTracking": "-0.04em"
+  },
+  "rules": [
+    "real runtime before marketing copy",
+    "one live preview instead of a fake screenshot",
+    "one page accent with game state colors reserved for the game",
+    "local play data is visible, resettable, and never sent elsewhere"
+  ]
+}

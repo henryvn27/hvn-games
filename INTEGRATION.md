@@ -16,6 +16,15 @@ The host flow is the public `HVN games` gallery. A visitor opens the gallery, ch
 - Next action: play again, return to the shelf, or share the public Pages URL.
 - Adoption point: `site/src/main.js` owns gallery routing; `games/<slug>/` owns game runtime code.
 
+## Play intelligence contract
+
+- Storage: browser `localStorage` under `hvn-games:play-intelligence:v1`.
+- Events: gallery view, run start, completed run, win or loss, time played, packets delivered, experiment variant, and optional feedback (`keep`, `hard`, or `skip`).
+- Privacy boundary: local-only and resettable. No analytics vendor, account, cookie, network request, or identifier is used.
+- Decision use: the gallery shows the local report; the daily scout reads it when a browser session exposes it and uses Computer History route frequency as a coarse fallback. High replay signals identify favorites. Low starts, short sessions, repeated losses, and negative feedback create improvement candidates.
+- Experiment rule: one clearly named variable per game at a time, stable assignment per browser, and variant results kept separate. Treat the results as directional for one player until a consented multi-player data path exists.
+- Adoption point: `site/src/play-intelligence.js` is the shared client layer. New games call `createGameTracker` and register one experiment only when the change is meaningful.
+
 ## Proof run
 
 The proof run must build the site, boot it through the intended local or Pages route, click Play, exercise the primary verbs, complete or fail a run, and verify the restart and back-to-shelf paths. Browser screenshots cover the gallery, active play, and result states on desktop and narrow mobile.

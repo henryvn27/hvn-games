@@ -1,4 +1,5 @@
 import "./styles.css";
+import { createGameTracker, getExperimentAssignment, getPlayReport, recordGalleryView, resetPlayReport } from "./play-intelligence.js";
 
 const app = document.querySelector("#app");
 const base = import.meta.env.BASE_URL;
@@ -12,34 +13,37 @@ if (params.get("game") === "phasebound") {
 
 function renderGallery() {
   document.body.className = "gallery-page";
+  recordGalleryView();
   app.innerHTML = `
     <header class="site-header page-width">
       <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="#shelf">The shelf</a>
+        <a href="#my-data">My data</a>
         <a href="#run-local">Run local</a>
       </nav>
     </header>
     <main>
       <section class="hero page-width" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow">A SMALL ARCADE SHELF</p>
-          <h1 id="hero-title">Built for a quick<br /><em>second run.</em></h1>
-          <p class="hero-lede">Focused browser games with a real loop, a little tension, and a reason to press play again.</p>
-          <a class="button button-primary" href="#shelf">Open the shelf <span aria-hidden="true">↘</span></a>
+          <p class="eyebrow">FEATURED GAME / 01</p>
+          <h1 id="hero-title">Phasebound</h1>
+          <p class="hero-lede">Match your phase. Grab the packet. Do not touch the static. One hit ends the run.</p>
+          <div class="hero-meta"><span>60 SEC RUN</span><span>SOLO</span><span>KEYBOARD + TOUCH</span></div>
+          <a class="button button-primary" href="${base}?game=phasebound">Play now <span aria-hidden="true">↘</span></a>
         </div>
-        <div class="hero-art" aria-label="Animated Phasebound signal preview">
-          <canvas id="shelf-canvas" width="760" height="560"></canvas>
-          <div class="art-caption"><span class="signal-mark" aria-hidden="true"></span> LIVE PREVIEW / PHASEBOUND</div>
+        <div class="hero-art" aria-label="Live Phasebound game preview">
+          <div id="shelf-preview-root"></div>
+          <div class="art-caption"><span class="signal-mark" aria-hidden="true"></span> LIVE RUN / PHASEBOUND</div>
         </div>
       </section>
 
       <section class="shelf page-width" id="shelf" aria-labelledby="shelf-title">
         <div class="section-intro">
           <div>
-            <h2 id="shelf-title">One game. One clean loop.</h2>
+            <h2 id="shelf-title">All games.</h2>
           </div>
-          <p class="section-note">No accounts. No clutter. Choose a game and get to the interesting part.</p>
+          <p class="section-note">One live. More only when they are worth the click.</p>
         </div>
         <article class="game-card">
           <div class="game-card-art">
@@ -52,7 +56,7 @@ function renderGallery() {
           <div class="game-card-copy">
             <div class="card-kicker"><span>60 SEC RUN</span><span>KEYBOARD + TOUCH</span></div>
             <h3>Phasebound</h3>
-            <p>Switch your phase, catch the right signal, and dash through a relay that is getting less stable by the second.</p>
+            <p>Match the packet color, steal a streak, and dash past the red ones before the relay eats your energy.</p>
             <div class="game-card-actions">
               <a class="button button-primary" href="${base}?game=phasebound">Play Phasebound <span aria-hidden="true">→</span></a>
               <span class="card-controls">WASD / SPACE / SHIFT</span>
@@ -61,15 +65,18 @@ function renderGallery() {
         </article>
       </section>
 
-      <section class="loop-section page-width" aria-labelledby="loop-title">
-        <div class="loop-heading">
-          <h2 id="loop-title">Learn it in a breath.<br />Master it by accident.</h2>
+      <section class="insights page-width" id="my-data" aria-labelledby="insights-title">
+        <div class="insights-heading">
+          <div>
+            <h2 id="insights-title">Your play history.</h2>
+            <p>Small, local signals help the next game earn your time. Nothing leaves this browser.</p>
+          </div>
+          <div class="insights-actions">
+            <button class="button button-secondary" id="copy-play-report" type="button">Copy report</button>
+            <button class="text-button" id="reset-play-report" type="button">Reset local data</button>
+          </div>
         </div>
-        <ol class="loop-steps">
-          <li><span>01</span><strong>Read the relay</strong><p>Packets arrive in two phases. Your color decides what is safe.</p></li>
-          <li><span>02</span><strong>Make the switch</strong><p>Change phase before the signal reaches you. Keep the streak alive.</p></li>
-          <li><span>03</span><strong>Spend the dash</strong><p>Burn a charge to cut through static, or save it for the last scramble.</p></li>
-        </ol>
+        <div id="play-report" class="play-report" aria-live="polite"></div>
       </section>
 
       <section class="run-local page-width" id="run-local" aria-labelledby="run-title">
@@ -89,6 +96,7 @@ function renderGallery() {
     <footer class="site-footer page-width"><span>HVN games</span><span>Made to be played.</span></footer>
   `;
   setupCopyButtons();
+  setupPlayInsights();
   startShelfPreview();
 }
 
@@ -100,7 +108,7 @@ function setupCopyButtons() {
   for (const button of document.querySelectorAll("[data-copy]")) {
     button.addEventListener("click", async () => {
       const code = document.getElementById(button.dataset.copy);
-      await navigator.clipboard.writeText(code.textContent);
+      await copyText(code.textContent);
       const original = button.textContent;
       button.textContent = "Copied";
       window.setTimeout(() => { button.textContent = original; }, 1200);
@@ -108,57 +116,58 @@ function setupCopyButtons() {
   }
 }
 
-function startShelfPreview() {
-  const canvas = document.querySelector("#shelf-canvas");
-  const context = canvas.getContext("2d");
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let frame = 0;
-
-  function draw(time) {
-    const t = reduced.matches ? 0.45 : time * 0.001;
-    const width = canvas.width;
-    const height = canvas.height;
-    context.clearRect(0, 0, width, height);
-    context.fillStyle = "#141b20";
-    context.fillRect(0, 0, width, height);
-    context.strokeStyle = "rgba(150, 183, 186, 0.12)";
-    context.lineWidth = 1;
-    for (let x = 0; x < width; x += 48) {
-      context.beginPath(); context.moveTo(x, 0); context.lineTo(x, height); context.stroke();
-    }
-    for (let y = 0; y < height; y += 48) {
-      context.beginPath(); context.moveTo(0, y); context.lineTo(width, y); context.stroke();
-    }
-    const centerX = width * 0.52;
-    const centerY = height * 0.5;
-    for (let ring = 0; ring < 3; ring += 1) {
-      context.beginPath();
-      context.arc(centerX, centerY, 82 + ring * 66 + Math.sin(t * 1.3 + ring) * 7, 0, Math.PI * 2);
-      context.strokeStyle = ring === 1 ? "rgba(255, 200, 87, 0.45)" : "rgba(114, 246, 227, 0.22)";
-      context.stroke();
-    }
-    const nodes = [
-      { phase: "#72f6e3", angle: t * 0.8, radius: 150 },
-      { phase: "#ffc857", angle: -t * 0.62 + 2.2, radius: 218 },
-      { phase: "#72f6e3", angle: t * 0.44 + 4.1, radius: 106 },
-    ];
-    for (const node of nodes) {
-      const x = centerX + Math.cos(node.angle) * node.radius;
-      const y = centerY + Math.sin(node.angle) * node.radius;
-      context.beginPath(); context.arc(x, y, 15, 0, Math.PI * 2); context.fillStyle = node.phase; context.globalAlpha = 0.16; context.fill();
-      context.beginPath(); context.arc(x, y, 6, 0, Math.PI * 2); context.globalAlpha = 1; context.fill();
-    }
-    context.globalAlpha = 1;
-    context.save();
-    context.translate(centerX + Math.cos(t * 1.1) * 50, centerY + Math.sin(t * 1.1) * 50);
-    context.rotate(t * 1.1);
-    context.fillStyle = "#f4f1e9";
-    context.beginPath(); context.moveTo(18, 0); context.lineTo(-10, -11); context.lineTo(-5, 0); context.lineTo(-10, 11); context.closePath(); context.fill();
-    context.restore();
-    if (!reduced.matches) frame = requestAnimationFrame(draw);
+async function copyText(value) {
+  try {
+    await navigator.clipboard.writeText(value);
+    return true;
+  } catch {
+    const area = document.createElement("textarea");
+    area.value = value;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.append(area);
+    area.select();
+    const copied = document.execCommand("copy");
+    area.remove();
+    return copied;
   }
-  draw(0);
-  return () => cancelAnimationFrame(frame);
+}
+
+function setupPlayInsights() {
+  const report = document.querySelector("#play-report");
+  const copyButton = document.querySelector("#copy-play-report");
+  const resetButton = document.querySelector("#reset-play-report");
+  const render = () => {
+    const data = getPlayReport();
+    if (!data.games.length) {
+      report.innerHTML = `<p class="insights-empty">No runs recorded yet. Pick a game and the shelf will remember the useful bits locally.</p>`;
+      return;
+    }
+    report.innerHTML = data.games.map((game) => {
+      const label = game.gameId.replaceAll("-", " ");
+      const favorite = data.favorite === game.gameId ? `<span class="insight-badge">Most played</span>` : "";
+      const runs = `${game.starts} start${game.starts === 1 ? "" : "s"} · ${game.minutes} min · ${game.wins} win${game.wins === 1 ? "" : "s"}`;
+      return `<div class="insight-row"><div><strong>${label}</strong><span>${runs}</span></div>${favorite}</div>`;
+    }).join("");
+  };
+  render();
+  copyButton.addEventListener("click", async () => {
+    const original = copyButton.textContent;
+    const copied = await copyText(JSON.stringify(getPlayReport(), null, 2));
+    copyButton.textContent = copied ? "Copied" : "Copy failed";
+    window.setTimeout(() => { copyButton.textContent = original; }, 1400);
+  });
+  resetButton.addEventListener("click", () => {
+    if (!window.confirm("Reset local play history and experiment assignments?")) return;
+    resetPlayReport();
+    render();
+  });
+}
+
+async function startShelfPreview() {
+  const { startPhasebound } = await import("../../games/phasebound/phasebound.js");
+  return startPhasebound({ parent: "shelf-preview-root", preview: true, pacing: "steady" });
 }
 
 async function renderGame() {
@@ -188,6 +197,10 @@ async function renderGame() {
           <p id="overlay-copy">Match your phase to incoming packets. Switch with Space, dash with Shift, and keep moving.</p>
           <button id="overlay-action" class="button button-primary" type="button">Start run <span aria-hidden="true">→</span></button>
           <p id="overlay-detail" class="overlay-detail">WASD or arrows to move · P to pause · R to restart</p>
+          <div id="overlay-feedback" class="overlay-feedback" hidden>
+            <span>How did that run feel?</span>
+            <div><button type="button" data-feedback="keep">Keep it</button><button type="button" data-feedback="hard">Too hard</button><button type="button" data-feedback="skip">Not for me</button></div>
+          </div>
         </div>
         <div class="touch-controls" aria-label="Touch controls">
           <div class="touch-pad"><button type="button" data-input="up" aria-label="Move up">↑</button><button type="button" data-input="left" aria-label="Move left">←</button><button type="button" data-input="down" aria-label="Move down">↓</button><button type="button" data-input="right" aria-label="Move right">→</button></div>
@@ -206,8 +219,12 @@ async function renderGame() {
   const overlayCopy = document.querySelector("#overlay-copy");
   const overlayDetail = document.querySelector("#overlay-detail");
   const overlayAction = document.querySelector("#overlay-action");
+  const overlayFeedback = document.querySelector("#overlay-feedback");
+  const experiment = getExperimentAssignment("phasebound", "opening-load", ["steady", "busy"]);
+  const tracker = createGameTracker("phasebound", "opening-load", experiment);
   let action = () => api.start();
   let api;
+  let previousMode = "menu";
 
   function showOverlay({ title, copy, detail, label, next }) {
     overlayTitle.textContent = title;
@@ -215,6 +232,7 @@ async function renderGame() {
     overlayDetail.textContent = detail;
     overlayAction.innerHTML = `${label} <span aria-hidden="true">→</span>`;
     action = next;
+    overlayFeedback.hidden = true;
     overlay.classList.remove("is-hidden");
   }
 
@@ -224,12 +242,14 @@ async function renderGame() {
     document.querySelector("#hud-score").textContent = String(state.score).padStart(4, "0");
     document.querySelector("#hud-streak").textContent = String(state.streak);
     document.querySelector("#hud-time").textContent = String(Math.max(0, Math.ceil(state.timeLeft))).padStart(2, "0");
-    document.querySelector("#hud-energy").style.width = `${Math.max(0, state.energy)}%`;
+    document.querySelector("#hud-energy").style.transform = `scaleX(${Math.max(0, state.energy) / 100})`;
   }
 
   api = startPhasebound({
     parent: "game-root",
     onState: (state) => {
+      if (state.mode === "active" && previousMode !== "active") tracker.start();
+      if (state.mode === "result" && previousMode !== "result") tracker.finish(state);
       updateHud(state);
       frame.classList.toggle("is-active", state.mode === "active");
       if (state.mode === "active") overlay.classList.add("is-hidden");
@@ -239,8 +259,11 @@ async function renderGame() {
       if (state.mode === "result") {
         const won = state.result === "won";
         showOverlay({ title: won ? "You made the handoff." : "The relay went quiet.", copy: won ? `${state.packets} packets delivered with a score of ${state.score}.` : `${state.packets} packets delivered. The next run starts clean.`, detail: won ? "Try to beat your streak, then take the long route." : "The field gets readable once you stop chasing every packet.", label: "Run it again", next: () => api.start() });
+        overlayFeedback.hidden = false;
       }
+      previousMode = state.mode;
     },
+    pacing: experiment,
   });
 
   overlayAction.addEventListener("click", () => { action(); });
@@ -252,5 +275,12 @@ async function renderGame() {
     button.addEventListener("pointerup", release);
     button.addEventListener("pointercancel", release);
     button.addEventListener("pointerleave", release);
+  }
+  for (const button of document.querySelectorAll("[data-feedback]")) {
+    button.addEventListener("click", () => {
+      tracker.feedback(button.dataset.feedback);
+      button.closest(".overlay-feedback").querySelectorAll("button").forEach((item) => { item.disabled = true; });
+      button.textContent = "Saved";
+    });
   }
 }

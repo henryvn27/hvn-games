@@ -21,6 +21,8 @@ export function startPhasebound(options = {}) {
   Object.assign(PhaseboundScene.prototype, {
     create() {
       this.mode = "menu";
+      this.preview = Boolean(options.preview);
+      this.pacing = options.pacing === "busy" ? "busy" : "steady";
       this.phase = "cyan";
       this.result = null;
       this.score = 0;
@@ -44,6 +46,7 @@ export function startPhasebound(options = {}) {
       this.createInput();
       this.createHazards();
       this.publish();
+      if (this.preview) this.startRun();
     },
 
     createBackdrop() {
@@ -126,7 +129,8 @@ export function startPhasebound(options = {}) {
       this.player.setPosition(480, 320);
       this.playerVelocity.set(0, 0);
       this.pointerTarget = null;
-      for (let index = 0; index < 5; index += 1) this.spawnPacket();
+      const openingPackets = this.pacing === "busy" ? 6 : 5;
+      for (let index = 0; index < openingPackets; index += 1) this.spawnPacket();
       this.publish();
     },
 
@@ -261,12 +265,12 @@ export function startPhasebound(options = {}) {
       if (this.dashTime > 0 || this.hitCooldown > 0) return;
       for (const hazard of this.hazards) {
         if (Phaser.Math.Distance.Between(this.player.x, this.player.y, hazard.x, hazard.y) < hazard.size + 17) {
-          this.energy -= 24;
+          this.energy = 0;
           this.streak = 0;
           this.hitCooldown = 0.8;
           this.burst(this.player.x, this.player.y, COLORS.danger, 16);
           this.playerVelocity.scale(-0.6);
-          if (this.energy <= 0) this.endRun("lost");
+          this.endRun("lost");
           break;
         }
       }

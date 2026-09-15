@@ -6,6 +6,7 @@ const required = [
   "site/index.html",
   "site/src/main.js",
   "site/src/styles.css",
+  "site/src/play-intelligence.js",
   "games/phasebound/phasebound.js",
   "INTEGRATION.md",
   ".github/workflows/pages.yml",
@@ -19,7 +20,7 @@ const html = readFileSync(join(root, "site/index.html"), "utf8");
 if (!html.includes("src/main.js")) throw new Error("Gallery entry point is not wired");
 
 const main = readFileSync(join(root, "site/src/main.js"), "utf8");
-for (const marker of ["phasebound", "copy"]) {
+for (const marker of ["phasebound", "copy", "play-intelligence", "overlay-feedback", "preview: true"]) {
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
 }
 
@@ -29,7 +30,7 @@ for (const marker of ["prefers-color-scheme", "prefers-reduced-motion"]) {
 }
 
 const game = readFileSync(join(root, "games/phasebound/phasebound.js"), "utf8");
-for (const marker of ["startPhasebound", "keydown-SPACE", "keydown-SHIFT", "phase"]) {
+for (const marker of ["startPhasebound", "keydown-SPACE", "keydown-SHIFT", "phase", "this.endRun(\"lost\")"]) {
   if (!game.includes(marker)) throw new Error(`Game is missing marker: ${marker}`);
 }
 

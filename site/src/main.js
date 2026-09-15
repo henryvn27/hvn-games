@@ -27,7 +27,7 @@ function renderGallery() {
       <section class="hero page-width" aria-labelledby="hero-title">
         <div class="hero-copy">
           <h1 id="hero-title">Phasebound</h1>
-          <p class="hero-lede">Match your phase. Grab the packet. Do not touch the static. One hit ends the run.</p>
+          <p class="hero-lede">Your color is safe. The other one is bait. Touch the static and the relay bites.</p>
           <div class="hero-meta"><span>60 SEC RUN</span><span>SOLO</span><span>KEYBOARD + TOUCH</span></div>
           <a class="button button-primary" href="${base}?game=phasebound">Play now <span aria-hidden="true">↘</span></a>
         </div>
@@ -42,7 +42,7 @@ function renderGallery() {
           <div>
             <h2 id="shelf-title">All games.</h2>
           </div>
-          <p class="section-note">One live. More only when they are worth the click.</p>
+          <p class="section-note">One live. It stays until something better earns the slot.</p>
         </div>
         <article class="game-card">
           <div class="game-card-art">
@@ -55,7 +55,7 @@ function renderGallery() {
           <div class="game-card-copy">
             <div class="card-kicker"><span>60 SEC RUN</span><span>KEYBOARD + TOUCH</span></div>
             <h3>Phasebound</h3>
-            <p>Match the packet color, steal a streak, and dash past the red ones before the relay eats your energy.</p>
+            <p>Catch 18 packets before the relay goes quiet. Miss the color or meet a hazard and the run is over.</p>
             <div class="game-card-actions">
               <a class="button button-primary" href="${base}?game=phasebound">Play Phasebound <span aria-hidden="true">→</span></a>
               <span class="card-controls">WASD / SPACE / SHIFT</span>
@@ -80,8 +80,8 @@ function renderGallery() {
 
       <section class="run-local page-width" id="run-local" aria-labelledby="run-title">
         <div class="run-copy">
-          <h2 id="run-title">Run the shelf on your machine.</h2>
-          <p>Clone the one shared repo, install its single dependency set, and play the same build locally.</p>
+          <h2 id="run-title">Take it home.</h2>
+          <p>Clone the one shared repo, install the dependencies, and play the same shelf without a login.</p>
         </div>
         <div class="command-stack">
           ${commandBlock("1 / INSTALL", "git clone https://github.com/henryvn27/hvn-games.git\ncd hvn-games", "install")}
@@ -182,7 +182,7 @@ async function renderGame() {
     <main class="game-main page-width">
       <div class="game-heading">
         <div><h1>Catch the right signal.</h1></div>
-        <p class="game-blurb">Switch phase, hold your streak, and leave the relay before it collapses.</p>
+        <p class="game-blurb">The red ones are not a metaphor. Switch, dash, and see how long your nerve lasts.</p>
       </div>
       <section class="game-frame" aria-label="Phasebound game">
         <div class="hud" aria-live="polite">
@@ -195,7 +195,7 @@ async function renderGame() {
         <div class="energy-wrap"><span class="hud-label">SIGNAL</span><div class="energy-track"><span id="hud-energy"></span></div></div>
         <div id="game-overlay" class="game-overlay">
           <h2 id="overlay-title">The relay is live.</h2>
-          <p id="overlay-copy">Match your phase to incoming packets. Switch with Space, dash with Shift, and keep moving.</p>
+          <p id="overlay-copy">Catch the packets that match your phase. Switch with Space, dash with Shift, and do not hug the red.</p>
           <button id="overlay-action" class="button button-primary" type="button">Start run <span aria-hidden="true">→</span></button>
           <p id="overlay-detail" class="overlay-detail">WASD or arrows to move · P to pause · R to restart</p>
           <div id="overlay-feedback" class="overlay-feedback" hidden>

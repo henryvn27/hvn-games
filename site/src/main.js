@@ -2,6 +2,7 @@ import "./styles.css";
 import { createGameTracker, getExperimentAssignment, getPlayReport, recordGalleryView, resetPlayReport } from "./play-intelligence.js";
 import { startSkyhook } from "../../games/skyhook/skyhook.js";
 import { startLastcall } from "../../games/lastcall/lastcall.js";
+import { startEchoLantern } from "../../games/echo-lantern/echo-lantern.js";
 
 const app = document.querySelector("#app");
 const base = import.meta.env.BASE_URL;
@@ -68,6 +69,10 @@ function renderGallery() {
           <article class="mini-game-card mini-game-card-lastcall">
             <div class="mini-game-art" aria-label="Live Last Call game preview"><div id="lastcall-preview-root"></div><b>LAST CALL</b></div>
             <div class="mini-game-copy"><h3>Last Call</h3><p>Hit the pink window ten times before the clock turns on you.</p><a class="text-link" href="${base}?game=lastcall">Play Last Call</a></div>
+          </article>
+          <article class="mini-game-card mini-game-card-echo">
+            <div class="mini-game-art" aria-label="Live Echo Lantern game preview"><div id="echo-lantern-preview-root"></div><b>ECHO LANTERN</b></div>
+            <div class="mini-game-copy"><h3>Echo Lantern</h3><p>Send a pulse, chase the answer, and keep the dark from closing in.</p><a class="text-link" href="${base}?game=echo-lantern">Play Echo Lantern</a></div>
           </article>
         </div>
       </section>
@@ -181,12 +186,14 @@ async function startShelfPreview() {
   startPhasebound({ parent: "phasebound-card-preview-root", preview: true, pacing: "steady" });
   startSkyhook({ parent: "skyhook-preview-root", preview: true, pacing: "steady" });
   startLastcall({ parent: "lastcall-preview-root", preview: true, pacing: "steady" });
+  startEchoLantern({ parent: "echo-lantern-preview-root", preview: true, pacing: "steady" });
 }
 
 async function renderArcadeGame(gameId) {
   const games = {
     skyhook: { title: "Skyhook", heading: "Keep your head up.", blurb: "Tap to climb through the gaps. The sky does not wait.", detail: "Space, W, or tap to rise · P to pause · R to restart", action: "Flap", stateLabel: "ALTITUDE", resourceLabel: "NERVE", start: startSkyhook },
     lastcall: { title: "Last Call", heading: "Do not miss the window.", blurb: "A tiny pink window. Ten chances. Make the clock nervous.", detail: "Space, Enter, or tap when the hand hits pink · R to restart", action: "Take shot", stateLabel: "WINDOW", resourceLabel: "FOCUS", start: startLastcall },
+    "echo-lantern": { title: "Echo Lantern", heading: "Light only what answers.", blurb: "Send a pulse into the dark. Chase the beacon before its echo fades.", detail: "WASD or arrows to move · Space or tap to pulse · P to pause · R to restart", action: "Pulse", stateLabel: "ECHO", resourceLabel: "LANTERN", start: startEchoLantern },
   };
   const game = games[gameId];
   if (!game) return renderGallery();
@@ -228,7 +235,7 @@ async function renderArcadeGame(gameId) {
   };
   api = startGame({ parent: "game-root", onState: update, preview: false, pacing: experiment });
   actionButton.onclick = () => api.start();
-  gameAction.onclick = () => api[gameId === "skyhook" ? "flap" : "shoot"]?.();
+  gameAction.onclick = () => api[gameId === "skyhook" ? "flap" : gameId === "lastcall" ? "shoot" : "light"]?.();
   for (const button of feedback.querySelectorAll("[data-feedback]")) button.addEventListener("click", () => { tracker.feedback(button.dataset.feedback); button.closest(".overlay-feedback").querySelectorAll("button").forEach((item) => { item.disabled = true; }); button.textContent = "Saved"; });
 }
 

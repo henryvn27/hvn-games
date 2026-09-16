@@ -2,7 +2,7 @@
 
 A small shelf of focused browser games built to be played, not just shown.
 
-The first game is [Phasebound](https://henryvn27.github.io/hvn-games/?game=phasebound), a 60-second phase-shifting courier run. Match packets to your current phase, dash through the static, and get out before the relay collapses.
+The shelf opens with [Phasebound](https://henryvn27.github.io/hvn-games/?game=phasebound), a 60-second phase-shifting courier run. Match packets to your current phase, dash through the static, and get out before the relay collapses. [Echo Lantern](https://henryvn27.github.io/hvn-games/?game=echo-lantern) adds a pulse-to-reveal navigation run: find each beacon before its light fades.
 
 ## Install and run
 

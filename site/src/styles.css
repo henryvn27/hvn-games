@@ -256,7 +256,7 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .touch-controls button:active { background: rgba(114, 246, 227, 0.26); transform: scale(0.96); }
   .game-frame, #game-root { min-height: 390px; }
   .game-frame.is-active, .game-frame.is-active #game-root { min-height: 0; aspect-ratio: 3 / 2; }
-  .game-overlay { padding: 25px 20px 24px; }
+  .game-overlay { padding: 25px 20px 20px; }
   .game-overlay h2 { font-size: clamp(2.1rem, 12vw, 3.2rem); }
   .overlay-feedback { margin-top: 20px; }
 }

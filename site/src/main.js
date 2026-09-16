@@ -45,7 +45,7 @@ function renderGallery() {
           <div>
             <h2 id="shelf-title">Games</h2>
           </div>
-          <p class="section-note">Three short browser games. Each one has a different trick.</p>
+          <p class="section-note">Four short browser games. Each one has a different trick.</p>
         </div>
         <article class="game-card">
           <div class="game-card-art" aria-label="Live Phasebound game preview">

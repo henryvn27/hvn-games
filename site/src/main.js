@@ -18,7 +18,7 @@ function renderGallery() {
   recordGalleryView();
   app.innerHTML = `
     <header class="site-header page-width">
-      <a class="wordmark" href="${base}" aria-label="HVN games home">HVN / GAMES</a>
+      <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="#shelf">The shelf</a>
         <a href="#my-data">My data</a>
@@ -29,22 +29,22 @@ function renderGallery() {
       <section class="hero page-width" aria-labelledby="hero-title">
         <div class="hero-copy">
           <h1 id="hero-title">Phasebound</h1>
-          <p class="hero-lede">Your color is safe. The other one is bait. Touch the static and the relay bites.</p>
+          <p class="hero-lede">Catch the packets that match your phase. Switch, dash, and stay alive for one more handoff.</p>
           <div class="hero-meta"><span>60 SEC RUN</span><span>SOLO</span><span>KEYBOARD + TOUCH</span></div>
-          <a class="button button-primary" href="${base}?game=phasebound">Play now <span aria-hidden="true">↘</span></a>
+          <a class="button button-primary" href="${base}?game=phasebound">Play Phasebound</a>
         </div>
         <div class="hero-art" aria-label="Live Phasebound game preview">
           <div id="shelf-preview-root"></div>
-          <div class="art-caption"><span class="signal-mark" aria-hidden="true"></span> PLAYING NOW / PHASEBOUND</div>
+          <div class="art-caption">LIVE PREVIEW / PHASEBOUND</div>
         </div>
       </section>
 
       <section class="shelf page-width" id="shelf" aria-labelledby="shelf-title">
         <div class="section-intro">
           <div>
-            <h2 id="shelf-title">Choose your bad idea.</h2>
+            <h2 id="shelf-title">Games</h2>
           </div>
-          <p class="section-note">Three small machines. Pick one, send the result to a friend.</p>
+          <p class="section-note">Three short browser games. Each one has a different trick.</p>
         </div>
         <article class="game-card">
           <div class="game-card-art" aria-label="Live Phasebound game preview">
@@ -55,7 +55,7 @@ function renderGallery() {
             <h3>Phasebound</h3>
             <p>Catch 18 packets before the relay goes quiet. Miss the color or meet a hazard and the run is over.</p>
             <div class="game-card-actions">
-              <a class="button button-primary" href="${base}?game=phasebound">Play Phasebound <span aria-hidden="true">→</span></a>
+              <a class="button button-primary" href="${base}?game=phasebound">Play Phasebound</a>
               <span class="card-controls">WASD / SPACE / SHIFT</span>
             </div>
           </div>
@@ -63,11 +63,11 @@ function renderGallery() {
         <div class="game-shelf-grid">
           <article class="mini-game-card mini-game-card-skyhook">
             <div class="mini-game-art" aria-label="Live Skyhook game preview"><div id="skyhook-preview-root"></div><b>SKYHOOK</b></div>
-            <div class="mini-game-copy"><h3>Skyhook</h3><p>Tap to climb. Thread the gap. The sky gets faster.</p><a class="text-link" href="${base}?game=skyhook">Play Skyhook <span aria-hidden="true">→</span></a></div>
+            <div class="mini-game-copy"><h3>Skyhook</h3><p>Tap to climb. Thread the gap. The sky gets faster.</p><a class="text-link" href="${base}?game=skyhook">Play Skyhook</a></div>
           </article>
           <article class="mini-game-card mini-game-card-lastcall">
             <div class="mini-game-art" aria-label="Live Last Call game preview"><div id="lastcall-preview-root"></div><b>LAST CALL</b></div>
-            <div class="mini-game-copy"><h3>Last Call</h3><p>Hit the pink window ten times before the clock turns on you.</p><a class="text-link" href="${base}?game=lastcall">Play Last Call <span aria-hidden="true">→</span></a></div>
+            <div class="mini-game-copy"><h3>Last Call</h3><p>Hit the pink window ten times before the clock turns on you.</p><a class="text-link" href="${base}?game=lastcall">Play Last Call</a></div>
           </article>
         </div>
       </section>
@@ -75,8 +75,8 @@ function renderGallery() {
       <section class="insights page-width" id="my-data" aria-labelledby="insights-title">
         <div class="insights-heading">
           <div>
-            <h2 id="insights-title">Your play history.</h2>
-            <p>Small, local signals help the next game earn your time. Nothing leaves this browser.</p>
+            <h2 id="insights-title">Your runs</h2>
+            <p>This stays on this browser. It helps decide what to tune next.</p>
           </div>
           <div class="insights-actions">
             <button class="button button-secondary" id="copy-play-report" type="button">Copy report</button>
@@ -88,8 +88,8 @@ function renderGallery() {
 
       <section class="run-local page-width" id="run-local" aria-labelledby="run-title">
         <div class="run-copy">
-          <h2 id="run-title">Take it home.</h2>
-          <p>Clone the one shared repo, install the dependencies, and play the same shelf without a login.</p>
+          <h2 id="run-title">Run locally</h2>
+          <p>Install the shared repo and play the same games without a login.</p>
         </div>
         <div class="command-stack">
           ${commandBlock("1 / INSTALL", "git clone https://github.com/henryvn27/hvn-games.git\ncd hvn-games", "install")}
@@ -192,9 +192,9 @@ async function renderArcadeGame(gameId) {
   if (!game) return renderGallery();
   document.body.className = `game-page game-${gameId}`;
   app.innerHTML = `
-    <header class="game-header page-width"><a class="wordmark" href="${base}">HVN games</a><a class="back-link" href="${base}">Back to shelf <span aria-hidden="true">↖</span></a></header>
+    <header class="game-header page-width"><a class="wordmark" href="${base}">HVN games</a><a class="back-link" href="${base}">Back to shelf</a></header>
     <main class="game-main page-width"><div class="game-heading"><div><h1>${game.heading}</h1></div><p class="game-blurb">${game.blurb}</p></div>
-      <section class="game-frame" aria-label="${game.title} game"><div class="hud" aria-live="polite"><div class="hud-group"><span class="hud-label">${game.stateLabel}</span><strong id="hud-phase">READY</strong></div><div class="hud-group"><span class="hud-label">SCORE</span><strong id="hud-score">0000</strong></div><div class="hud-group"><span class="hud-label">STREAK</span><strong id="hud-streak">0</strong></div><div class="hud-group hud-time"><span class="hud-label">TIME</span><strong id="hud-time">45</strong></div></div><div id="game-root"></div><div class="energy-wrap"><span class="hud-label">${game.resourceLabel}</span><div class="energy-track"><span id="hud-energy"></span></div></div><button id="game-action" class="game-action-button" type="button">${game.action}</button><div id="game-overlay" class="game-overlay"><h2 id="overlay-title">${game.title} is waiting.</h2><p id="overlay-copy">${game.blurb}</p><button id="overlay-action" class="button button-primary" type="button">Start run <span aria-hidden="true">→</span></button><p id="overlay-detail" class="overlay-detail">${game.detail}</p><div id="overlay-feedback" class="overlay-feedback" hidden><span>How did that run feel?</span><div><button type="button" data-feedback="keep">Keep it</button><button type="button" data-feedback="hard">Too hard</button><button type="button" data-feedback="skip">Not for me</button></div></div></div></section>
+      <section class="game-frame" aria-label="${game.title} game"><div class="hud" aria-live="polite"><div class="hud-group"><span class="hud-label">${game.stateLabel}</span><strong id="hud-phase">READY</strong></div><div class="hud-group"><span class="hud-label">SCORE</span><strong id="hud-score">0000</strong></div><div class="hud-group"><span class="hud-label">STREAK</span><strong id="hud-streak">0</strong></div><div class="hud-group hud-time"><span class="hud-label">TIME</span><strong id="hud-time">45</strong></div></div><div id="game-root"></div><div class="energy-wrap"><span class="hud-label">${game.resourceLabel}</span><div class="energy-track"><span id="hud-energy"></span></div></div><button id="game-action" class="game-action-button" type="button">${game.action}</button><div id="game-overlay" class="game-overlay"><h2 id="overlay-title">${game.title} is waiting.</h2><p id="overlay-copy">${game.blurb}</p><button id="overlay-action" class="button button-primary" type="button">Start run</button><p id="overlay-detail" class="overlay-detail">${game.detail}</p><div id="overlay-feedback" class="overlay-feedback" hidden><span>How did that run feel?</span><div><button type="button" data-feedback="keep">Keep it</button><button type="button" data-feedback="hard">Too hard</button><button type="button" data-feedback="skip">Not for me</button></div></div></div></section>
       <div class="game-notes"><span><b>Action</b> ${game.action}</span><span><b>Restart</b> R</span><span><b>Pause</b> P</span></div>
     </main>`;
   const startGame = game.start;
@@ -210,7 +210,7 @@ async function renderArcadeGame(gameId) {
   const tracker = createGameTracker(gameId, "opening-load", experiment);
   let api;
   let previousMode = "menu";
-  const show = (nextTitle, nextCopy, nextDetail, nextLabel, nextAction) => { title.textContent = nextTitle; copy.textContent = nextCopy; detail.textContent = nextDetail; actionButton.innerHTML = `${nextLabel} <span aria-hidden="true">→</span>`; actionButton.onclick = nextAction; feedback.hidden = true; overlay.classList.remove("is-hidden"); };
+  const show = (nextTitle, nextCopy, nextDetail, nextLabel, nextAction) => { title.textContent = nextTitle; copy.textContent = nextCopy; detail.textContent = nextDetail; actionButton.textContent = nextLabel; actionButton.onclick = nextAction; feedback.hidden = true; overlay.classList.remove("is-hidden"); };
   const update = (state) => {
     if (state.mode === "active" && previousMode !== "active") tracker.start();
     if (state.mode === "result" && previousMode !== "result") tracker.finish(state);
@@ -238,7 +238,7 @@ async function renderGame() {
   app.innerHTML = `
     <header class="game-header page-width">
       <a class="wordmark" href="${base}">HVN games</a>
-      <a class="back-link" href="${base}">Back to shelf <span aria-hidden="true">↖</span></a>
+      <a class="back-link" href="${base}">Back to shelf</a>
     </header>
     <main class="game-main page-width">
       <div class="game-heading">
@@ -257,7 +257,7 @@ async function renderGame() {
         <div id="game-overlay" class="game-overlay">
           <h2 id="overlay-title">The relay is live.</h2>
           <p id="overlay-copy">Catch the packets that match your phase. Switch with Space, dash with Shift, and do not hug the red.</p>
-          <button id="overlay-action" class="button button-primary" type="button">Start run <span aria-hidden="true">→</span></button>
+          <button id="overlay-action" class="button button-primary" type="button">Start run</button>
           <p id="overlay-detail" class="overlay-detail">WASD or arrows to move · P to pause · R to restart</p>
           <div id="overlay-feedback" class="overlay-feedback" hidden>
             <span>How did that run feel?</span>
@@ -292,7 +292,7 @@ async function renderGame() {
     overlayTitle.textContent = title;
     overlayCopy.textContent = copy;
     overlayDetail.textContent = detail;
-    overlayAction.innerHTML = `${label} <span aria-hidden="true">→</span>`;
+    overlayAction.textContent = label;
     action = next;
     overlayFeedback.hidden = true;
     overlay.classList.remove("is-hidden");

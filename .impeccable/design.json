@@ -1,16 +1,16 @@
 {
   "version": 1,
   "mode": "experience",
-  "world": "black-hole observatory game shelf",
+  "world": "direct personal game index",
   "dials": {
     "designVariance": 8,
     "motionIntensity": 5,
     "visualDensity": 4
   },
   "tokens": {
-    "pageAccent": "#d78b2b",
-    "lightBackground": "#f3f0e8",
-    "darkBackground": "#090a0c",
+    "pageAccent": "#c8f04a",
+    "lightBackground": "#f7f7f2",
+    "darkBackground": "#111211",
     "surfaceRadius": "0px",
     "controlRadius": "3px",
     "displayTracking": "-0.04em"
@@ -18,7 +18,7 @@
   "rules": [
     "real runtime before marketing copy",
     "every game proves its verb in a real live preview",
-    "one page accent with game state colors reserved for the game",
+    "one action accent with game state colors reserved for the game",
     "local play data is visible, resettable, and never sent elsewhere"
   ]
 }

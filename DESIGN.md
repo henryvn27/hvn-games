@@ -2,11 +2,11 @@
 
 ## Design read
 
-This is an experience surface for friends choosing a browser game together. The page should feel like a set of small machines at the edge of a black hole: each game has a different gravity, a different risk, and one obvious action.
+This is a small game index for friends choosing something to play. It should feel made by a person who actually plays these games: direct, a little odd, and specific about what each one does.
 
 ## Visual world
 
-Black-hole accretion disk translated into a game shelf. Use a void-black field, hairline orbit geometry, warped circular thresholds, and one photon-ring gold accent. The gallery is the observatory; the real runtimes are the evidence. Do not use generic rounded cards, dashboard chrome, gradients, or decorative fake previews.
+Use a quiet paper/ink base and one bright lime action color. Let the game runtimes provide the color and motion. No collection-wide metaphor, fake atmosphere, oversized launch copy, decorative glyphs, gradients, or rounded dashboard chrome.
 
 ## First viewport
 
@@ -14,11 +14,11 @@ The first viewport leads with Phasebound’s concrete rule, a direct Play action
 
 ## Motion grammar
 
-One live attract loop per game and small state changes that feel like matter crossing a threshold. No blanket entrance animations, no ambient glow fields, and no motion that hides content. Reduced motion freezes attract frames while keeping game routes available.
+One live attract loop per game. Motion should explain how the game works, not decorate the page. Reduced motion freezes attract frames while keeping game routes available.
 
 ## Material and type
 
-Warm observatory paper and ink in light mode, void-black surfaces in dark mode, with photon-ring gold as the page accent. Each runtime retains its own game-state colors. Use installed sans typography for display and monospace only for commands, measurements, and machine labels.
+Neutral paper and ink in light mode, charcoal surfaces in dark mode, with lime reserved for actions. Each runtime retains its own game-state colors. Use installed sans typography for display and monospace only for commands, measurements, and machine labels.
 
 ## Boundaries
 

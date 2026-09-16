@@ -125,8 +125,9 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .mini-game-art::after { width: 105px; height: 105px; right: -28px; top: 28px; }
 .mini-game-art span, .mini-game-art b { position: relative; z-index: 1; }
 .mini-game-art b { font-size: 0.8rem; font-weight: 500; }
-.mini-game-card-skyhook .mini-game-art { background: #17333a; color: #75f2d8; }
-.mini-game-card-lastcall .mini-game-art { background: #261c2d; color: #ff729f; }
+.mini-game-card-skyhook .mini-game-art { background: #91d2df; color: #164d5a; }
+.mini-game-card-lastcall .mini-game-art { background: #28131d; color: #ff557f; }
+.mini-game-card-echo .mini-game-art { background: #182117; color: #ffd477; }
 .mini-game-copy { display: flex; flex-direction: column; justify-content: center; padding: 24px; }
 .mini-game-copy h3 { font-size: 1.55rem; margin-bottom: 10px; }
 .mini-game-copy p { color: var(--muted); font-size: 0.88rem; margin-bottom: 14px; }

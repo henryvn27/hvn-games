@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-const COLORS = { field: 0x1b1822, ink: 0xf4f0e6, pink: 0xff729f, mint: 0x79f0d3, gold: 0xffc857 };
+const COLORS = { field: 0x28131d, ink: 0xffead8, pink: 0xff557f, mint: 0x8ee7c4, gold: 0xffb347 };
 
 export function startLastcall(options = {}) {
   class LastcallScene extends Phaser.Scene {

@@ -26,6 +26,7 @@ The gallery and every game are deployed together from the public `hvn-games` Git
 
 - The gallery links to playable routes in the same Pages deployment.
 - Each game must have a distinct mechanic, clear first action, readable outcome, and fast restart.
+- The collection must have visible variety: Phasebound is a tense signal chase, Skyhook is a bright vertical arcade climb, Last Call is an analog timing game, and Echo Lantern is a quiet search game. Do not reuse the same palette, camera feel, backdrop language, or pressure pattern across the shelf.
 - The current game is Phasebound, a one-minute phase matching run with movement, dash, hazards, score, and streak.
 - The gallery may store resettable aggregate play signals in browser localStorage only: starts, runs, time, outcomes, progress, experiment assignment, and explicit feedback.
 - No account, third-party analytics, advertising, cookies, fingerprinting, public personal-data endpoint, or external runtime asset dependency.

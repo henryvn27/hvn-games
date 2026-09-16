@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-const COLORS = { sky: 0x12232a, cream: 0xf1f1df, mint: 0x75f2d8, coral: 0xff806d, gold: 0xffc857 };
+const COLORS = { sky: 0x91d2df, cream: 0xfff4d2, mint: 0x164d5a, coral: 0xe85f50, gold: 0xf5a623 };
 
 export function startSkyhook(options = {}) {
   class SkyhookScene extends Phaser.Scene {
@@ -29,8 +29,10 @@ export function startSkyhook(options = {}) {
     createBackdrop() {
       this.backdrop = this.add.graphics();
       this.backdrop.fillStyle(COLORS.sky, 1).fillRect(0, 0, 960, 540);
-      this.backdrop.lineStyle(1, 0x8bb8b0, 0.12);
-      for (let x = 0; x < 960; x += 48) this.backdrop.lineBetween(x, 0, x, 540);
+      this.backdrop.fillStyle(COLORS.gold, 0.9).fillCircle(790, 92, 42);
+      this.backdrop.fillStyle(0x5bb5a7, 0.9).fillRect(0, 474, 960, 66);
+      this.backdrop.lineStyle(2, COLORS.cream, 0.22);
+      for (let y = 120; y < 450; y += 82) this.backdrop.lineBetween(0, y, 960, y + 28);
       this.clouds = Array.from({ length: 6 }, (_, index) => ({ x: index * 190 + 30, y: 80 + (index % 3) * 125, width: 90 + (index % 2) * 48 }));
       this.cloudArt = this.add.graphics().setDepth(1);
       this.drawPlayer();

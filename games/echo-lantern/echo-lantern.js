@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-const COLORS = { field: 0x080d12, grid: 0x5f7a78, ink: 0xf5f0dd, mint: 0x79f3d1, amber: 0xffc857, coral: 0xff7d6c, violet: 0xa997ff };
+const COLORS = { field: 0x182117, grid: 0x6f8a63, ink: 0xfff2cf, mint: 0xffd477, amber: 0xf4ad52, coral: 0xd96b55, violet: 0xb6a0e6 };
 
 export function startEchoLantern(options = {}) {
   class EchoLanternScene extends Phaser.Scene { constructor() { super("EchoLantern"); } }
@@ -54,7 +54,7 @@ export function startEchoLantern(options = {}) {
       for (const hazard of this.hazards) if (Phaser.Math.Distance.Between(this.player.x, this.player.y, hazard.x, hazard.y) < 25) { this.hitCooldown = 0.8; this.energy = Math.max(0, this.energy - 24); this.streak = 0; this.burst(this.player.x, this.player.y, COLORS.coral, 10); break; }
     },
     drawStars(time) {
-      this.backdrop.clear(); this.backdrop.fillStyle(COLORS.field, 1).fillRect(0, 0, 960, 540); this.backdrop.lineStyle(1, COLORS.grid, 0.16); for (let x = 0; x <= 960; x += 48) this.backdrop.lineBetween(x, 0, x, 540); for (let y = 0; y <= 540; y += 48) this.backdrop.lineBetween(0, y, 960, y); this.backdrop.lineStyle(1, COLORS.violet, 0.12); this.backdrop.strokeCircle(480, 270, 112); this.backdrop.strokeCircle(480, 270, 220); for (const star of this.stars) { this.backdrop.fillStyle(COLORS.ink, 0.12 + (Math.sin(time * 0.002 + star.phase) + 1) * 0.08); this.backdrop.fillCircle(star.x, star.y, star.r); }
+      this.backdrop.clear(); this.backdrop.fillStyle(COLORS.field, 1).fillRect(0, 0, 960, 540); this.backdrop.fillStyle(0x32472a, 0.65).fillCircle(480, 270, 220); this.backdrop.lineStyle(2, COLORS.grid, 0.22); for (let x = 0; x <= 960; x += 96) this.backdrop.lineBetween(x, 0, x - 80, 540); this.backdrop.lineStyle(1, COLORS.violet, 0.15); this.backdrop.strokeCircle(480, 270, 112); this.backdrop.strokeCircle(480, 270, 220); for (const star of this.stars) { this.backdrop.fillStyle(COLORS.ink, 0.18 + (Math.sin(time * 0.002 + star.phase) + 1) * 0.12); this.backdrop.fillCircle(star.x, star.y, star.r); }
     },
     drawEchoes(dt) {
       this.echoArt.clear(); for (const echo of this.echoes) { echo.radius += 520 * dt; echo.life -= dt * 0.38; this.echoArt.lineStyle(3, COLORS.mint, Math.max(0, echo.life) * 0.62); this.echoArt.strokeCircle(echo.x, echo.y, echo.radius); this.echoArt.lineStyle(1, COLORS.ink, Math.max(0, echo.life) * 0.18); this.echoArt.strokeCircle(echo.x, echo.y, Math.max(0, echo.radius - 10)); } this.echoes = this.echoes.filter((echo) => echo.radius < 690);

@@ -18,7 +18,7 @@ One live attract loop per game. Motion should explain how the game works, not de
 
 ## Material and type
 
-Neutral paper and ink in light mode, charcoal surfaces in dark mode, with lime reserved for actions. Each runtime retains its own game-state colors. Use installed sans typography for display and monospace only for commands, measurements, and machine labels.
+Neutral paper and ink in light mode, charcoal surfaces in dark mode, with lime reserved for actions. Each runtime retains its own game-state colors. Use a deliberate installed sans-serif throughout; never use stylized monospace UI labels.
 
 ## Boundaries
 

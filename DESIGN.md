@@ -28,6 +28,10 @@ Neutral paper and ink in light mode, charcoal surfaces in dark mode, with lime r
 - Do not copy Poki or Notch branding, assets, layout, wording, or claims.
 - Do not add fake catalog depth, invented popularity, empty icons, generic marketing sections, or a shared HUD that erases game identity.
 
+## Echo Lantern addition
+
+Echo Lantern uses a deep-field observatory palette and a pulse ring as its signature affordance. Its UI stays low-chrome: one action, one energy bar, and transient beacons that reward movement and timing. The pulse is both the mechanic and the visual explanation.
+
 ## Quality bar
 
 The page must make a friend want to play within seconds, work at desktop and narrow mobile widths, respect light and dark preference, expose keyboard and touch paths, and show the game doing its job before explaining it.

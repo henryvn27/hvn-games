@@ -25,7 +25,9 @@ The host flow is the public `HVN games` gallery. A visitor opens the gallery, ch
 - Experiment rule: one clearly named variable per game at a time, stable assignment per browser, and variant results kept separate. Treat the results as directional for one player until a consented multi-player data path exists.
 - Adoption point: `site/src/play-intelligence.js` is the shared client layer. New games call `createGameTracker` and register one experiment only when the change is meaningful.
 
-The current shelf has three intentionally different loops: Phasebound (movement and phase matching), Skyhook (one-button altitude and gate threading), and Last Call (timed precision shots). New games should add a new verb or decision, not another skin for an existing loop.
+The current shelf has four intentionally different loops: Phasebound (movement and phase matching), Skyhook (one-button altitude and gate threading), Last Call (timed precision shots), and Echo Lantern (pulse-to-reveal navigation). New games should add a new verb or decision, not another skin for an existing loop.
+
+Echo Lantern proof contract: the gallery preview and `?game=echo-lantern` route both call `startEchoLantern`; the DOM action button invokes `light`, while keyboard Space and pointer input invoke the same pulse action. A run exposes `mode`, `score`, `streak`, `packets`, `timeLeft`, and `energy` to the shared tracker and ends in a visible win or loss state with R/restart and Back to shelf paths.
 
 ## Proof run
 

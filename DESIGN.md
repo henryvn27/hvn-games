@@ -46,4 +46,10 @@ The collection felt interchangeable even though the canvases used different colo
 
 Every game must own its objective shape, primary metric, failure condition, HUD vocabulary, and result language. Shared gallery routing and local play reporting are allowed; a shared score/streak/countdown/resource shell is not. New games need a one-sentence player fantasy and one primary decision that is visibly different from every existing game before implementation.
 
-Applied here: Phasebound is a packet relay; Skyhook is an endless one-life flight; Last Call is a fixed ten-shot accuracy test; Echo Lantern is a beacon route.
+Applied here: Phasebound is an endless color-matching run; Skyhook is a one-life flight; Last Call is a ten-shot timing test; Echo Lantern is a pulse-and-search game.
+
+## Phasebound direction
+
+Phasebound is the shelf anchor. It has no timer and no win target. The run ends when a hazard hits the player or the signal charge is spent. Each matching pickup raises heat: movement gets quicker, hazards move faster, and new hazards join the field. The HUD reports packets, heat, score, phase, and dash charge. A local top-ten board gives the run a reason to come back.
+
+The words stay plain: "Switch. Move. Keep going." and "Run over." are better than invented fiction around a relay or a handoff. The three-second start count appears before every button-triggered run so the player has a clear first beat.

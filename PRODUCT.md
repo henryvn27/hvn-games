@@ -27,8 +27,8 @@ The gallery and every game are deployed together from the public `hvn-games` Git
 - The gallery links to playable routes in the same Pages deployment.
 - Each game must have a distinct mechanic, clear first action, readable outcome, and fast restart.
 - The collection must have visible variety: Phasebound is a tense signal chase, Skyhook is a bright vertical arcade climb, Last Call is an analog timing game, and Echo Lantern is a quiet search game. Do not reuse the same palette, camera feel, backdrop language, or pressure pattern across the shelf.
-- The current game is Phasebound, a one-minute phase matching run with movement, dash, hazards, score, and streak.
-- The gallery may store resettable aggregate play signals in browser localStorage only: starts, runs, time, outcomes, progress, experiment assignment, and explicit feedback.
+- The current game is Phasebound, an endless phase-matching run with movement, dash, hazards, score, heat, and a local best-run board.
+- The gallery may store resettable aggregate play signals in browser localStorage only: starts, runs, time, outcomes, progress, experiment assignment, explicit feedback, a player-chosen local score name, and local leaderboard scores.
 - No account, third-party analytics, advertising, cookies, fingerprinting, public personal-data endpoint, or external runtime asset dependency.
 - Install, setup, verification, and run commands must remain copyable when shown.
 
@@ -39,6 +39,7 @@ The gallery and every game are deployed together from the public `hvn-games` Git
 - The actual shipped game runtime is the gallery preview. Decorative demo canvases and fake screenshots are not acceptable substitutes.
 - Direct feedback about game feel, clarity, difficulty, performance, visuals, and replay value becomes a reusable regression rule.
 - No AI-slop visual patterns, empty icon slots, or generic marketing filler.
+- Copy should use ordinary words and concrete actions. Avoid decorative nouns such as "relay," "signal," "field," "handoff," or "the dark" unless the mechanic actually needs them.
 
 ## Evidence on Hand
 

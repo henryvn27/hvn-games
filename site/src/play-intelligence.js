@@ -2,7 +2,7 @@ const STORAGE_KEY = "hvn-games:play-intelligence:v1";
 const MAX_FEEDBACK = 60;
 
 function blankData() {
-  return { games: {}, experiments: {}, feedback: [] };
+  return { games: {}, experiments: {}, feedback: [], leaderboards: {}, playerName: "YOU" };
 }
 
 function readData() {
@@ -128,4 +128,46 @@ export function resetPlayReport() {
   } catch {
     // Nothing to do when storage is unavailable.
   }
+}
+
+function leaderboardEntries(data, gameId) {
+  data.leaderboards ||= {};
+  data.leaderboards[gameId] ||= [];
+  return data.leaderboards[gameId];
+}
+
+export function getPlayerName() {
+  const data = readData();
+  return data.playerName || "YOU";
+}
+
+export function setPlayerName(value) {
+  const data = readData();
+  const name = String(value || "YOU").trim().replace(/\s+/g, " ").slice(0, 16) || "YOU";
+  data.playerName = name;
+  writeData(data);
+  return name;
+}
+
+export function getLeaderboard(gameId = "phasebound") {
+  const data = readData();
+  return leaderboardEntries(data, gameId)
+    .slice()
+    .sort((left, right) => right.score - left.score || right.packets - left.packets || left.createdAt.localeCompare(right.createdAt))
+    .slice(0, 10);
+}
+
+export function recordLeaderboardScore(gameId, score, packets, seconds) {
+  const data = readData();
+  const entries = leaderboardEntries(data, gameId);
+  entries.push({
+    name: data.playerName || "YOU",
+    score: Math.max(0, Math.round(score || 0)),
+    packets: Math.max(0, Math.round(packets || 0)),
+    seconds: Math.max(0, Math.round(seconds || 0)),
+    createdAt: new Date().toISOString(),
+  });
+  data.leaderboards[gameId] = entries.sort((left, right) => right.score - left.score || right.packets - left.packets || left.createdAt.localeCompare(right.createdAt)).slice(0, 25);
+  writeData(data);
+  return getLeaderboard(gameId);
 }

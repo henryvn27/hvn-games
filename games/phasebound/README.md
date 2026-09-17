@@ -1,6 +1,6 @@
 # Phasebound
 
-Phasebound is a 60-second courier run through a relay that keeps changing its mind. Move, switch phase with Space, and dash with Shift. Collect packets that match your current phase, avoid the orbiting static, and keep your streak alive. One static collision ends the run; the dash is your brief escape window.
+Phasebound is an endless color-matching run. Move, switch phase with Space, and dash with Shift. Collect the packet that matches your current phase, avoid the orbiting hazards, and keep going as the field gets faster. A hazard hit or an empty signal charge ends the run.
 
 ## Player verbs
 

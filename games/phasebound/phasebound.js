@@ -28,8 +28,7 @@ export function startPhasebound(options = {}) {
       this.score = 0;
       this.streak = 0;
       this.packetsCollected = 0;
-      this.target = 18;
-      this.timeLeft = 60;
+      this.heat = 1;
       this.energy = 100;
       this.elapsed = 0;
       this.spawnClock = 0;
@@ -97,17 +96,24 @@ export function startPhasebound(options = {}) {
     },
 
     createHazards() {
-      for (let index = 0; index < 5; index += 1) {
-        const hazard = {
-          angle: (Math.PI * 2 * index) / 5 + 0.35,
-          radius: 130 + (index % 3) * 76,
-          speed: 0.22 + index * 0.035,
-          size: index % 2 === 0 ? 15 : 11,
-          wobble: index * 0.8,
-          art: this.add.graphics().setDepth(2),
-        };
-        this.hazards.push(hazard);
-      }
+      for (let index = 0; index < 5; index += 1) this.addHazard(index);
+    },
+
+    addHazard(index) {
+      this.hazards.push({
+        angle: (Math.PI * 2 * index) / 5 + 0.35,
+        radius: 130 + (index % 3) * 76,
+        speed: 0.22 + index * 0.035,
+        size: index % 2 === 0 ? 15 : 11,
+        wobble: index * 0.8,
+        art: this.add.graphics().setDepth(2),
+      });
+    },
+
+    updateDifficulty() {
+      this.heat = 1 + Math.floor(this.packetsCollected / 5);
+      const desiredHazards = Math.min(10, 5 + Math.floor(this.packetsCollected / 7));
+      while (this.hazards.length < desiredHazards) this.addHazard(this.hazards.length);
     },
 
     startRun() {
@@ -119,7 +125,7 @@ export function startPhasebound(options = {}) {
       this.score = 0;
       this.streak = 0;
       this.packetsCollected = 0;
-      this.timeLeft = 60;
+      this.heat = 1;
       this.energy = 100;
       this.elapsed = 0;
       this.spawnClock = 0;
@@ -173,18 +179,18 @@ export function startPhasebound(options = {}) {
     update(time, delta) {
       const dt = Math.min(delta / 1000, 0.04);
       for (const star of this.stars) star.object.setAlpha(0.16 + (Math.sin(time * 0.001 + star.phase) + 1) * 0.11);
-      this.updateHazards(time);
+      this.updateHazards(time, dt);
       this.updateBursts(dt);
       if (this.mode !== "active") return;
 
       this.elapsed += dt;
-      this.timeLeft -= dt;
       this.hitCooldown = Math.max(0, this.hitCooldown - dt);
       this.dashTime = Math.max(0, this.dashTime - dt);
       this.dashCooldown = Math.max(0, this.dashCooldown - dt);
       this.energy = Math.min(100, this.energy + dt * 2.4);
       this.updateMovement(dt);
       this.updatePackets(time);
+      this.updateDifficulty();
       this.updateHazardCollision();
       this.drawPlayer();
       this.publishClock += dt;
@@ -192,8 +198,7 @@ export function startPhasebound(options = {}) {
         this.publishClock = 0;
         this.publish();
       }
-      if (this.packetsCollected >= this.target) this.endRun("won");
-      else if (this.timeLeft <= 0) this.endRun("lost");
+      if (this.energy <= 0) this.endRun("lost");
     },
 
     updateMovement(dt) {
@@ -205,8 +210,9 @@ export function startPhasebound(options = {}) {
       if (this.cursors.down.isDown || this.keys.S.isDown || this.touch.down) y += 1;
       if (x || y) {
         const length = Math.hypot(x, y) || 1;
-        this.playerVelocity.x = Phaser.Math.Linear(this.playerVelocity.x, (x / length) * (this.dashTime > 0 ? 520 : 235), 0.24);
-        this.playerVelocity.y = Phaser.Math.Linear(this.playerVelocity.y, (y / length) * (this.dashTime > 0 ? 520 : 235), 0.24);
+        const runSpeed = 235 + Math.min(90, this.packetsCollected * 2.2);
+        this.playerVelocity.x = Phaser.Math.Linear(this.playerVelocity.x, (x / length) * (this.dashTime > 0 ? 520 : runSpeed), 0.24);
+        this.playerVelocity.y = Phaser.Math.Linear(this.playerVelocity.y, (y / length) * (this.dashTime > 0 ? 520 : runSpeed), 0.24);
       } else if (this.pointerTarget) {
         const direction = new Phaser.Math.Vector2(this.pointerTarget.x - this.player.x, this.pointerTarget.y - this.player.y);
         if (direction.length() > 10) {
@@ -229,7 +235,7 @@ export function startPhasebound(options = {}) {
         this.drawPacket(packet, time);
         if (distance > 30) continue;
         if (packet.phase === this.phase) {
-          this.score += 100 + this.streak * 25;
+          this.score += 100 + this.streak * 25 + this.heat * 12;
           this.streak += 1;
           this.packetsCollected += 1;
           this.energy = Math.min(100, this.energy + 8);
@@ -244,10 +250,10 @@ export function startPhasebound(options = {}) {
       }
     },
 
-    updateHazards(time) {
+    updateHazards(time, dt) {
       for (const hazard of this.hazards) {
-        const speed = hazard.speed * (1 + Math.min(0.8, this.elapsed / 90));
-        hazard.angle += speed * 0.016;
+        const speed = hazard.speed * (1 + Math.min(4.2, this.packetsCollected * 0.11 + this.elapsed * 0.018));
+        hazard.angle += speed * dt;
         const wobble = Math.sin(time * 0.0012 + hazard.wobble) * 22;
         hazard.x = 480 + Math.cos(hazard.angle) * (hazard.radius + wobble);
         hazard.y = 320 + Math.sin(hazard.angle) * (hazard.radius + wobble) * 0.58;
@@ -361,7 +367,7 @@ export function startPhasebound(options = {}) {
     },
 
     publish() {
-      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, score: this.score, streak: this.streak, packets: this.packetsCollected, target: this.target, timeLeft: this.timeLeft, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed });
+      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, score: this.score, streak: this.streak, packets: this.packetsCollected, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed });
     },
   });
 

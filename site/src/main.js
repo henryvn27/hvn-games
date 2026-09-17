@@ -193,7 +193,7 @@ async function renderArcadeGame(gameId) {
   const games = {
     skyhook: { title: "Skyhook", heading: "Keep your head up.", blurb: "Tap to climb through the gaps. The sky does not wait.", detail: "Space, W, or tap to rise · P to pause · R to restart", action: "Flap", stateLabel: "ALTITUDE", resourceLabel: "NERVE", start: startSkyhook },
     lastcall: { title: "Last Call", heading: "Do not miss the window.", blurb: "A tiny pink window. Ten chances. Make the clock nervous.", detail: "Space, Enter, or tap when the hand hits pink · R to restart", action: "Take shot", stateLabel: "WINDOW", resourceLabel: "FOCUS", start: startLastcall },
-    "echo-lantern": { title: "Echo Lantern", heading: "Light only what answers.", blurb: "Send a pulse into the dark. Chase the beacon before its echo fades.", detail: "WASD or arrows to move · Space or tap to pulse · P to pause · R to restart", action: "Pulse", stateLabel: "ECHO", resourceLabel: "LANTERN", start: startEchoLantern },
+    "echo-lantern": { title: "Echo Lantern", heading: "Light only what answers.", blurb: "Send a pulse into the dark. Chase the beacon before its echo fades.", detail: "WASD or arrows to move · Space or tap to pulse · P or Pause to pause · R to restart", action: "Pulse", stateLabel: "ECHO", resourceLabel: "LANTERN", start: startEchoLantern },
   };
   const game = games[gameId];
   if (!game) return renderGallery();
@@ -201,7 +201,7 @@ async function renderArcadeGame(gameId) {
   app.innerHTML = `
     <header class="game-header page-width"><a class="wordmark" href="${base}">HVN games</a><a class="back-link" href="${base}">Back to shelf</a></header>
     <main class="game-main page-width"><div class="game-heading"><div><h1>${game.heading}</h1></div><p class="game-blurb">${game.blurb}</p></div>
-      <section class="game-frame" aria-label="${game.title} game"><div class="hud" aria-live="polite"><div class="hud-group"><span class="hud-label">${game.stateLabel}</span><strong id="hud-phase">READY</strong></div><div class="hud-group"><span class="hud-label">SCORE</span><strong id="hud-score">0000</strong></div><div class="hud-group"><span class="hud-label">STREAK</span><strong id="hud-streak">0</strong></div><div class="hud-group hud-time"><span class="hud-label">TIME</span><strong id="hud-time">45</strong></div></div><div id="game-root"></div><div class="energy-wrap"><span class="hud-label">${game.resourceLabel}</span><div class="energy-track"><span id="hud-energy"></span></div></div><button id="game-action" class="game-action-button" type="button">${game.action}</button><div id="game-overlay" class="game-overlay"><h2 id="overlay-title">${game.title} is waiting.</h2><p id="overlay-copy">${game.blurb}</p><button id="overlay-action" class="button button-primary" type="button">Start run</button><p id="overlay-detail" class="overlay-detail">${game.detail}</p><div id="overlay-feedback" class="overlay-feedback" hidden><span>How did that run feel?</span><div><button type="button" data-feedback="keep">Keep it</button><button type="button" data-feedback="hard">Too hard</button><button type="button" data-feedback="easy">Too easy</button><button type="button" data-feedback="skip">Not for me</button></div></div></div></section>
+      <section class="game-frame" aria-label="${game.title} game"><div class="hud" aria-live="polite"><div class="hud-group"><span class="hud-label">${game.stateLabel}</span><strong id="hud-phase">READY</strong></div><div class="hud-group"><span class="hud-label">SCORE</span><strong id="hud-score">0000</strong></div><div class="hud-group"><span class="hud-label">STREAK</span><strong id="hud-streak">0</strong></div><div class="hud-group hud-time"><span class="hud-label">TIME</span><strong id="hud-time">45</strong></div></div><div id="game-root"></div><div class="energy-wrap"><span class="hud-label">${game.resourceLabel}</span><div class="energy-track"><span id="hud-energy"></span></div></div><button id="game-action" class="game-action-button" type="button">${game.action}</button><div id="game-overlay" class="game-overlay"><h2 id="overlay-title">${game.title} is waiting.</h2><p id="overlay-copy">${game.blurb}</p><button id="overlay-action" class="button button-primary" type="button">Start run</button><p id="overlay-detail" class="overlay-detail">${game.detail}</p><div id="overlay-feedback" class="overlay-feedback" hidden><span>How did that run feel?</span><div><button type="button" data-feedback="keep">Keep it</button><button type="button" data-feedback="hard">Too hard</button><button type="button" data-feedback="easy">Too easy</button><button type="button" data-feedback="skip">Not for me</button></div></div></div>${gameId === "echo-lantern" ? `<div class="arcade-touch-controls" aria-label="Echo Lantern touch controls"><div class="arcade-touch-pad"><button type="button" data-touch-input="up" aria-label="Move up">↑</button><button type="button" data-touch-input="left" aria-label="Move left">←</button><button type="button" data-touch-input="down" aria-label="Move down">↓</button><button type="button" data-touch-input="right" aria-label="Move right">→</button></div><button class="arcade-pause-button" type="button" data-touch-input="pause">Pause</button></div>` : ""}</section>
       <div class="game-notes"><span><b>Action</b> ${game.action}</span><span><b>Restart</b> R</span><span><b>Pause</b> P</span></div>
     </main>`;
   const startGame = game.start;
@@ -236,6 +236,19 @@ async function renderArcadeGame(gameId) {
   api = startGame({ parent: "game-root", onState: update, preview: false, pacing: experiment });
   actionButton.onclick = () => api.start();
   gameAction.onclick = () => api[gameId === "skyhook" ? "flap" : gameId === "lastcall" ? "shoot" : "light"]?.();
+  for (const button of document.querySelectorAll("[data-touch-input]")) {
+    const input = button.dataset.touchInput;
+    if (input === "pause") {
+      button.addEventListener("click", () => api.togglePause?.());
+      continue;
+    }
+    const press = (event) => { event.preventDefault(); api.setTouchDirection?.(input, true); };
+    const release = (event) => { event.preventDefault(); api.setTouchDirection?.(input, false); };
+    button.addEventListener("pointerdown", press);
+    button.addEventListener("pointerup", release);
+    button.addEventListener("pointercancel", release);
+    button.addEventListener("pointerleave", release);
+  }
   for (const button of feedback.querySelectorAll("[data-feedback]")) button.addEventListener("click", () => { tracker.feedback(button.dataset.feedback); button.closest(".overlay-feedback").querySelectorAll("button").forEach((item) => { item.disabled = true; }); button.textContent = "Saved"; });
 }
 

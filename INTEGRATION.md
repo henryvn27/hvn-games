@@ -29,6 +29,16 @@ The current shelf has four intentionally different loops: Phasebound (movement a
 
 Echo Lantern proof contract: the gallery preview and `?game=echo-lantern` route both call `startEchoLantern`; the DOM action button invokes `light`, while keyboard Space and pointer input invoke the same pulse action. A run exposes `mode`, `score`, `streak`, `packets`, `timeLeft`, and `energy` to the shared tracker and ends in a visible win or loss state with R/restart and Back to shelf paths.
 
+## Echo Lantern touch path
+
+- Trigger: open `?game=echo-lantern` on a narrow viewport and start a run.
+- Input: hold the four directional touch controls to move; use Pulse to reveal a beacon; use Pause to suspend the run.
+- Output: the same movement, pulse, pause, result, and restart states as keyboard play.
+- Adoption point: `site/src/main.js` renders the narrow controls and `games/echo-lantern/echo-lantern.js` maps them into the runtime.
+- Privacy boundary: no new data or browser permission; controls only change in-memory run state.
+- Rollback: remove the `arcade-touch-controls` block and `setTouchDirection` bridge to restore the previous route.
+- Proof run: smoke checks confirm the bridge and markers; browser QA must hold each direction, pulse, pause, restart, and return to shelf on desktop and narrow viewports.
+
 ## Proof run
 
 The proof run must build the site, boot it through the intended local or Pages route, click Play, exercise the primary verbs, complete or fail a run, and verify the restart and back-to-shelf paths. Browser screenshots cover the gallery, active play, and result states on desktop and narrow mobile.

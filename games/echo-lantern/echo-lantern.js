@@ -31,6 +31,7 @@ export function startEchoLantern(options = {}) {
     },
     togglePause() { if (this.mode === "active") this.mode = "pause"; else if (this.mode === "pause") this.mode = "active"; this.publish(); },
     resume() { if (this.mode === "pause") { this.mode = "active"; this.publish(); } },
+    setTouchDirection(direction, pressed) { if (direction in this.touch) this.touch[direction] = pressed; },
     update(time, delta) {
       const dt = Math.min(delta / 1000, 0.04); if (this.mode === "active") this.elapsed += dt; this.pulseCooldown = Math.max(0, this.pulseCooldown - dt); this.drawStars(time); this.drawEchoes(dt); this.drawBursts(dt); this.drawHazards(dt); this.drawBeacons(time); if (this.mode !== "active") return;
       this.timeLeft -= dt; this.energy = Math.min(100, this.energy + dt * 5.4); this.updateMovement(dt); this.updateBeaconState(); this.updateHazardCollision(); this.drawPlayer(); if (this.collected >= this.target) this.endRun("won"); else if (this.timeLeft <= 0 || this.energy <= 0) this.endRun("lost"); this.publish();
@@ -72,5 +73,5 @@ export function startEchoLantern(options = {}) {
     publish() { options.onState?.({ mode: this.mode, result: this.result, score: this.score, streak: this.streak, packets: this.collected, timeLeft: this.timeLeft, energy: this.energy, phase: "echo" }); },
   });
   const game = new Phaser.Game({ type: Phaser.AUTO, width: 960, height: 540, parent: options.parent, backgroundColor: "#080d12", scene: EchoLanternScene, scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH } });
-  const getScene = () => game.scene.getScene("EchoLantern"); return { start: () => getScene()?.startRun(), resume: () => getScene()?.resume(), light: () => getScene()?.pulse(), destroy: () => game.destroy(true) };
+  const getScene = () => game.scene.getScene("EchoLantern"); return { start: () => getScene()?.startRun(), resume: () => getScene()?.resume(), togglePause: () => getScene()?.togglePause(), setTouchDirection: (direction, pressed) => getScene()?.setTouchDirection(direction, pressed), light: () => getScene()?.pulse(), destroy: () => game.destroy(true) };
 }

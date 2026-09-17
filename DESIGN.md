@@ -35,3 +35,7 @@ Echo Lantern uses a deep-field observatory palette and a pulse ring as its signa
 ## Quality bar
 
 The page must make a friend want to play within seconds, work at desktop and narrow mobile widths, respect light and dark preference, expose keyboard and touch paths, and show the game doing its job before explaining it.
+
+## Echo Lantern controls
+
+The narrow route adds a field-instrument control cluster: a four-way d-pad for movement and a quiet Pause control, while Pulse remains the single signal-colored action. The controls stay out of the playfield on desktop and use the same verbs as keyboard play.

@@ -10,7 +10,7 @@ Use a quiet paper/ink base and one bright lime action color. Let the game runtim
 
 ## First viewport
 
-The first viewport leads with Phasebound’s concrete rule, a direct Play action, and the actual runtime in attract mode. Below it, every shelf entry proves its own verb in a small live preview before asking for a click.
+The first viewport is just Phasebound: a concrete rule, a direct play button, and the actual runtime in attract mode. The page should feel like a small game someone made, not a catalog trying to sell a catalog.
 
 ## Motion grammar
 
@@ -46,10 +46,10 @@ The collection felt interchangeable even though the canvases used different colo
 
 Every game must own its objective shape, primary metric, failure condition, HUD vocabulary, and result language. Shared gallery routing and local play reporting are allowed; a shared score/streak/countdown/resource shell is not. New games need a one-sentence player fantasy and one primary decision that is visibly different from every existing game before implementation.
 
-Applied here: Phasebound is an endless color-matching run; Skyhook is a one-life flight; Last Call is a ten-shot timing test; Echo Lantern is a pulse-and-search game.
+Applied here: Phasebound is the public game. Skyhook, Last Call, and Echo Lantern stay in the repo but are off the public shelf until they have a stronger point of view.
 
 ## Phasebound direction
 
-Phasebound is the shelf anchor. It has no timer and no win target. The run ends when a hazard hits the player or the signal charge is spent. Each matching pickup raises heat: movement gets quicker, hazards move faster, and new hazards join the field. The HUD reports packets, heat, score, phase, and dash charge. A local top-ten board gives the run a reason to come back.
+Phasebound is the public game. It has no timer and no win target. The run ends when a hazard hits the player or the signal charge is spent. Each matching pickup raises heat: movement gets quicker, hazards move faster, and new hazards join the field. The HUD reports packets, heat, score, phase, and dash charge. A local top-ten board gives the run a reason to come back.
 
-The words stay plain: "Switch. Move. Keep going." and "Run over." are better than invented fiction around a relay or a handoff. The three-second start count appears before every button-triggered run so the player has a clear first beat.
+The words stay plain: "Grab cyan. Avoid red." is enough. The three-second start count appears before every button-triggered run so the player has a clear first beat.

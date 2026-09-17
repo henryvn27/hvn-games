@@ -23,7 +23,7 @@ const html = readFileSync(join(root, "site/index.html"), "utf8");
 if (!html.includes("src/main.js")) throw new Error("Gallery entry point is not wired");
 
 const main = readFileSync(join(root, "site/src/main.js"), "utf8");
-for (const marker of ["phasebound", "skyhook", "lastcall", "echo-lantern", "copy", "play-intelligence", "overlay-feedback", "Too easy", "preview: true", "data-touch-input", "Pause", "leaderboard", "What are you playing?", "data-game-filter"]) {
+for (const marker of ["phasebound", "skyhook", "lastcall", "echo-lantern", "copy", "play-intelligence", "overlay-feedback", "Too easy", "preview: true", "data-touch-input", "Pause", "leaderboard", "phasebound-card-preview-root", "Grab the cyan dots"]) {
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
 }
 

@@ -387,3 +387,75 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .mini-game-art { min-height: 170px; }
   .mini-game-copy { min-height: 170px; }
 }
+
+/* One-game page: a little loose, a little homemade. */
+.gallery-page {
+  --bg: #fff8e8;
+  --surface: #fffdf5;
+  --surface-strong: #f0e7ce;
+  --ink: #20231d;
+  --muted: #746e5b;
+  --line: rgba(32, 35, 29, 0.22);
+  --accent: #c8f04a;
+  --accent-strong: #506b0b;
+  background: var(--bg);
+  overflow-x: hidden;
+}
+.gallery-page .site-header { min-height: 68px; border-bottom: 2px solid var(--ink); }
+.gallery-page .wordmark { font-size: 1rem; letter-spacing: -0.06em; }
+.gallery-page .site-nav { gap: 18px; text-transform: lowercase; }
+.gallery-page .site-nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.phasebound-home { display: grid; grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.3fr); gap: 52px; align-items: center; padding-block: 70px 54px; }
+.phasebound-home-copy { position: relative; max-width: 430px; }
+.phasebound-home-copy::after { content: "hi"; position: absolute; top: -18px; right: 12px; color: var(--accent-strong); font: 1.2rem/1 var(--hand-font, "Comic Sans MS", cursive); transform: rotate(9deg); }
+.phasebound-home .eyebrow { margin-bottom: 18px; color: var(--ink); }
+.phasebound-home h1 { margin-bottom: 18px; font-size: clamp(4rem, 8vw, 7.4rem); letter-spacing: -0.09em; }
+.phasebound-rule { max-width: 300px; margin-bottom: 26px; font-size: 1.1rem; line-height: 1.35; }
+.made-note { margin: 28px 0 0; color: var(--muted); font: 0.92rem/1.35 var(--hand-font, "Comic Sans MS", cursive); transform: rotate(-3deg); }
+.phasebound-home .button-primary { border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); text-transform: lowercase; }
+.phasebound-home .button-primary:hover { background: var(--ink); color: var(--accent); transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+.phasebound-home-art { position: relative; min-width: 0; min-height: 420px; overflow: hidden; background: var(--field); border: 2px solid var(--ink); box-shadow: 9px 9px 0 var(--ink); transform: rotate(0.7deg); }
+#phasebound-card-preview-root { display: grid; place-items: center; width: 100%; min-width: 0; min-height: 420px; height: 100%; overflow: hidden; }
+#phasebound-card-preview-root canvas { display: block; width: 100% !important; height: auto !important; }
+.phasebound-home-art .art-caption { inset: auto 18px 16px; color: #adc0c0; font-size: 0.66rem; text-transform: lowercase; }
+.phasebound-strip { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px 22px; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); padding-block: 16px; color: var(--muted); font-size: 0.76rem; }
+.phasebound-strip b { color: var(--ink); font-weight: 800; }
+.bench-note { margin-left: auto; color: var(--accent-strong); font: 0.86rem var(--hand-font, "Comic Sans MS", cursive); transform: rotate(-2deg); }
+.gallery-page .leaderboard-section { grid-template-columns: minmax(250px, 0.8fr) minmax(320px, 1.2fr); gap: 56px; padding-block: 74px 66px; }
+.gallery-page .leaderboard-heading h2 { font-size: clamp(2.6rem, 5vw, 4.8rem); }
+.gallery-page .leaderboard-heading > p:last-child { max-width: 360px; }
+.gallery-page .leaderboard-panel { border-top: 2px solid var(--ink); }
+.gallery-page .name-form input { background: var(--surface); border: 2px solid var(--ink); }
+.gallery-page .button-secondary { border: 2px solid var(--ink); }
+.gallery-page .button-secondary:hover { background: var(--ink); color: var(--accent); }
+.gallery-page .leaderboard-list li { grid-template-columns: 34px minmax(80px, 1fr) auto; padding-block: 13px; }
+.gallery-page .leaderboard-list b { font-size: 1.05rem; }
+.gallery-page .leaderboard-packets { display: none; }
+.gallery-page .history { padding-bottom: 70px; }
+.gallery-page .history-heading h2 { font-size: clamp(2.4rem, 4vw, 4rem); }
+.gallery-page .developer-note { padding-bottom: 60px; }
+.gallery-page .developer-note summary { font: 0.95rem var(--hand-font, "Comic Sans MS", cursive); }
+.gallery-page .site-footer { border-top: 2px solid var(--ink); color: var(--ink); }
+
+@media (prefers-color-scheme: dark) {
+  .gallery-page { --bg: #1d211b; --surface: #262a22; --surface-strong: #30352b; --ink: #f4f1df; --muted: #b5b09d; --line: rgba(244, 241, 223, 0.25); --accent-strong: #d9f879; }
+  .gallery-page .phasebound-home-art { box-shadow: 9px 9px 0 #090b09; }
+  .gallery-page .phasebound-home .button-primary { border-color: var(--ink); box-shadow: 4px 4px 0 #090b09; }
+}
+
+@media (max-width: 850px) {
+  .phasebound-home { grid-template-columns: 1fr; gap: 36px; padding-block: 52px 42px; }
+  .phasebound-home-art, #phasebound-card-preview-root { min-height: 330px; }
+  .bench-note { width: 100%; margin-left: 0; }
+}
+
+@media (max-width: 600px) {
+  .gallery-page .site-header { min-height: 62px; }
+  .gallery-page .site-nav { gap: 12px; font-size: 0.72rem; }
+  .phasebound-home { padding-block: 45px 34px; }
+  .phasebound-home h1 { font-size: clamp(3.8rem, 20vw, 5.6rem); }
+  .phasebound-home-art, #phasebound-card-preview-root { min-height: 275px; }
+  .phasebound-home-art { box-shadow: 5px 5px 0 var(--ink); }
+  .phasebound-strip { gap: 8px 15px; font-size: 0.7rem; }
+  .gallery-page .leaderboard-section { padding-block: 58px 52px; }
+}

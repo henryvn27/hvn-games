@@ -1,8 +1,8 @@
 # HVN games
 
-A small shelf of focused browser games built to be played, not just shown.
+A small browser game made to be played, not just shown.
 
-The shelf opens with [Phasebound](https://henryvn27.github.io/hvn-games/?game=phasebound), an endless color-matching run. Switch phase, take the matching packets, and stay out of the hazards as the field speeds up. [Echo Lantern](https://henryvn27.github.io/hvn-games/?game=echo-lantern) is a pulse-and-search game: find each beacon before its light fades.
+The public page currently opens with [Phasebound](https://henryvn27.github.io/hvn-games/?game=phasebound). The other experiments are still in the repo, but they are off the shelf while they are being tuned.
 
 ## Install and run
 
@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Open the local URL Vite prints, then choose a game from the shelf. The public gallery is at <https://henryvn27.github.io/hvn-games/>.
+Open the local URL Vite prints, then play Phasebound. The public gallery is at <https://henryvn27.github.io/hvn-games/>.
 
 ## Play intelligence
 

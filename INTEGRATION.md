@@ -2,7 +2,7 @@
 
 ## Host flow
 
-The host flow is the public `HVN games` gallery. A visitor opens the gallery, chooses a game, and the Play action loads the selected game in the same Pages deployment. This keeps every game discoverable from one durable URL instead of scattering small projects across separate repositories.
+The host flow is the public `HVN games` page. A visitor opens the page and the Play action loads Phasebound in the same Pages deployment. The other experiments remain available by direct route while they are off the public shelf.
 
 ## Trigger and input
 
@@ -13,7 +13,7 @@ The host flow is the public `HVN games` gallery. A visitor opens the gallery, ch
 ## Output and next action
 
 - Output: a playable run, a visible result state, and a fast restart path.
-- Next action: play again, return to the shelf, or share the public Pages URL.
+- Next action: play again, return to the page, or share the public Pages URL.
 - Adoption point: `site/src/main.js` owns gallery routing; `games/<slug>/` owns game runtime code.
 
 ## Play intelligence contract
@@ -25,7 +25,7 @@ The host flow is the public `HVN games` gallery. A visitor opens the gallery, ch
 - Experiment rule: one clearly named variable per game at a time, stable assignment per browser, and variant results kept separate. Treat the results as directional for one player until a consented multi-player data path exists.
 - Adoption point: `site/src/play-intelligence.js` is the shared client layer. New games call `createGameTracker` and register one experiment only when the change is meaningful.
 
-The current shelf has four intentionally different loops: Phasebound (endless color matching and escalating hazards), Skyhook (endless one-life flight), Last Call (fixed ten-shot timing), and Echo Lantern (pulse-and-search navigation). New games should add a new verb or decision, not another skin for an existing loop.
+The current public shelf has one game: Phasebound, with color matching and escalating hazards. Skyhook, Last Call, and Echo Lantern stay in the repo while their visual and mechanical differences are being rebuilt. New games should add a new verb or decision, not another skin for an existing loop.
 
 Echo Lantern proof contract: the gallery preview and `?game=echo-lantern` route both call `startEchoLantern`; the DOM action button invokes `light`, while keyboard Space and pointer input invoke the same pulse action. A run exposes `mode`, `score`, `streak`, `packets`, `timeLeft`, and `energy` to the shared tracker and ends in a visible win or loss state with R/restart and Back to shelf paths.
 

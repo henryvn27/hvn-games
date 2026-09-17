@@ -136,6 +136,19 @@ function leaderboardEntries(data, gameId) {
   return data.leaderboards[gameId];
 }
 
+function removeRapidDuplicates(entries) {
+  const kept = [];
+  for (const entry of entries) {
+    const duplicate = kept.some((previous) => previous.name === entry.name
+      && previous.score === entry.score
+      && previous.packets === entry.packets
+      && previous.seconds === entry.seconds
+      && Math.abs(Date.parse(previous.createdAt) - Date.parse(entry.createdAt)) < 2000);
+    if (!duplicate) kept.push(entry);
+  }
+  return kept;
+}
+
 export function getPlayerName() {
   const data = readData();
   return data.playerName || "YOU";
@@ -151,7 +164,13 @@ export function setPlayerName(value) {
 
 export function getLeaderboard(gameId = "phasebound") {
   const data = readData();
-  return leaderboardEntries(data, gameId)
+  const entries = leaderboardEntries(data, gameId);
+  const cleaned = removeRapidDuplicates(entries);
+  if (cleaned.length !== entries.length) {
+    data.leaderboards[gameId] = cleaned;
+    writeData(data);
+  }
+  return cleaned
     .slice()
     .sort((left, right) => right.score - left.score || right.packets - left.packets || left.createdAt.localeCompare(right.createdAt))
     .slice(0, 10);
@@ -160,14 +179,17 @@ export function getLeaderboard(gameId = "phasebound") {
 export function recordLeaderboardScore(gameId, score, packets, seconds) {
   const data = readData();
   const entries = leaderboardEntries(data, gameId);
-  entries.push({
+  const next = {
     name: data.playerName || "YOU",
     score: Math.max(0, Math.round(score || 0)),
     packets: Math.max(0, Math.round(packets || 0)),
     seconds: Math.max(0, Math.round(seconds || 0)),
     createdAt: new Date().toISOString(),
-  });
-  data.leaderboards[gameId] = entries.sort((left, right) => right.score - left.score || right.packets - left.packets || left.createdAt.localeCompare(right.createdAt)).slice(0, 25);
+  };
+  entries.push(next);
+  data.leaderboards[gameId] = removeRapidDuplicates(entries)
+    .sort((left, right) => right.score - left.score || right.packets - left.packets || left.createdAt.localeCompare(right.createdAt))
+    .slice(0, 25);
   writeData(data);
   return getLeaderboard(gameId);
 }

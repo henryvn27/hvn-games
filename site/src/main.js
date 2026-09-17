@@ -22,66 +22,35 @@ function renderGallery() {
     <header class="site-header page-width">
       <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
       <nav class="site-nav" aria-label="Primary navigation">
-        <a href="#shelf">Games</a>
-        <a href="#leaderboard">Best runs</a>
-        <a href="#history">History</a>
+        <a href="#leaderboard">scores</a>
+        <a href="#history">history</a>
       </nav>
     </header>
     <main>
-      <section class="arcade-intro page-width" aria-labelledby="hero-title">
-        <div>
-          <p class="eyebrow">HVN / BROWSER GAMES</p>
-          <h1 id="hero-title">What are you playing?</h1>
+      <section class="phasebound-home page-width" aria-labelledby="hero-title">
+        <div class="phasebound-home-copy">
+          <p class="eyebrow">HVN games / 01</p>
+          <h1 id="hero-title">Phasebound</h1>
+          <p class="phasebound-rule">Grab the cyan dots. Don’t touch the red ones.</p>
+          <a class="button button-primary" href="${base}?game=phasebound">play</a>
+          <p class="made-note">made for a quick break<br>keyboard or touch</p>
         </div>
-        <div class="arcade-intro-note"><p>Short games for a short break.</p><span>Play in the tab. No account.</span></div>
+        <div class="phasebound-home-art" aria-label="Live Phasebound game preview">
+          <div id="phasebound-card-preview-root"></div>
+          <span class="art-caption">phasebound / live</span>
+        </div>
       </section>
 
-      <section class="shelf page-width" id="shelf" aria-labelledby="shelf-title">
-        <div class="browse-bar">
-          <div><p class="eyebrow">Games</p><h2 id="shelf-title">Pick a lane.</h2></div>
-          <div class="shelf-filters" aria-label="Filter games" role="tablist">
-            <button type="button" role="tab" aria-selected="true" data-game-filter="all">All</button>
-            <button type="button" role="tab" aria-selected="false" data-game-filter="fast">Fast</button>
-            <button type="button" role="tab" aria-selected="false" data-game-filter="timing">Timing</button>
-            <button type="button" role="tab" aria-selected="false" data-game-filter="search">Search</button>
-          </div>
-        </div>
-        <p class="filter-status" id="filter-status">4 games</p>
-        <article class="game-card featured-game-card browse-card" data-game-kinds="fast">
-          <div class="game-card-art" aria-label="Live Phasebound game preview">
-            <div id="phasebound-card-preview-root"></div>
-          </div>
-          <div class="game-card-copy">
-            <div class="card-kicker"><span>01 / ENDLESS</span><span>FAST</span></div>
-            <h3>Phasebound</h3>
-            <p>Match the packet. Avoid the red. The field gets faster.</p>
-            <div class="game-card-actions">
-              <a class="button button-primary" href="${base}?game=phasebound">Play</a>
-              <span class="card-controls">WASD / SPACE / SHIFT</span>
-            </div>
-          </div>
-        </article>
-        <div class="game-shelf-grid">
-          <article class="mini-game-card browse-card mini-game-card-skyhook" data-game-kinds="fast">
-            <div class="mini-game-art" aria-label="Live Skyhook game preview"><div id="skyhook-preview-root"></div><b>SKYHOOK</b></div>
-            <div class="mini-game-copy"><span class="game-number">02 / FAST</span><h3>Skyhook</h3><p>Tap to climb. Miss a gap and start over.</p><a class="text-link" href="${base}?game=skyhook">Play</a></div>
-          </article>
-          <article class="mini-game-card browse-card mini-game-card-lastcall" data-game-kinds="timing">
-            <div class="mini-game-art" aria-label="Live Last Call game preview"><div id="lastcall-preview-root"></div><b>LAST CALL</b></div>
-            <div class="mini-game-copy"><span class="game-number">03 / TIMING</span><h3>Last Call</h3><p>Ten shots. Press when the hand hits pink.</p><a class="text-link" href="${base}?game=lastcall">Play</a></div>
-          </article>
-          <article class="mini-game-card browse-card mini-game-card-echo" data-game-kinds="search">
-            <div class="mini-game-art" aria-label="Live Echo Lantern game preview"><div id="echo-lantern-preview-root"></div><b>ECHO LANTERN</b></div>
-            <div class="mini-game-copy"><span class="game-number">04 / SEARCH</span><h3>Echo Lantern</h3><p>Send a pulse. Find the light before it goes.</p><a class="text-link" href="${base}?game=echo-lantern">Play</a></div>
-          </article>
-        </div>
+      <section class="phasebound-strip page-width" aria-label="Phasebound controls">
+        <span><b>keys</b> WASD / arrows</span><span><b>phase</b> Space</span><span><b>dash</b> Shift</span><span><b>pause</b> P</span>
+        <span class="bench-note">the other games are on the bench for now.</span>
       </section>
 
       <section class="leaderboard-section page-width" id="leaderboard" aria-labelledby="leaderboard-title">
         <div class="leaderboard-heading">
-          <p class="eyebrow">Saved on this browser</p>
-          <h2 id="leaderboard-title">Best runs.</h2>
-          <p>Local scores for Phasebound. Nothing leaves this browser.</p>
+          <p class="eyebrow">saved on this browser</p>
+          <h2 id="leaderboard-title">who got far?</h2>
+          <p>Local Phasebound scores. Not a real leaderboard. Just this browser.</p>
         </div>
         <div class="leaderboard-panel">
           <form id="leaderboard-name-form" class="name-form">
@@ -95,12 +64,12 @@ function renderGallery() {
       <section class="history page-width" id="history" aria-labelledby="history-title">
         <div class="history-heading">
           <div>
-            <h2 id="history-title">History</h2>
-            <p>Your play history, kept on this browser.</p>
+            <h2 id="history-title">history</h2>
+            <p>A tiny record of what got played here.</p>
           </div>
           <div class="insights-actions">
-            <button class="button button-secondary" id="copy-play-report" type="button">Copy history</button>
-            <button class="text-button" id="reset-play-report" type="button">Reset local data</button>
+            <button class="button button-secondary" id="copy-play-report" type="button">copy</button>
+            <button class="text-button" id="reset-play-report" type="button">clear it</button>
           </div>
         </div>
         <div id="play-report" class="play-report" aria-live="polite"></div>
@@ -108,7 +77,7 @@ function renderGallery() {
 
       <section class="developer-note page-width" id="details" aria-labelledby="details-title">
         <details>
-          <summary id="details-title">Run it locally</summary>
+          <summary id="details-title">want to poke at it?</summary>
           <div class="developer-note-body">
             <p>Install the repo if you want to change a game.</p>
             <div class="command-stack">
@@ -120,12 +89,11 @@ function renderGallery() {
         </details>
       </section>
     </main>
-    <footer class="site-footer page-width"><span>HVN games</span><span>Small games, made here.</span></footer>
+    <footer class="site-footer page-width"><span>HVN games</span><span>phasebound for now</span></footer>
   `;
   setupCopyButtons();
   setupPlayInsights();
   setupLeaderboard();
-  setupShelfFilters();
   startShelfPreview();
 }
 
@@ -216,12 +184,9 @@ function renderLeaderboard(node, entries = getLeaderboard(LEADERBOARD_GAME)) {
     rank.textContent = String(index + 1).padStart(2, "0");
     const name = document.createElement("strong");
     name.textContent = entry.name;
-    const packets = document.createElement("span");
-    packets.className = "leaderboard-packets";
-    packets.textContent = `${entry.packets} packets`;
     const score = document.createElement("b");
     score.textContent = String(entry.score);
-    row.append(rank, name, packets, score);
+    row.append(rank, name, score);
     list.append(row);
   });
   node.append(list);
@@ -240,25 +205,6 @@ function setupLeaderboard() {
     const button = form.querySelector("button");
     button.textContent = "Saved";
     window.setTimeout(() => { button.textContent = "Save"; }, 1000);
-  });
-}
-
-function setupShelfFilters() {
-  const buttons = [...document.querySelectorAll("[data-game-filter]")];
-  const cards = [...document.querySelectorAll("[data-game-kinds]")];
-  const status = document.querySelector("#filter-status");
-  if (!buttons.length || !cards.length || !status) return;
-  buttons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const filter = button.dataset.gameFilter;
-      buttons.forEach((item) => item.setAttribute("aria-selected", String(item === button)));
-      const visibleCount = cards.reduce((count, card) => {
-        const visible = filter === "all" || card.dataset.gameKinds.split(" ").includes(filter);
-        card.hidden = !visible;
-        return count + (visible ? 1 : 0);
-      }, 0);
-      status.textContent = `${visibleCount} game${visibleCount === 1 ? "" : "s"}`;
-    });
   });
 }
 
@@ -291,11 +237,7 @@ function beginCountdown({ overlay, title, copy, detail, actionButton, feedback, 
 
 async function startShelfPreview() {
   const [{ startPhasebound }] = await Promise.all([import("../../games/phasebound/phasebound.js")]);
-  startPhasebound({ parent: "shelf-preview-root", preview: true, pacing: "steady" });
   startPhasebound({ parent: "phasebound-card-preview-root", preview: true, pacing: "steady" });
-  startSkyhook({ parent: "skyhook-preview-root", preview: true, pacing: "steady" });
-  startLastcall({ parent: "lastcall-preview-root", preview: true, pacing: "steady" });
-  startEchoLantern({ parent: "echo-lantern-preview-root", preview: true, pacing: "steady" });
 }
 
 function formatSeconds(value) {
@@ -419,8 +361,8 @@ async function renderGame() {
     </header>
     <main class="game-main page-width">
       <div class="game-heading">
-        <div><p class="eyebrow">Phasebound / endless</p><h1>Switch. Move. Keep going.</h1></div>
-        <p class="game-blurb">Match the packet. Avoid the red. The field gets faster after every pickup.</p>
+        <div><p class="eyebrow">Phasebound</p><h1>Phasebound</h1></div>
+        <p class="game-blurb">Grab cyan. Avoid red. It gets faster.</p>
       </div>
       <section class="game-frame" aria-label="Phasebound game">
         <div class="hud" aria-live="polite">
@@ -434,21 +376,21 @@ async function renderGame() {
         <div class="energy-wrap"><span class="hud-label">SIGNAL</span><div class="energy-track"><span id="hud-energy"></span></div></div>
         <div id="game-overlay" class="game-overlay">
           <h2 id="overlay-title">Ready?</h2>
-          <p id="overlay-copy">Match the packet color. Avoid the red. The field speeds up as you play.</p>
+          <p id="overlay-copy">Grab cyan. Avoid red.</p>
           <button id="overlay-action" class="button button-primary" type="button">Start</button>
-          <p id="overlay-detail" class="overlay-detail">WASD or arrows to move · Space to switch · Shift to dash</p>
+          <p id="overlay-detail" class="overlay-detail">WASD or arrows · Space changes phase · Shift dashes</p>
           <div id="overlay-feedback" class="overlay-feedback" hidden>
             <span>How was it?</span>
             <div><button type="button" data-feedback="keep">Keep it</button><button type="button" data-feedback="hard">Too hard</button><button type="button" data-feedback="easy">Too easy</button><button type="button" data-feedback="skip">Not for me</button></div>
           </div>
         </div>
         <div class="touch-controls" aria-label="Touch controls">
-          <div class="touch-pad"><button type="button" data-input="up" aria-label="Move up">↑</button><button type="button" data-input="left" aria-label="Move left">←</button><button type="button" data-input="down" aria-label="Move down">↓</button><button type="button" data-input="right" aria-label="Move right">→</button></div>
-          <div class="touch-actions"><button type="button" data-input="phase" aria-label="Switch phase">Phase</button><button type="button" data-input="dash" aria-label="Dash">Dash</button></div>
+          <div class="touch-pad"><button type="button" data-input="up" aria-label="Up">↑</button><button type="button" data-input="left" aria-label="Left">←</button><button type="button" data-input="down" aria-label="Down">↓</button><button type="button" data-input="right" aria-label="Right">→</button></div>
+          <div class="touch-actions"><button type="button" data-input="phase" aria-label="Change phase">Phase</button><button type="button" data-input="dash" aria-label="Dash">Dash</button></div>
         </div>
       </section>
-      <div class="game-notes"><span><b>Move</b> WASD / arrows</span><span><b>Switch</b> Space</span><span><b>Dash</b> Shift</span><span><b>Pause</b> P</span></div>
-      <section class="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><p class="eyebrow">Saved on this browser</p><h2 id="route-leaderboard-title">Phasebound bests.</h2><p>Scores stay here. Use the shelf to change your name.</p></div><div id="phasebound-leaderboard"></div></section>
+      <div class="game-notes"><span><b>keys</b> WASD / arrows</span><span><b>phase</b> Space</span><span><b>dash</b> Shift</span><span><b>pause</b> P</span></div>
+      <section class="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><p class="eyebrow">saved on this browser</p><h2 id="route-leaderboard-title">scores</h2><p>Just local scores. Use the shelf to change your name.</p></div><div id="phasebound-leaderboard"></div></section>
     </main>
   `;
 
@@ -488,7 +430,7 @@ async function renderGame() {
     document.querySelector("#hud-energy").style.transform = `scaleX(${Math.max(0, state.energy) / 100})`;
   }
 
-  const startWithCountdown = () => beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, feedback: overlayFeedback, message: "Match the color.", next: () => api.start() });
+  const startWithCountdown = () => beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, feedback: overlayFeedback, message: "Grab cyan.", next: () => api.start() });
 
   api = startPhasebound({
     parent: "game-root",
@@ -501,11 +443,11 @@ async function renderGame() {
       if (state.mode === "pause") {
         showOverlay({ title: "Paused.", copy: "Your run is safe.", detail: "Press P or choose resume.", label: "Resume", next: () => api.resume() });
       }
-      if (state.mode === "result") {
+      if (state.mode === "result" && previousMode !== "result") {
         const won = state.result === "won";
         recordLeaderboardScore("phasebound", state.score, state.packets, state.elapsed);
         renderLeaderboard(document.querySelector("#phasebound-leaderboard"));
-        showOverlay({ title: won ? "Still going?" : "Run over.", copy: `${state.packets} packets. Score ${state.score}.`, detail: won ? "The field will keep speeding up." : "One mistake is enough. Try again.", label: "Run it again", next: startWithCountdown });
+        showOverlay({ title: won ? "Still playing?" : "Run over.", copy: `Score ${state.score}.`, detail: won ? "It gets faster." : "Try again if you want.", label: "Run it again", next: startWithCountdown });
         overlayFeedback.hidden = false;
       }
       previousMode = state.mode;

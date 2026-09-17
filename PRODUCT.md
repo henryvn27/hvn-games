@@ -26,7 +26,7 @@ The gallery and every game are deployed together from the public `hvn-games` Git
 
 - The gallery links to playable routes in the same Pages deployment.
 - Each game must have a distinct mechanic, clear first action, readable outcome, and fast restart.
-- The collection must have visible variety: Phasebound is a tense signal chase, Skyhook is a bright vertical arcade climb, Last Call is an analog timing game, and Echo Lantern is a quiet search game. Do not reuse the same palette, camera feel, backdrop language, or pressure pattern across the shelf.
+- The public shelf currently shows Phasebound only. The other experiments stay in the repo until they have a visual and mechanical identity that does not blur into Phasebound.
 - The current game is Phasebound, an endless phase-matching run with movement, dash, hazards, score, heat, and a local best-run board.
 - The gallery may store resettable aggregate play signals in browser localStorage only: starts, runs, time, outcomes, progress, experiment assignment, explicit feedback, a player-chosen local score name, and local leaderboard scores.
 - No account, third-party analytics, advertising, cookies, fingerprinting, public personal-data endpoint, or external runtime asset dependency.
@@ -53,7 +53,7 @@ The gallery and every game are deployed together from the public `hvn-games` Git
 - Make the first action obvious and the next run tempting.
 - Use real play signals and direct feedback as evidence, not as a substitute for judgment.
 - Keep the data boundary small, local, and resettable.
-- Make every game earn its place in the shelf.
+- Make every game earn its place in the shelf. It is fine to have one good game instead of four similar ones.
 
 ## Accessibility & Inclusion
 

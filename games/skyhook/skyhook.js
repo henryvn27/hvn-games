@@ -13,8 +13,7 @@ export function startSkyhook(options = {}) {
       this.preview = Boolean(options.preview);
       this.score = 0;
       this.streak = 0;
-      this.timeLeft = 45;
-      this.energy = 100;
+      this.flightTime = 0;
       this.elapsed = 0;
       this.spawnClock = 0;
       this.nextGap = 275;
@@ -52,8 +51,7 @@ export function startSkyhook(options = {}) {
       this.mode = "active";
       this.score = 0;
       this.streak = 0;
-      this.timeLeft = 45;
-      this.energy = 100;
+      this.flightTime = 0;
       this.elapsed = 0;
       this.spawnClock = 0;
       this.nextGap = 275;
@@ -69,7 +67,6 @@ export function startSkyhook(options = {}) {
     flap() {
       if (this.mode !== "active") return;
       this.player.velocity = -350;
-      this.energy = Math.max(0, this.energy - 1);
       this.publish();
     },
 
@@ -86,7 +83,7 @@ export function startSkyhook(options = {}) {
       this.drawClouds(time);
       if (this.mode !== "active") return;
       this.elapsed += dt;
-      this.timeLeft -= dt;
+      this.flightTime += dt;
       this.player.velocity += 950 * dt;
       this.player.y += this.player.velocity * dt;
       this.player.rotation = Phaser.Math.Clamp(this.player.velocity / 1100, -0.45, 0.8);
@@ -112,7 +109,6 @@ export function startSkyhook(options = {}) {
       this.spawnClock += dt;
       if (this.spawnClock > 1.75) { this.spawnClock = 0; this.spawnGate(1030); }
       if (this.preview && this.player.y > 360) this.flap();
-      if (this.timeLeft <= 0) this.endRun("won");
       this.publish();
     },
 
@@ -159,7 +155,7 @@ export function startSkyhook(options = {}) {
     },
 
     publish() {
-      options.onState?.({ mode: this.mode, result: this.result, score: this.score, streak: this.streak, packets: this.score, timeLeft: this.timeLeft, energy: this.energy, phase: "sky" });
+      options.onState?.({ mode: this.mode, result: this.result, score: this.score, streak: this.streak, packets: this.score, elapsed: this.flightTime, flightTime: this.flightTime, phase: "sky" });
     },
   });
 

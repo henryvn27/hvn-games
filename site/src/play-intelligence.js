@@ -73,7 +73,7 @@ export function createGameTracker(gameId, experimentId, variant, durationSeconds
       const data = readData();
       const game = gameRecord(data, gameId);
       const experiment = experimentRecord(data, gameId, experimentId, variant);
-      const seconds = Math.round(Math.max(0, durationSeconds - state.timeLeft));
+      const seconds = Math.round(Math.max(0, state.elapsed ?? durationSeconds - (state.timeLeft ?? durationSeconds)));
       game.runs += 1;
       game.seconds += seconds;
       game.packets += state.packets;

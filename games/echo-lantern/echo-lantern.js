@@ -70,7 +70,7 @@ export function startEchoLantern(options = {}) {
     burst(x, y, color, size) { this.bursts.push({ x, y, radius: 5, life: 1, color, size }); },
     drawBursts(dt) { for (const burst of this.bursts) { burst.radius += burst.size * 8 * dt; burst.life -= dt * 1.8; this.echoArt.lineStyle(2, burst.color, Math.max(0, burst.life)); this.echoArt.strokeCircle(burst.x, burst.y, burst.radius); } this.bursts = this.bursts.filter((burst) => burst.life > 0); },
     endRun(result) { if (this.mode !== "active") return; this.mode = "result"; this.result = result; this.publish(); },
-    publish() { options.onState?.({ mode: this.mode, result: this.result, score: this.score, streak: this.streak, packets: this.collected, timeLeft: this.timeLeft, energy: this.energy, phase: "echo" }); },
+    publish() { options.onState?.({ mode: this.mode, result: this.result, score: this.score, streak: this.streak, packets: this.collected, target: this.target, timeLeft: this.timeLeft, energy: this.energy, elapsed: this.elapsed, phase: "echo" }); },
   });
   const game = new Phaser.Game({ type: Phaser.AUTO, width: 960, height: 540, parent: options.parent, backgroundColor: "#080d12", scene: EchoLanternScene, scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH } });
   const getScene = () => game.scene.getScene("EchoLantern"); return { start: () => getScene()?.startRun(), resume: () => getScene()?.resume(), togglePause: () => getScene()?.togglePause(), setTouchDirection: (direction, pressed) => getScene()?.setTouchDirection(direction, pressed), light: () => getScene()?.pulse(), destroy: () => game.destroy(true) };

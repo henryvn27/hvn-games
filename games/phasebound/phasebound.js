@@ -361,7 +361,7 @@ export function startPhasebound(options = {}) {
     },
 
     publish() {
-      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, score: this.score, streak: this.streak, packets: this.packetsCollected, target: this.target, timeLeft: this.timeLeft, energy: this.energy });
+      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, score: this.score, streak: this.streak, packets: this.packetsCollected, target: this.target, timeLeft: this.timeLeft, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed });
     },
   });
 

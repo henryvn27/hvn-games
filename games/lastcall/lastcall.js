@@ -13,10 +13,10 @@ export function startLastcall(options = {}) {
       this.preview = Boolean(options.preview);
       this.score = 0;
       this.streak = 0;
+      this.hits = 0;
       this.shots = 0;
       this.target = 10;
-      this.timeLeft = 30;
-      this.energy = 100;
+      this.elapsed = 0;
       this.cursor = 0;
       this.cursorSpeed = 1.4;
       this.shootClock = 0;
@@ -44,9 +44,9 @@ export function startLastcall(options = {}) {
       this.mode = "active";
       this.score = 0;
       this.streak = 0;
+      this.hits = 0;
       this.shots = 0;
-      this.timeLeft = 30;
-      this.energy = 100;
+      this.elapsed = 0;
       this.cursor = 0;
       this.shootClock = 0;
       this.publish();
@@ -58,16 +58,15 @@ export function startLastcall(options = {}) {
       const hit = distance < 0.22;
       this.shots += 1;
       if (hit) {
+        this.hits += 1;
         this.score += 100 + this.streak * 40;
         this.streak += 1;
-        this.energy = Math.min(100, this.energy + 10);
       } else {
         this.streak = 0;
-        this.energy = Math.max(0, this.energy - 22);
       }
       this.cursor = Phaser.Math.FloatBetween(-Math.PI, Math.PI);
       this.cursorSpeed = Phaser.Math.FloatBetween(1.1, 2.2);
-      if (this.shots >= this.target) this.endRun(hit ? "won" : "lost");
+      if (this.shots >= this.target) this.endRun(this.hits >= 7 ? "won" : "lost");
       this.publish();
     },
 
@@ -83,12 +82,11 @@ export function startLastcall(options = {}) {
       const dt = Math.min(delta / 1000, 0.04);
       this.drawDial();
       if (this.mode !== "active") return;
-      this.timeLeft -= dt;
+      this.elapsed += dt;
       this.cursor += this.cursorSpeed * dt;
       if (this.cursor > Math.PI) this.cursor -= Math.PI * 2;
       this.shootClock += dt;
       if (this.preview && this.shootClock > 0.2 && Math.abs(this.cursor) < 0.12) { this.shootClock = 0; this.shoot(); }
-      if (this.timeLeft <= 0) this.endRun("lost");
       this.publish();
     },
 
@@ -127,7 +125,7 @@ export function startLastcall(options = {}) {
     },
 
     publish() {
-      options.onState?.({ mode: this.mode, result: this.result, score: this.score, streak: this.streak, packets: this.shots, timeLeft: this.timeLeft, energy: this.energy, phase: "ready" });
+      options.onState?.({ mode: this.mode, result: this.result, score: this.score, streak: this.streak, hits: this.hits, shots: this.shots, target: this.target, packets: this.hits, elapsed: this.elapsed, phase: "ready" });
     },
   });
 

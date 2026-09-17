@@ -23,7 +23,7 @@ const html = readFileSync(join(root, "site/index.html"), "utf8");
 if (!html.includes("src/main.js")) throw new Error("Gallery entry point is not wired");
 
 const main = readFileSync(join(root, "site/src/main.js"), "utf8");
-for (const marker of ["phasebound", "skyhook", "lastcall", "echo-lantern", "copy", "play-intelligence", "overlay-feedback", "Too easy", "preview: true", "data-touch-input", "Pause"]) {
+for (const marker of ["phasebound", "skyhook", "lastcall", "echo-lantern", "copy", "play-intelligence", "overlay-feedback", "Too easy", "preview: true", "data-touch-input", "Pause", "One button, one life", "No timer."]) {
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
 }
 
@@ -39,6 +39,16 @@ for (const marker of ["startPhasebound", "keydown-SPACE", "keydown-SHIFT", "phas
 
 for (const [relative, marker] of [["games/skyhook/skyhook.js", "startSkyhook"], ["games/lastcall/lastcall.js", "startLastcall"]]) {
   if (!readFileSync(join(root, relative), "utf8").includes(marker)) throw new Error(`${relative} is missing marker: ${marker}`);
+}
+
+const skyhook = readFileSync(join(root, "games/skyhook/skyhook.js"), "utf8");
+for (const marker of ["flightTime", "this.endRun(\"lost\")"]) {
+  if (!skyhook.includes(marker)) throw new Error(`Skyhook is missing marker: ${marker}`);
+}
+
+const lastcall = readFileSync(join(root, "games/lastcall/lastcall.js"), "utf8");
+for (const marker of ["hits", "this.hits >= 7", "this.shots >= this.target"]) {
+  if (!lastcall.includes(marker)) throw new Error(`Last Call is missing marker: ${marker}`);
 }
 
 const echo = readFileSync(join(root, "games/echo-lantern/echo-lantern.js"), "utf8");

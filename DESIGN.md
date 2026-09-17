@@ -39,3 +39,11 @@ The page must make a friend want to play within seconds, work at desktop and nar
 ## Echo Lantern controls
 
 The narrow route adds a field-instrument control cluster: a four-way d-pad for movement and a quiet Pause control, while Pulse remains the single signal-colored action. The controls stay out of the playfield on desktop and use the same verbs as keyboard play.
+
+## Distinctness rule
+
+The collection felt interchangeable even though the canvases used different colors and props. The shared timed-run shell flattened the experience: every route foregrounded score, streak, countdown, resource bar, generic pause copy, and replay rhythm.
+
+Every game must own its objective shape, primary metric, failure condition, HUD vocabulary, and result language. Shared gallery routing and local play reporting are allowed; a shared score/streak/countdown/resource shell is not. New games need a one-sentence player fantasy and one primary decision that is visibly different from every existing game before implementation.
+
+Applied here: Phasebound is a packet relay; Skyhook is an endless one-life flight; Last Call is a fixed ten-shot accuracy test; Echo Lantern is a beacon route.

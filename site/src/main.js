@@ -210,6 +210,22 @@ async function renderGame() {
         </div>
         <div id="game-root"></div>
         <div id="game-overlay" class="game-overlay">
+          <div id="first-play-tutorial" class="first-play-tutorial" hidden>
+            <p class="tutorial-kicker">first time here</p>
+            <h2>Stay in the orbit.</h2>
+            <p class="tutorial-intro">Collect the dot that matches your color. Red planets end the run. There is no timer — last as long as you can while the field speeds up.</p>
+            <div class="tutorial-rules">
+              <div class="tutorial-rule"><span class="tutorial-dot tutorial-dot-cyan" aria-hidden="true"></span><div><strong>match your color</strong><span>cyan collects cyan · amber collects amber</span></div></div>
+              <div class="tutorial-rule"><span class="tutorial-dot tutorial-dot-red" aria-hidden="true"></span><div><strong>avoid the planets</strong><span>one hit ends the run</span></div></div>
+            </div>
+            <div class="tutorial-controls" aria-label="Controls">
+              <div class="tutorial-control"><kbd>WASD</kbd><span>move</span></div>
+              <div class="tutorial-control"><kbd>SPACE</kbd><span>switch</span></div>
+              <div class="tutorial-control"><kbd>SHIFT</kbd><span>dash</span></div>
+              <div class="tutorial-control tutorial-control-touch"><span class="tutorial-touch-mark" aria-hidden="true"></span><span>drag to move · tap the square to switch</span></div>
+            </div>
+            <button id="tutorial-start" class="button button-primary" type="button">got it — start</button>
+          </div>
           <h2 id="overlay-title">Ready?</h2>
           <p id="overlay-copy">Grab cyan. Avoid red.</p>
           <button id="overlay-action" class="button button-primary" type="button">Start</button>
@@ -238,6 +254,8 @@ async function renderGame() {
   const overlayCopy = document.querySelector("#overlay-copy");
   const overlayDetail = document.querySelector("#overlay-detail");
   const overlayAction = document.querySelector("#overlay-action");
+  const firstPlayTutorial = document.querySelector("#first-play-tutorial");
+  const tutorialStart = document.querySelector("#tutorial-start");
   const phaseSwitch = document.querySelector("#phase-switch");
   const pauseButton = document.querySelector("#pause-button");
   const scoreSave = document.querySelector("#score-save");
@@ -254,7 +272,42 @@ async function renderGame() {
   let api;
   let previousMode = "menu";
 
+  const tutorialStorageKey = "hvn-games:orbit-tutorial:v1";
+  const hasSeenTutorial = () => {
+    try {
+      return window.localStorage.getItem(tutorialStorageKey) === "seen";
+    } catch {
+      return false;
+    }
+  };
+  const markTutorialSeen = () => {
+    try {
+      window.localStorage.setItem(tutorialStorageKey, "seen");
+    } catch {
+      // The tutorial can show again when storage is unavailable.
+    }
+  };
+
+  function showTutorial() {
+    firstPlayTutorial.hidden = false;
+    overlayTitle.hidden = true;
+    overlayCopy.hidden = true;
+    overlayAction.hidden = true;
+    overlayDetail.hidden = true;
+    scoreSave.hidden = true;
+    overlay.classList.remove("is-hidden", "is-countdown");
+  }
+
+  function hideTutorial() {
+    firstPlayTutorial.hidden = true;
+    overlayTitle.hidden = false;
+    overlayCopy.hidden = false;
+    overlayAction.hidden = false;
+    overlayDetail.hidden = false;
+  }
+
   function showOverlay({ title, copy, detail, label, next }) {
+    hideTutorial();
     overlayTitle.textContent = title;
     overlayCopy.textContent = copy;
     overlayDetail.textContent = detail;
@@ -305,7 +358,11 @@ async function renderGame() {
     pauseButton.setAttribute("aria-label", state.mode === "pause" ? "Resume" : "Pause");
   }
 
-  const startWithCountdown = () => beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, message: "Grab cyan.", next: () => api.start() });
+  const startWithCountdown = () => {
+    markTutorialSeen();
+    hideTutorial();
+    beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, message: "Grab cyan.", next: () => api.start() });
+  };
 
   api = startPhasebound({
     parent: "game-root",
@@ -330,6 +387,7 @@ async function renderGame() {
   renderLeaderboard(document.querySelector("#phasebound-leaderboard"));
 
   overlayAction.addEventListener("click", () => { if (overlayAction.hidden) return; action(); });
+  tutorialStart.addEventListener("click", startWithCountdown);
   phaseSwitch.addEventListener("click", () => api.togglePhase());
   pauseButton.addEventListener("click", () => api.togglePause());
   scoreSaveButton.addEventListener("click", () => {
@@ -340,4 +398,5 @@ async function renderGame() {
   });
   scoreSkipButton.addEventListener("click", () => { scoreSave.hidden = true; });
   scoreSaveForm.addEventListener("submit", (event) => { event.preventDefault(); savePendingScore(scoreSaveName.value); });
+  if (!hasSeenTutorial()) showTutorial();
 }

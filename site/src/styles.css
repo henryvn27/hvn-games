@@ -722,3 +722,32 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 @media (max-width: 600px) {
   .gallery-page .phasebound-home { padding-block: 72px 78px; }
 }
+
+/* First-play tutorial: enough to start confidently, short enough to read. */
+.game-page [hidden] { display: none !important; }
+.first-play-tutorial { width: min(100%, 600px); text-align: left; }
+.tutorial-kicker { margin: 0 0 10px; color: #8e9bb4; font-size: 0.72rem; }
+.first-play-tutorial h2 { margin-bottom: 10px; font-size: clamp(2.4rem, 5vw, 4rem); }
+.tutorial-intro { max-width: 520px; margin: 0; color: #d6dced; line-height: 1.55; }
+.tutorial-rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 22px 0 18px; }
+.tutorial-rule { display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: start; padding: 11px 12px; border: 1px solid rgba(224, 232, 255, 0.18); }
+.tutorial-rule > div { display: grid; gap: 3px; }
+.tutorial-rule strong { font-size: 0.82rem; font-weight: 700; }
+.tutorial-rule span:last-child { color: #8e9bb4; font-size: 0.72rem; line-height: 1.35; }
+.tutorial-dot { width: 13px; height: 13px; margin-top: 2px; border-radius: 50%; }
+.tutorial-dot-cyan { background: #72f6e3; }
+.tutorial-dot-red { background: #ff5f61; }
+.tutorial-controls { display: flex; flex-wrap: wrap; gap: 9px 14px; align-items: center; margin-bottom: 22px; color: #8e9bb4; font-size: 0.72rem; }
+.tutorial-control { display: inline-flex; align-items: center; gap: 6px; }
+.tutorial-control kbd { padding: 3px 5px; border: 1px solid rgba(224, 232, 255, 0.28); color: #f5f7ff; font: 700 0.62rem var(--ui-font); }
+.tutorial-touch-mark { width: 13px; height: 13px; border: 1px solid #8e9bb4; border-radius: 50%; }
+.first-play-tutorial .button-primary { min-height: 42px; }
+
+@media (max-width: 600px) {
+  .first-play-tutorial { max-width: 360px; }
+  .first-play-tutorial h2 { font-size: clamp(2.2rem, 11vw, 3rem); }
+  .tutorial-intro { font-size: 0.88rem; }
+  .tutorial-rules { grid-template-columns: 1fr; gap: 8px; margin-block: 17px 15px; }
+  .tutorial-controls { gap: 8px 12px; margin-bottom: 18px; }
+  .tutorial-control-touch { flex-basis: 100%; }
+}

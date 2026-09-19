@@ -213,21 +213,15 @@ async function renderGame() {
         <div id="game-root"></div>
         <div id="game-overlay" class="game-overlay">
           <div id="first-play-tutorial" class="first-play-tutorial" hidden>
-            <p class="tutorial-kicker">first time here</p>
-            <h2>Stay in the orbit.</h2>
-            <p class="tutorial-intro">Collect the dot that matches your color. Red planets cost a life; purple stars give one back. The orbit changes at each phase, but there is no timer.</p>
-            <div class="tutorial-rules">
-              <div class="tutorial-rule"><span class="tutorial-dot tutorial-dot-cyan" aria-hidden="true"></span><div><strong>match your color</strong><span>cyan collects cyan · amber collects amber</span></div></div>
-              <div class="tutorial-rule"><span class="tutorial-dot tutorial-dot-red" aria-hidden="true"></span><div><strong>avoid the planets</strong><span>they cost a life</span></div></div>
-              <div class="tutorial-rule"><span class="tutorial-dot tutorial-dot-life" aria-hidden="true">+</span><div><strong>grab the purple star</strong><span>it gives you one extra hit</span></div></div>
+            <p class="tutorial-kicker">quick practice</p>
+            <p id="tutorial-step" class="tutorial-step">lesson 1 of 4</p>
+            <h2 id="tutorial-title">Move the triangle.</h2>
+            <p id="tutorial-copy" class="tutorial-intro">Press WASD or an arrow key. Try moving once.</p>
+            <div id="tutorial-demo" class="tutorial-demo" aria-live="polite">
+              <span id="tutorial-status">waiting for movement</span>
             </div>
-            <div class="tutorial-controls" aria-label="Controls">
-              <div class="tutorial-control"><kbd>WASD</kbd><span>move</span></div>
-              <div class="tutorial-control"><kbd>SPACE</kbd><span>switch</span></div>
-              <div class="tutorial-control"><kbd>SHIFT</kbd><span>dash</span></div>
-              <div class="tutorial-control tutorial-control-touch"><span class="tutorial-touch-mark" aria-hidden="true"></span><span>drag to move · tap the square to switch</span></div>
-            </div>
-            <button id="tutorial-start" class="button button-primary" type="button">got it — start</button>
+            <button id="tutorial-swatch" class="tutorial-swatch" type="button" hidden aria-label="Switch color in the practice lesson"><span aria-hidden="true"></span><b>tap to switch</b></button>
+            <button id="tutorial-start" class="button button-primary" type="button" disabled>move to continue</button>
           </div>
           <h2 id="overlay-title">Ready?</h2>
           <p id="overlay-copy">Grab cyan. Avoid red.</p>
@@ -261,6 +255,11 @@ async function renderGame() {
   const hudLives = document.querySelector("#hud-lives");
   const hudStreak = document.querySelector("#hud-streak");
   const firstPlayTutorial = document.querySelector("#first-play-tutorial");
+  const tutorialStep = document.querySelector("#tutorial-step");
+  const tutorialTitle = document.querySelector("#tutorial-title");
+  const tutorialCopy = document.querySelector("#tutorial-copy");
+  const tutorialStatus = document.querySelector("#tutorial-status");
+  const tutorialSwatch = document.querySelector("#tutorial-swatch");
   const tutorialStart = document.querySelector("#tutorial-start");
   const phaseSwitch = document.querySelector("#phase-switch");
   const pauseButton = document.querySelector("#pause-button");
@@ -278,7 +277,7 @@ async function renderGame() {
   let api;
   let previousMode = "menu";
 
-  const tutorialStorageKey = "hvn-games:orbit-tutorial:v4";
+  const tutorialStorageKey = "hvn-games:orbit-tutorial:v5";
   const hasSeenTutorial = () => {
     try {
       return window.localStorage.getItem(tutorialStorageKey) === "seen";
@@ -294,18 +293,93 @@ async function renderGame() {
     }
   };
 
+  const tutorialLessons = [
+    {
+      title: "Move the triangle.",
+      copy: "Press WASD or an arrow key. Try moving once.",
+      waiting: "waiting for movement",
+      ready: "Good. You are steering the triangle.",
+      blocked: "move to continue",
+      next: "next: switch color",
+    },
+    {
+      title: "Switch your color.",
+      copy: "Press Space, or tap the square below. Match your color to collect a dot.",
+      waiting: "waiting for a color change",
+      ready: "Nice. Your color changed.",
+      blocked: "switch to continue",
+      next: "next: try a dash",
+    },
+    {
+      title: "Dash out of trouble.",
+      copy: "Press Shift for a quick burst. Use it when a red planet gets too close.",
+      waiting: "waiting for a dash",
+      ready: "That burst can get you clear.",
+      blocked: "dash to continue",
+      next: "next: see the goal",
+    },
+    {
+      title: "Match dots. Dodge planets.",
+      copy: "Collect dots that match your color. Red planets cost a life. Pink stars give one back.",
+      waiting: "you are ready",
+      ready: "",
+      blocked: "start the run",
+      next: "start the run",
+    },
+  ];
+  let tutorialActive = false;
+  let tutorialLessonIndex = 0;
+  let tutorialLessonReady = false;
+
+  function renderTutorialLesson() {
+    const lesson = tutorialLessons[tutorialLessonIndex];
+    tutorialStep.textContent = `lesson ${tutorialLessonIndex + 1} of ${tutorialLessons.length}`;
+    tutorialTitle.textContent = lesson.title;
+    tutorialCopy.textContent = lesson.copy;
+    tutorialStatus.textContent = tutorialLessonReady ? lesson.ready : lesson.waiting;
+    tutorialStart.textContent = tutorialLessonReady ? lesson.next : lesson.blocked;
+    tutorialStart.disabled = !tutorialLessonReady;
+    tutorialSwatch.hidden = tutorialLessonIndex !== 1;
+    tutorialSwatch.dataset.phase = tutorialLessonIndex === 1 ? "cyan" : "";
+  }
+
+  function finishTutorialLesson(message) {
+    tutorialLessonReady = true;
+    tutorialStatus.textContent = message;
+    tutorialStart.disabled = false;
+    tutorialStart.focus({ preventScroll: true });
+  }
+
+  function advanceTutorial() {
+    if (!tutorialLessonReady) return;
+    if (tutorialLessonIndex === tutorialLessons.length - 1) {
+      startWithCountdown();
+      return;
+    }
+    tutorialLessonIndex += 1;
+    tutorialLessonReady = tutorialLessonIndex === tutorialLessons.length - 1;
+    renderTutorialLesson();
+  }
+
   function showTutorial() {
+    tutorialActive = true;
+    tutorialLessonIndex = 0;
+    tutorialLessonReady = false;
+    renderTutorialLesson();
     firstPlayTutorial.hidden = false;
     overlayTitle.hidden = true;
     overlayCopy.hidden = true;
     overlayAction.hidden = true;
     overlayDetail.hidden = true;
     scoreSave.hidden = true;
+    overlay.classList.add("tutorial-open");
     overlay.classList.remove("is-hidden", "is-countdown");
   }
 
   function hideTutorial() {
+    tutorialActive = false;
     firstPlayTutorial.hidden = true;
+    overlay.classList.remove("tutorial-open");
     overlayTitle.hidden = false;
     overlayCopy.hidden = false;
     overlayAction.hidden = false;
@@ -364,12 +438,14 @@ async function renderGame() {
     hudLives.textContent = state.lives === 1 ? "1 extra life" : `${state.lives} extra lives`;
     hudStreak.textContent = `streak ${state.streak}`;
     phaseSwitch.dataset.phase = state.phase;
+    tutorialSwatch.dataset.phase = state.phase;
     phaseSwitch.setAttribute("aria-label", `Switch color. Current color: ${state.phase}`);
     pauseButton.textContent = state.mode === "pause" ? "▶" : "Ⅱ";
     pauseButton.setAttribute("aria-label", state.mode === "pause" ? "Resume" : "Pause");
   }
 
   const startWithCountdown = () => {
+    tutorialActive = false;
     markTutorialSeen();
     hideTutorial();
     beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, message: "Grab cyan.", next: () => api.start() });
@@ -377,11 +453,12 @@ async function renderGame() {
 
   api = startPhasebound({
     parent: "game-root",
+    tutorial: !hasSeenTutorial(),
     onState: (state) => {
       if (state.mode === "active" && previousMode !== "active") tracker.start();
       if (state.mode === "result" && previousMode !== "result") tracker.finish(state);
       updateHud(state);
-      frame.classList.toggle("is-active", state.mode === "active");
+      frame.classList.toggle("is-active", state.mode === "active" || state.mode === "tutorial");
       if (state.mode === "active") overlay.classList.add("is-hidden");
       if (state.mode === "pause") {
         showOverlay({ title: "Paused.", copy: "Your run is safe.", detail: "Press P or choose resume.", label: "Resume", next: () => api.resume() });
@@ -398,7 +475,23 @@ async function renderGame() {
   renderLeaderboard(document.querySelector("#phasebound-leaderboard"));
 
   overlayAction.addEventListener("click", () => { if (overlayAction.hidden) return; action(); });
-  tutorialStart.addEventListener("click", startWithCountdown);
+  tutorialStart.addEventListener("click", advanceTutorial);
+  tutorialSwatch.addEventListener("click", () => {
+    if (!tutorialActive || tutorialLessonIndex !== 1 || tutorialLessonReady) return;
+    api.togglePhase();
+    finishTutorialLesson(tutorialLessons[1].ready);
+  });
+  window.addEventListener("keydown", (event) => {
+    if (!tutorialActive || event.repeat) return;
+    const key = event.key.toLowerCase();
+    if (tutorialLessonIndex === 0 && ["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(key)) {
+      finishTutorialLesson(tutorialLessons[0].ready);
+    } else if (tutorialLessonIndex === 1 && event.code === "Space") {
+      finishTutorialLesson(tutorialLessons[1].ready);
+    } else if (tutorialLessonIndex === 2 && event.key === "Shift") {
+      finishTutorialLesson(tutorialLessons[2].ready);
+    }
+  }, { capture: true });
   phaseSwitch.addEventListener("click", () => api.togglePhase());
   pauseButton.addEventListener("click", () => api.togglePause());
   scoreSaveButton.addEventListener("click", () => {

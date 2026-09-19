@@ -5,8 +5,8 @@ const COLORS = {
   amber: 0xffc857,
   ink: 0xeff4ee,
   muted: 0x769094,
-  danger: 0xff6e5b,
-  field: 0x141b20,
+  danger: 0xff5f61,
+  field: 0x24203b,
 };
 
 const PHASES = ["cyan", "amber"];
@@ -52,19 +52,18 @@ export function startPhasebound(options = {}) {
       this.backdrop = this.add.graphics();
       this.backdrop.fillStyle(COLORS.field, 1);
       this.backdrop.fillRect(0, 0, 960, 640);
-      this.backdrop.lineStyle(1, 0x527077, 0.13);
-      for (let x = 0; x <= 960; x += 48) this.backdrop.lineBetween(x, 0, x, 640);
-      for (let y = 0; y <= 640; y += 48) this.backdrop.lineBetween(0, y, 960, y);
-      this.backdrop.lineStyle(1, COLORS.cyan, 0.13);
-      this.backdrop.strokeCircle(480, 320, 106);
-      this.backdrop.strokeCircle(480, 320, 198);
-      this.backdrop.lineStyle(1, COLORS.amber, 0.11);
-      this.backdrop.strokeEllipse(480, 320, 610, 350);
+      this.backdrop.lineStyle(2, 0x5b527a, 0.22);
+      for (let x = -320; x < 1280; x += 64) this.backdrop.lineBetween(x, 0, x + 640, 640);
+      this.backdrop.lineStyle(3, COLORS.ink, 0.18);
+      this.backdrop.strokeRect(28, 28, 904, 584);
+      this.backdrop.lineStyle(2, COLORS.cyan, 0.2);
+      this.backdrop.lineBetween(28, 92, 170, 92);
+      this.backdrop.lineBetween(790, 548, 932, 548);
       this.stars = [];
-      for (let index = 0; index < 46; index += 1) {
-        const star = this.add.circle(Phaser.Math.Between(20, 940), Phaser.Math.Between(18, 622), Phaser.Math.Between(1, 2), 0xb9d7d3, Phaser.Math.FloatBetween(0.12, 0.48));
-        star.setDepth(0);
-        this.stars.push({ object: star, phase: index * 0.7 });
+      for (let index = 0; index < 22; index += 1) {
+        const mark = this.add.rectangle(Phaser.Math.Between(42, 918), Phaser.Math.Between(42, 598), Phaser.Math.Between(2, 5), Phaser.Math.Between(2, 5), index % 2 ? COLORS.amber : COLORS.cyan, Phaser.Math.FloatBetween(0.18, 0.46));
+        mark.setDepth(0);
+        this.stars.push({ object: mark, phase: index * 0.7 });
       }
     },
 
@@ -258,12 +257,12 @@ export function startPhasebound(options = {}) {
         hazard.x = 480 + Math.cos(hazard.angle) * (hazard.radius + wobble);
         hazard.y = 320 + Math.sin(hazard.angle) * (hazard.radius + wobble) * 0.58;
         hazard.art.clear();
-        hazard.art.fillStyle(COLORS.danger, 0.1);
-        hazard.art.fillCircle(hazard.x, hazard.y, hazard.size + 12);
-        hazard.art.lineStyle(2, COLORS.danger, 0.78);
-        hazard.art.strokeCircle(hazard.x, hazard.y, hazard.size);
-        hazard.art.fillStyle(COLORS.danger, 0.9);
-        hazard.art.fillCircle(hazard.x, hazard.y, 4);
+        const size = hazard.size + Math.sin(time * 0.004 + hazard.wobble) * 2;
+        hazard.art.fillStyle(COLORS.danger, 0.94);
+        hazard.art.fillRect(hazard.x - size, hazard.y - size, size * 2, size * 2);
+        hazard.art.lineStyle(3, COLORS.ink, 0.82);
+        hazard.art.lineBetween(hazard.x - size - 5, hazard.y - size - 5, hazard.x + size + 5, hazard.y + size + 5);
+        hazard.art.lineBetween(hazard.x + size + 5, hazard.y - size - 5, hazard.x - size - 5, hazard.y + size + 5);
       }
     },
 
@@ -306,25 +305,25 @@ export function startPhasebound(options = {}) {
       const color = COLORS[packet.phase];
       const pulse = 1 + Math.sin(time * 0.004 + packet.angle) * 0.15;
       packet.art.clear();
-      packet.art.fillStyle(color, 0.1);
-      packet.art.fillCircle(packet.x, packet.y, 22 * pulse);
-      packet.art.lineStyle(2, color, 0.86);
-      packet.art.strokeCircle(packet.x, packet.y, 10 * pulse);
-      packet.art.lineBetween(packet.x - 4, packet.y, packet.x + 4, packet.y);
-      packet.art.lineBetween(packet.x, packet.y - 4, packet.x, packet.y + 4);
+      const size = 10 * pulse;
+      packet.art.fillStyle(color, 1);
+      packet.art.fillTriangle(packet.x, packet.y - size, packet.x + size, packet.y, packet.x, packet.y + size, packet.x - size, packet.y);
+      packet.art.lineStyle(2, COLORS.ink, 0.9);
+      packet.art.strokeTriangle(packet.x, packet.y - size, packet.x + size, packet.y, packet.x, packet.y + size, packet.x - size, packet.y);
+      packet.art.fillStyle(COLORS.field, 1);
+      packet.art.fillRect(packet.x - 3, packet.y - 3, 6, 6);
     },
 
     drawPlayer() {
       const color = COLORS[this.phase];
       this.playerArt.clear();
-      this.playerArt.fillStyle(color, this.dashTime > 0 ? 0.18 : 0.1);
-      this.playerArt.fillCircle(0, 0, this.dashTime > 0 ? 34 : 27);
-      this.playerArt.lineStyle(2, color, 0.9);
-      this.playerArt.strokeCircle(0, 0, 17);
-      this.playerArt.fillStyle(COLORS.ink, 1);
-      this.playerArt.fillTriangle(0, -15, -10, 10, 10, 10);
-      this.playerArt.lineStyle(2, color, 1);
-      this.playerArt.lineBetween(-6, 5, 6, 5);
+      const size = this.dashTime > 0 ? 19 : 15;
+      this.playerArt.fillStyle(color, 1);
+      this.playerArt.fillTriangle(0, -size, size, 0, 0, size, -size, 0);
+      this.playerArt.lineStyle(3, COLORS.ink, 1);
+      this.playerArt.strokeTriangle(0, -size, size, 0, 0, size, -size, 0);
+      this.playerArt.fillStyle(COLORS.field, 1);
+      this.playerArt.fillRect(-4, -4, 8, 8);
     },
 
     burst(x, y, color, count) {
@@ -376,7 +375,7 @@ export function startPhasebound(options = {}) {
     parent: options.parent,
     width: 960,
     height: 640,
-    backgroundColor: "#141b20",
+    backgroundColor: "#24203b",
     render: { antialias: true, pixelArt: false, roundPixels: true },
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     input: { activePointers: 3 },

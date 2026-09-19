@@ -6,7 +6,7 @@ This is a small game index for friends choosing something to play. It should fee
 
 ## Visual world
 
-Use a quiet paper/ink base and one bright lime action color. Let the game runtime provide the color and motion. No collection-wide metaphor, fake atmosphere, oversized launch copy, decorative glyphs, gradients, or rounded dashboard chrome.
+Use a sky-blue game-flyer base, navy ink, and one coral action color. Let the game runtime provide the color and motion. No collection-wide metaphor, fake atmosphere, oversized launch copy, decorative glyphs, gradients, or rounded dashboard chrome.
 
 ## First viewport
 
@@ -18,7 +18,7 @@ One live attract loop. Motion should explain how the game works, not decorate it
 
 ## Material and type
 
-Neutral paper and ink in light mode, charcoal surfaces in dark mode, with lime reserved for actions. The runtime retains its own game-state colors. Use a deliberate installed sans-serif throughout; never use stylized monospace UI labels.
+Sky-blue paper and navy ink in light mode, dark plum surfaces in dark mode, with coral reserved for page actions. The runtime retains its own game-state colors. Use a deliberate installed sans-serif throughout; never use stylized monospace UI labels.
 
 ## Boundaries
 

@@ -20,56 +20,43 @@ function renderGallery() {
       <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="#leaderboard">scores</a>
-        <a href="#history">history</a>
+        <a href="${base}?game=phasebound">play</a>
       </nav>
     </header>
     <main>
       <section class="phasebound-home page-width" aria-labelledby="hero-title">
         <div class="phasebound-home-copy">
-          <p class="eyebrow">HVN games / 01</p>
+          <p class="eyebrow">one game / 01</p>
           <h1 id="hero-title">Phasebound</h1>
-          <p class="phasebound-rule">Grab the cyan dots. Don’t touch the red ones.</p>
-          <a class="button button-primary" href="${base}?game=phasebound">play</a>
+          <p class="phasebound-rule">Grab cyan. Miss red. It gets quicker.</p>
+          <a class="button button-primary" href="${base}?game=phasebound">play it</a>
           <p class="made-note">made for a quick break<br>keyboard or touch</p>
         </div>
         <div class="phasebound-home-art" aria-label="Live Phasebound game preview">
+          <div class="preview-topline"><span>01 / 01</span><span>live run</span></div>
           <div id="phasebound-card-preview-root"></div>
-          <span class="art-caption">phasebound / live</span>
+          <div class="phasebound-legend" aria-label="Phasebound rules"><span><i class="legend-dot legend-cyan"></i>cyan = good</span><span><i class="legend-dot legend-red"></i>red = bad</span><span>faster after each hit</span></div>
         </div>
       </section>
 
       <section class="phasebound-strip page-width" aria-label="Phasebound controls">
         <span><b>keys</b> WASD / arrows</span><span><b>phase</b> Space</span><span><b>dash</b> Shift</span><span><b>pause</b> P</span>
-        <span class="bench-note">just Phasebound for now.</span>
+        <span class="bench-note">a small one-game site.</span>
       </section>
 
       <section class="leaderboard-section page-width" id="leaderboard" aria-labelledby="leaderboard-title">
         <div class="leaderboard-heading">
-          <p class="eyebrow">saved on this browser</p>
+          <p class="eyebrow">high scores</p>
           <h2 id="leaderboard-title">who got far?</h2>
-          <p id="leaderboard-connection">Phasebound scores. This board is on this browser for now.</p>
+          <p id="leaderboard-connection">This board stays in your browser for now.</p>
         </div>
         <div class="leaderboard-panel">
           <form id="leaderboard-name-form" class="name-form">
-            <label for="leaderboard-name">Three letters or a name</label>
+            <label for="leaderboard-name">your initials or name</label>
             <div><input id="leaderboard-name" name="name" maxlength="16" autocomplete="nickname" placeholder="ABC or your name"><button class="button button-secondary" type="submit">Save</button></div>
           </form>
           <div id="leaderboard-list" aria-live="polite"></div>
         </div>
-      </section>
-
-      <section class="history page-width" id="history" aria-labelledby="history-title">
-        <div class="history-heading">
-          <div>
-            <h2 id="history-title">history</h2>
-            <p>A tiny record of what got played here.</p>
-          </div>
-          <div class="insights-actions">
-            <button class="button button-secondary" id="copy-play-report" type="button">copy</button>
-            <button class="text-button" id="reset-play-report" type="button">clear it</button>
-          </div>
-        </div>
-        <div id="play-report" class="play-report" aria-live="polite"></div>
       </section>
 
       <section class="developer-note page-width" id="details" aria-labelledby="details-title">
@@ -86,10 +73,9 @@ function renderGallery() {
         </details>
       </section>
     </main>
-    <footer class="site-footer page-width"><span>HVN games</span><span>phasebound for now</span></footer>
+    <footer class="site-footer page-width"><span>HVN games</span><span>phasebound / 01</span></footer>
   `;
   setupCopyButtons();
-  setupPlayInsights();
   setupLeaderboard();
   startShelfPreview();
 }
@@ -247,24 +233,24 @@ async function renderGame() {
     </header>
     <main class="game-main page-width">
       <div class="game-heading">
-        <div><p class="eyebrow">Phasebound</p><h1>Phasebound</h1></div>
-        <p class="game-blurb">Grab cyan. Avoid red. It gets faster.</p>
+        <div><p class="game-index">01 / phasebound</p><h1>Phasebound</h1></div>
+        <p class="game-blurb">cyan good. red bad. gets quicker.</p>
       </div>
       <section class="game-frame" aria-label="Phasebound game">
         <div class="hud" aria-live="polite">
-          <div class="hud-group"><span class="hud-label">PHASE</span><strong id="hud-phase">CYAN</strong></div>
-          <div class="hud-group"><span class="hud-label">PACKETS</span><strong id="hud-packets">00</strong></div>
-          <div class="hud-group"><span class="hud-label">HEAT</span><strong id="hud-heat">01</strong></div>
-          <div class="hud-group"><span class="hud-label">SCORE</span><strong id="hud-score">0000</strong></div>
-          <div class="hud-group hud-time"><span class="hud-label">DASH</span><strong id="hud-dash">READY</strong></div>
+          <div class="hud-group"><span class="hud-label">phase</span><strong id="hud-phase">cyan</strong></div>
+          <div class="hud-group"><span class="hud-label">hits</span><strong id="hud-packets">00</strong></div>
+          <div class="hud-group"><span class="hud-label">heat</span><strong id="hud-heat">01</strong></div>
+          <div class="hud-group"><span class="hud-label">score</span><strong id="hud-score">0000</strong></div>
+          <div class="hud-group hud-time"><span class="hud-label">dash</span><strong id="hud-dash">ready</strong></div>
         </div>
         <div id="game-root"></div>
-        <div class="energy-wrap"><span class="hud-label">SIGNAL</span><div class="energy-track"><span id="hud-energy"></span></div></div>
+        <div class="energy-wrap"><span class="hud-label">signal</span><div class="energy-track"><span id="hud-energy"></span></div></div>
         <div id="game-overlay" class="game-overlay">
           <h2 id="overlay-title">Ready?</h2>
           <p id="overlay-copy">Grab cyan. Avoid red.</p>
           <button id="overlay-action" class="button button-primary" type="button">Start</button>
-          <p id="overlay-detail" class="overlay-detail">WASD or arrows · Space changes phase · Shift dashes</p>
+          <p id="overlay-detail" class="overlay-detail">move with WASD or arrows · Space changes phase · Shift dashes</p>
           <div id="overlay-feedback" class="overlay-feedback" hidden>
             <span>How was it?</span>
             <div><button type="button" data-feedback="keep">Keep it</button><button type="button" data-feedback="hard">Too hard</button><button type="button" data-feedback="easy">Too easy</button><button type="button" data-feedback="skip">Not for me</button></div>
@@ -273,7 +259,7 @@ async function renderGame() {
             <p id="score-save-question">Save this score?</p>
             <div class="score-save-actions"><button id="score-save-button" class="button button-primary" type="button">save it</button><button id="score-skip-button" class="text-button" type="button">not this time</button></div>
             <form id="score-save-form" class="score-save-form" hidden>
-              <label for="score-save-name">Three letters or a name</label>
+              <label for="score-save-name">your initials or name</label>
               <div><input id="score-save-name" maxlength="16" autocomplete="nickname" placeholder="ABC or your name"><button class="button button-secondary" type="submit">put it on the board</button></div>
               <p id="score-save-error" class="score-save-error" role="alert"></p>
             </form>
@@ -285,8 +271,8 @@ async function renderGame() {
           <div class="touch-actions"><button type="button" data-input="phase" aria-label="Change phase">Phase</button><button type="button" data-input="dash" aria-label="Dash">Dash</button></div>
         </div>
       </section>
-      <div class="game-notes"><span><b>keys</b> WASD / arrows</span><span><b>phase</b> Space</span><span><b>dash</b> Shift</span><span><b>pause</b> P</span></div>
-      <section class="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><p class="eyebrow">saved on this browser</p><h2 id="route-leaderboard-title">scores</h2><p>Just local scores. Use the shelf to change your name.</p></div><div id="phasebound-leaderboard"></div></section>
+      <div class="game-notes"><span><b>move</b> WASD / arrows</span><span><b>phase</b> Space</span><span><b>dash</b> Shift</span><span><b>pause</b> P</span></div>
+      <section class="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><p class="game-index">high scores</p><h2 id="route-leaderboard-title">scores</h2><p>Scores from this browser.</p></div><div id="phasebound-leaderboard"></div></section>
     </main>
   `;
 
@@ -358,12 +344,12 @@ async function renderGame() {
   }
 
   function updateHud(state) {
-    document.querySelector("#hud-phase").textContent = state.phase.toUpperCase();
+    document.querySelector("#hud-phase").textContent = state.phase;
     document.querySelector("#hud-phase").className = `phase-${state.phase}`;
     document.querySelector("#hud-packets").textContent = String(state.packets).padStart(2, "0");
     document.querySelector("#hud-heat").textContent = String(state.heat).padStart(2, "0");
     document.querySelector("#hud-score").textContent = String(state.score).padStart(4, "0");
-    document.querySelector("#hud-dash").textContent = state.dashCooldown > 0 ? `${state.dashCooldown.toFixed(1)}s` : "READY";
+    document.querySelector("#hud-dash").textContent = state.dashCooldown > 0 ? `${state.dashCooldown.toFixed(1)}s` : "ready";
     document.querySelector("#hud-energy").style.transform = `scaleX(${Math.max(0, state.energy) / 100})`;
   }
 

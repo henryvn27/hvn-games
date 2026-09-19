@@ -491,3 +491,71 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .score-save-form > div { align-items: stretch; flex-direction: column; }
   .score-save-form input { width: 100%; }
 }
+
+/* Playful flyer pass: fewer product labels, more game-night energy. */
+.gallery-page {
+  --bg: #d9edff;
+  --surface: #fffaf0;
+  --surface-strong: #ffd65c;
+  --ink: #15243b;
+  --muted: #4d637a;
+  --line: rgba(21, 36, 59, 0.25);
+  --accent: #ff624f;
+  --accent-strong: #a63a3e;
+  background: var(--bg);
+}
+.gallery-page .site-header { min-height: 70px; border-bottom: 3px solid var(--ink); }
+.gallery-page .wordmark { font-size: 1.08rem; }
+.gallery-page .site-nav { color: var(--ink); }
+.gallery-page .site-nav a:last-child { color: var(--accent-strong); font-weight: 800; }
+.gallery-page .eyebrow { color: var(--ink); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.03em; text-transform: none; }
+.phasebound-home { gap: 60px; padding-block: 58px 52px; }
+.phasebound-home-copy::after { content: none; }
+.phasebound-home h1 { max-width: 520px; font-size: clamp(3.6rem, 5.4vw, 5.2rem); }
+.phasebound-rule { max-width: 330px; font-size: 1.2rem; font-weight: 600; }
+.made-note { margin-top: 24px; color: var(--muted); font-family: inherit; font-size: 0.84rem; transform: none; }
+.gallery-page .button-primary { background: var(--accent); color: #fffaf0; border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
+.gallery-page .button-primary:hover { background: var(--ink); color: var(--surface-strong); box-shadow: 2px 2px 0 var(--ink); }
+.phasebound-home-art { border: 3px solid var(--ink); box-shadow: 11px 11px 0 var(--accent); transform: rotate(-0.45deg); }
+.preview-topline { position: absolute; z-index: 2; inset: 13px 16px auto; display: flex; justify-content: space-between; color: #e8e6df; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em; }
+.phasebound-legend { position: absolute; z-index: 2; inset: auto 16px 13px; display: flex; flex-wrap: wrap; gap: 5px 14px; color: #e8e6df; font-size: 0.68rem; }
+.phasebound-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend-dot { width: 8px; height: 8px; display: inline-block; border-radius: 50%; }
+.legend-cyan { background: #72f6e3; }
+.legend-red { background: #ff5f61; }
+.phasebound-strip { border-top: 3px solid var(--ink); color: var(--ink); }
+.phasebound-strip b { color: var(--accent-strong); }
+.bench-note { color: var(--ink); font-family: inherit; font-size: 0.78rem; font-weight: 700; transform: none; }
+.gallery-page .leaderboard-section { padding-block: 68px 60px; }
+.gallery-page .leaderboard-heading h2 { font-size: clamp(2.8rem, 5vw, 5rem); }
+.gallery-page .name-form label { color: var(--ink); font-family: inherit; font-size: 0.78rem; font-weight: 700; letter-spacing: 0; text-transform: none; }
+.gallery-page .leaderboard-panel { border-top: 3px solid var(--ink); }
+.gallery-page .leaderboard-list li { border-bottom-color: var(--line); }
+.gallery-page .site-footer { border-top: 3px solid var(--ink); color: var(--ink); }
+.game-page { background: #24203b; }
+.game-page .game-header { border-bottom-width: 3px; }
+.game-page .game-index { margin: 0 0 12px; color: #aeb7d4; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.03em; }
+.game-page .game-blurb { color: #f4f0dc; font-weight: 700; }
+.game-page .game-frame { border: 3px solid #f4f0dc; background: #24203b; box-shadow: 10px 10px 0 #151225; }
+.game-page .hud-label { font-size: 0.72rem; letter-spacing: 0.03em; text-transform: none; }
+.game-page .hud-group strong { font-size: 1.05rem; }
+.game-page .game-overlay { background: rgba(36, 32, 59, 0.9); backdrop-filter: none; }
+.game-page .game-notes { color: #aeb7d4; text-transform: none; letter-spacing: 0.02em; }
+.game-page .game-notes b { color: #f4f0dc; }
+.game-page .route-leaderboard { padding-top: 62px; }
+.game-page .route-leaderboard .game-index { color: #72f6e3; }
+
+@media (prefers-color-scheme: dark) {
+  .gallery-page { --bg: #18253b; --surface: #202f49; --surface-strong: #ffd65c; --ink: #fff7e7; --muted: #b7c5d3; --line: rgba(255, 247, 231, 0.25); --accent: #ff7967; --accent-strong: #ffad86; }
+  .gallery-page .phasebound-home-art { box-shadow: 11px 11px 0 #ff7967; }
+}
+
+@media (max-width: 600px) {
+  .phasebound-home { padding-block: 45px 34px; }
+  .phasebound-home-copy { min-width: 0; }
+  .phasebound-home h1 { max-width: 100%; font-size: clamp(3.4rem, 16.5vw, 5.3rem); }
+  .phasebound-home-art { box-shadow: 6px 6px 0 var(--accent); }
+  .preview-topline { inset-inline: 12px; }
+  .phasebound-legend { inset-inline: 12px; font-size: 0.62rem; }
+  .gallery-page .leaderboard-section { grid-template-columns: 1fr; }
+}

@@ -213,16 +213,16 @@ async function renderGame() {
       </div>
       <section class="game-frame" aria-label="Hot Dot game">
         <div class="hud" aria-live="polite">
-          <div class="hud-group hud-score"><span class="hud-label">score</span><strong id="hud-score">0000</strong></div>
-          <div class="hud-group hud-phase"><span class="hud-label">grab</span><strong id="hud-phase">cyan</strong></div>
+          <div class="hud-group hud-score"><strong id="hud-score">0000</strong></div>
+          <button id="phase-switch" class="phase-button" type="button" data-phase="cyan" aria-label="Switch color. Current color: cyan"><span aria-hidden="true"></span></button>
+          <button id="pause-button" class="pause-button" type="button" aria-label="Pause">Ⅱ</button>
         </div>
         <div id="game-root"></div>
-        <div class="energy-wrap"><span class="hud-label">energy</span><div class="energy-track"><span id="hud-energy"></span></div></div>
         <div id="game-overlay" class="game-overlay">
           <h2 id="overlay-title">Ready?</h2>
           <p id="overlay-copy">Grab cyan. Avoid red.</p>
           <button id="overlay-action" class="button button-primary" type="button">Start</button>
-          <p id="overlay-detail" class="overlay-detail">move with WASD or arrows · Space changes phase · Shift dashes</p>
+          <p id="overlay-detail" class="overlay-detail">move with WASD or arrows · tap the square or press Space</p>
           <div id="score-save" class="score-save" hidden>
             <p id="score-save-question">Save this score?</p>
             <div class="score-save-actions"><button id="score-save-button" class="button button-primary" type="button">save it</button><button id="score-skip-button" class="text-button" type="button">not this time</button></div>
@@ -233,10 +233,6 @@ async function renderGame() {
             </form>
             <p id="score-save-status" class="score-save-status" aria-live="polite"></p>
           </div>
-        </div>
-        <div class="touch-controls" aria-label="Touch controls">
-          <div class="touch-pad"><button type="button" data-input="up" aria-label="Up">↑</button><button type="button" data-input="left" aria-label="Left">←</button><button type="button" data-input="down" aria-label="Down">↓</button><button type="button" data-input="right" aria-label="Right">→</button></div>
-          <div class="touch-actions"><button type="button" data-input="phase" aria-label="Change phase">Phase</button><button type="button" data-input="dash" aria-label="Dash">Dash</button></div>
         </div>
       </section>
       <section class="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><h2 id="route-leaderboard-title">high scores</h2><p>Scores saved in this browser.</p></div><div id="phasebound-leaderboard"></div></section>
@@ -251,6 +247,8 @@ async function renderGame() {
   const overlayCopy = document.querySelector("#overlay-copy");
   const overlayDetail = document.querySelector("#overlay-detail");
   const overlayAction = document.querySelector("#overlay-action");
+  const phaseSwitch = document.querySelector("#phase-switch");
+  const pauseButton = document.querySelector("#pause-button");
   const scoreSave = document.querySelector("#score-save");
   const scoreSaveQuestion = document.querySelector("#score-save-question");
   const scoreSaveButton = document.querySelector("#score-save-button");
@@ -309,10 +307,11 @@ async function renderGame() {
   }
 
   function updateHud(state) {
-    document.querySelector("#hud-phase").textContent = state.phase;
-    document.querySelector("#hud-phase").className = `phase-${state.phase}`;
     document.querySelector("#hud-score").textContent = String(state.score).padStart(4, "0");
-    document.querySelector("#hud-energy").style.transform = `scaleX(${Math.max(0, state.energy) / 100})`;
+    phaseSwitch.dataset.phase = state.phase;
+    phaseSwitch.setAttribute("aria-label", `Switch color. Current color: ${state.phase}`);
+    pauseButton.textContent = state.mode === "pause" ? "▶" : "Ⅱ";
+    pauseButton.setAttribute("aria-label", state.mode === "pause" ? "Resume" : "Pause");
   }
 
   const startWithCountdown = () => beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, message: "Grab cyan.", next: () => api.start() });
@@ -339,7 +338,9 @@ async function renderGame() {
   });
   renderLeaderboard(document.querySelector("#phasebound-leaderboard"));
 
-  overlayAction.addEventListener("click", () => { if (overlayAction.hidden) return; startWithCountdown(); });
+  overlayAction.addEventListener("click", () => { if (overlayAction.hidden) return; action(); });
+  phaseSwitch.addEventListener("click", () => api.togglePhase());
+  pauseButton.addEventListener("click", () => api.togglePause());
   scoreSaveButton.addEventListener("click", () => {
     const savedName = getPlayerName();
     if (savedName) savePendingScore(savedName);
@@ -348,13 +349,4 @@ async function renderGame() {
   });
   scoreSkipButton.addEventListener("click", () => { scoreSave.hidden = true; });
   scoreSaveForm.addEventListener("submit", (event) => { event.preventDefault(); savePendingScore(scoreSaveName.value); });
-  for (const button of document.querySelectorAll("[data-input]")) {
-    const input = button.dataset.input;
-    const press = (event) => { event.preventDefault(); if (input === "phase") api.togglePhase(); else if (input === "dash") api.dash(); else api.setTouchDirection(input, true); };
-    const release = (event) => { event.preventDefault(); if (!["phase", "dash"].includes(input)) api.setTouchDirection(input, false); };
-    button.addEventListener("pointerdown", press);
-    button.addEventListener("pointerup", release);
-    button.addEventListener("pointercancel", release);
-    button.addEventListener("pointerleave", release);
-  }
 }

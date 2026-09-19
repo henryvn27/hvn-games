@@ -652,3 +652,37 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .game-page .hud-group strong { font-size: 0.84rem; }
   .game-page .energy-wrap { inset: auto auto 16px 50%; transform: translateX(-50%); }
 }
+
+/* Reference direction: a quiet navy field with a single, physical color switch. */
+.game-page {
+  --field-ink: #f5f7ff;
+  --muted: #8e9bb4;
+  --accent: #54e2f5;
+  background: #071124;
+}
+.game-page .game-header { border-color: rgba(224, 232, 255, 0.14); }
+.game-page .game-header .wordmark,
+.game-page .game-header .back-link { color: #f5f7ff; }
+.game-page .game-header .back-link { color: #8e9bb4; }
+.game-page .game-frame { border: 1px solid rgba(224, 232, 255, 0.18); border-radius: 0; background: #071124; }
+.game-page #game-root { min-height: min(70vh, 680px); }
+.game-page .hud { inset: 18px 24px auto; display: block; text-align: center; }
+.game-page .hud-score { justify-content: center; }
+.game-page .hud-score strong { color: #f5f7ff; font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 500; letter-spacing: 0.02em; }
+.game-page .phase-button { position: absolute; top: 6px; left: 0; width: 22px; height: 22px; padding: 0; border: 1px solid rgba(224, 232, 255, 0.32); border-radius: 3px; background: #4cddf2; cursor: pointer; pointer-events: auto; }
+.game-page .phase-button[data-phase="amber"] { background: #ffc447; }
+.game-page .phase-button:hover { border-color: #f5f7ff; }
+.game-page .phase-button:active { transform: scale(0.9); }
+.game-page .pause-button { position: absolute; top: -2px; right: 0; display: grid; place-items: center; width: 44px; height: 44px; padding: 0 0 2px 1px; border: 1px solid rgba(224, 232, 255, 0.3); border-radius: 50%; background: transparent; color: #f5f7ff; font: 700 1.1rem/1 var(--ui-font); cursor: pointer; pointer-events: auto; }
+.game-page .pause-button:hover { border-color: #f5f7ff; background: rgba(224, 232, 255, 0.08); }
+.game-page .touch-controls { display: none !important; }
+.game-page .game-overlay { border-radius: 0; background: rgba(7, 17, 36, 0.86); }
+.game-page .overlay-detail { max-width: 340px; color: #8e9bb4; }
+
+@media (max-width: 600px) {
+  .game-page .game-frame { border-radius: 0; }
+  .game-page .hud { inset: 14px 16px auto; }
+  .game-page .hud-score strong { font-size: 2.15rem; }
+  .game-page .phase-button { top: 4px; width: 20px; height: 20px; }
+  .game-page .pause-button { top: -3px; width: 40px; height: 40px; font-size: 1rem; }
+}

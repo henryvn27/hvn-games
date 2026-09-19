@@ -31,7 +31,7 @@ for (const marker of ["prefers-color-scheme", "prefers-reduced-motion"]) {
 }
 
 const game = readFileSync(join(root, "games/phasebound/phasebound.js"), "utf8");
-for (const marker of ["startPhasebound", "keydown-SPACE", "keydown-SHIFT", "phaseNumber", "phaseLabel", "phaseWarning", "phaseTransition", "PHASE_TURN_SLOWDOWN_DURATION", "updatePhase", "ORBIT_FOCI", "drawOrbitMap", "updateCamera", "HIT_FREEZE_DURATION", "hitFreeze", "cameras.main.flash", "this.tweens.pauseAll()", "this.tweens.resumeAll()", "heat", "lives", "EXTRA_LIFE_SCORE_STEP", "maybeSpawnLifePickup", "drawLifePickup", "updateDifficulty", "this.endRun(\"lost\")"]) {
+for (const marker of ["startPhasebound", "keydown-SPACE", "keydown-SHIFT", "phaseNumber", "phaseLabel", "phaseWarning", "phaseTransition", "PHASE_TURN_SLOWDOWN_DURATION", "updatePhase", "ORBIT_FOCI", "drawOrbitMap", "updateCamera", "HIT_FREEZE_DURATION", "hitFreeze", "cameras.main.flash", "this.tweens.pauseAll()", "this.tweens.resumeAll()", "const size = hazard.size;", "heat", "lives", "EXTRA_LIFE_SCORE_STEP", "maybeSpawnLifePickup", "drawLifePickup", "updateDifficulty", "this.endRun(\"lost\")"]) {
   if (!game.includes(marker)) throw new Error(`Game is missing marker: ${marker}`);
 }
 if (game.includes("timeLeft = 60") || game.includes("target = 18")) throw new Error("Phasebound still has a fixed timer or packet target");

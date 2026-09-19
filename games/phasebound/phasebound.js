@@ -370,7 +370,7 @@ export function startPhasebound(options = {}) {
         hazard.x = hazard.centerX + Math.cos(hazard.angle) * (hazard.radius * focus.scale + wobble);
         hazard.y = hazard.centerY + Math.sin(hazard.angle) * (hazard.radius * focus.scale + wobble) * 0.58;
         hazard.art.clear();
-        const size = hazard.size + Math.sin(time * 0.004 + hazard.wobble) * 2;
+        const size = hazard.size;
         hazard.art.fillStyle(COLORS.danger, 0.96);
         hazard.art.fillCircle(hazard.x, hazard.y, size);
         hazard.art.fillStyle(0xa83f4f, 0.85);

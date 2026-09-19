@@ -18,6 +18,8 @@ const PHASE_WARNING_SCORE = 550;
 const PHASE_WARNING_MIN_DURATION = 1.3;
 const PHASE_TURN_SLOWDOWN_DURATION = 0.95;
 const PHASE_TURN_DURATION = 2.4;
+const HIT_FREEZE_DURATION = 0.5;
+const HIT_FLASH_DURATION = 420;
 const PHASE_LABELS = ["steady", "turnaround", "tight orbit", "fast orbit", "rough orbit"];
 const ORBIT_RINGS = [[300, 132, 0.16, 2], [470, 220, 0.12, 1], [660, 320, 0.1, 1], [880, 430, 0.08, 1], [1_100, 540, 0.06, 1]];
 const ORBIT_FOCI = [
@@ -58,6 +60,7 @@ export function startPhasebound(options = {}) {
       this.spawnClock = 0;
       this.publishClock = 0;
       this.hitCooldown = 0;
+      this.hitFreeze = 0;
       this.dashTime = 0;
       this.dashCooldown = 0;
       this.touch = { up: false, down: false, left: false, right: false };
@@ -213,6 +216,7 @@ export function startPhasebound(options = {}) {
       this.elapsed = 0;
       this.spawnClock = 0;
       this.hitCooldown = 0;
+      this.hitFreeze = 0;
       this.dashTime = 0;
       this.dashCooldown = 0;
       this.player.setPosition(480, 320);
@@ -264,9 +268,13 @@ export function startPhasebound(options = {}) {
     update(time, delta) {
       const dt = Math.min(delta / 1000, 0.04);
       for (const star of this.stars) star.object.setAlpha(0.16 + (Math.sin(time * 0.001 + star.phase) + 1) * 0.11);
-      this.updateHazards(time, dt);
       this.updateBursts(dt);
       if (this.mode !== "active") return;
+      if (this.hitFreeze > 0) {
+        this.hitFreeze = Math.max(0, this.hitFreeze - dt);
+        return;
+      }
+      this.updateHazards(time, dt);
 
       this.elapsed += dt;
       this.updatePhaseTransition(dt);
@@ -400,6 +408,8 @@ export function startPhasebound(options = {}) {
           if (this.lives > 0) {
             this.lives -= 1;
             this.energy = 100;
+            this.hitFreeze = HIT_FREEZE_DURATION;
+            this.cameras.main.flash(HIT_FLASH_DURATION, 255, 95, 97, false);
             this.publish();
           } else {
             this.energy = 0;

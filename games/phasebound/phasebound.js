@@ -38,7 +38,7 @@ export function startPhasebound(options = {}) {
 
   Object.assign(HotDotScene.prototype, {
     create() {
-      this.mode = "menu";
+      this.mode = options.tutorial ? "tutorial" : "menu";
       this.preview = Boolean(options.preview);
       this.pacing = options.pacing === "busy" ? "busy" : "steady";
       this.phase = "cyan";
@@ -73,6 +73,7 @@ export function startPhasebound(options = {}) {
       this.createHazards();
       this.publish();
       if (this.preview) this.startRun();
+      else if (options.tutorial) this.startTutorial();
     },
 
     createBackdrop() {
@@ -138,11 +139,11 @@ export function startPhasebound(options = {}) {
         if (this.mode === "result" || this.mode === "menu") this.startRun();
       });
       this.input.on("pointerdown", (pointer) => {
-        if (this.mode !== "active") return;
+        if (this.mode !== "active" && this.mode !== "tutorial") return;
         this.pointerTarget = new Phaser.Math.Vector2(pointer.worldX, pointer.worldY);
       });
       this.input.on("pointermove", (pointer) => {
-        if (this.mode === "active" && pointer.isDown) this.pointerTarget = new Phaser.Math.Vector2(pointer.worldX, pointer.worldY);
+        if ((this.mode === "active" || this.mode === "tutorial") && pointer.isDown) this.pointerTarget = new Phaser.Math.Vector2(pointer.worldX, pointer.worldY);
       });
       this.input.on("pointerup", () => { this.pointerTarget = null; });
     },
@@ -229,8 +230,42 @@ export function startPhasebound(options = {}) {
       this.publish();
     },
 
+    startTutorial() {
+      this.clearPackets();
+      this.clearBursts();
+      this.mode = "tutorial";
+      this.result = null;
+      this.phase = "cyan";
+      this.phaseNumber = 1;
+      this.phaseLabel = PHASE_LABELS[0];
+      this.phaseWarning = false;
+      this.phaseWarningStartedAt = 0;
+      this.phaseTransition = null;
+      this.score = 0;
+      this.streak = 0;
+      this.packetsCollected = 0;
+      this.lives = 0;
+      this.nextLifeScore = EXTRA_LIFE_FIRST_SCORE;
+      this.clearLifePickup();
+      this.heat = 1;
+      this.energy = 100;
+      this.elapsed = 0;
+      this.spawnClock = 0;
+      this.hitCooldown = 0;
+      this.hitFreeze = 0;
+      this.dashTime = 0;
+      this.dashCooldown = 0;
+      this.player.setPosition(480, 320);
+      this.cameras.main.setZoom(1);
+      this.playerVelocity.set(0, 0);
+      this.pointerTarget = null;
+      for (const hazard of this.hazards) hazard.direction = 1;
+      this.drawPlayer();
+      this.publish();
+    },
+
     togglePhase() {
-      if (this.mode !== "active") return;
+      if (this.mode !== "active" && this.mode !== "tutorial") return;
       this.phase = this.phase === "cyan" ? "amber" : "cyan";
       this.burst(this.player.x, this.player.y, COLORS[this.phase], 8);
       this.drawPlayer();
@@ -238,7 +273,7 @@ export function startPhasebound(options = {}) {
     },
 
     dash() {
-      if (this.mode !== "active" || this.dashCooldown > 0 || this.energy < 20) return;
+      if ((this.mode !== "active" && this.mode !== "tutorial") || this.dashCooldown > 0 || this.energy < 20) return;
       this.dashTime = 0.24;
       this.dashCooldown = 1.3;
       this.energy -= 20;
@@ -269,6 +304,15 @@ export function startPhasebound(options = {}) {
 
     update(time, delta) {
       const dt = Math.min(delta / 1000, 0.04);
+      if (this.mode === "tutorial") {
+        this.dashTime = Math.max(0, this.dashTime - dt);
+        this.dashCooldown = Math.max(0, this.dashCooldown - dt);
+        this.energy = Math.min(100, this.energy + dt * 2.4);
+        this.updateHazards(time, dt);
+        this.updateMovement(dt);
+        this.drawPlayer();
+        return;
+      }
       if (this.mode !== "active") return;
       for (const star of this.stars) star.object.setAlpha(0.16 + (Math.sin(time * 0.001 + star.phase) + 1) * 0.11);
       this.updateBursts(dt);
@@ -650,6 +694,7 @@ export function startPhasebound(options = {}) {
   const getScene = () => game.scene.getScene("HotDot");
   return {
     start: () => getScene()?.startRun(),
+    startTutorial: () => getScene()?.startTutorial(),
     resume: () => getScene()?.resumeRun(),
     togglePhase: () => getScene()?.togglePhase(),
     togglePause: () => getScene()?.togglePause(),

@@ -524,6 +524,29 @@ export function startPhasebound(options = {}) {
     scene: HotDotScene,
   });
 
+  // Phaser's logical game size stays at 960x640, but the canvas backing store
+  // should match a Retina display so circles and the player triangle stay crisp.
+  // Cap the multiplier to avoid turning low-value effects into a needlessly
+  // expensive render target on very dense displays.
+  const canvasDensity = Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
+  const applyCanvasDensity = () => {
+    if (!game.canvas || !game.renderer) return;
+
+    const { width, height } = game.scale.gameSize;
+    game.canvas.width = Math.round(width * canvasDensity);
+    game.canvas.height = Math.round(height * canvasDensity);
+    game.renderer.width = game.canvas.width;
+    game.renderer.height = game.canvas.height;
+  };
+
+  game.events.once("ready", () => {
+    applyCanvasDensity();
+    game.renderer.on("prerender", () => {
+      game.renderer.gameContext.scale(canvasDensity, canvasDensity);
+    });
+    game.scale.on("resize", applyCanvasDensity);
+  });
+
   const getScene = () => game.scene.getScene("HotDot");
   return {
     start: () => getScene()?.startRun(),

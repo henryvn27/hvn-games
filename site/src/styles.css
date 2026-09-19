@@ -559,3 +559,73 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .phasebound-legend { inset-inline: 12px; font-size: 0.62rem; }
   .gallery-page .leaderboard-section { grid-template-columns: 1fr; }
 }
+
+/* Simple pass: let the game and the scores do the talking. */
+.gallery-page {
+  --bg: #f6f6f1;
+  --surface: #ffffff;
+  --surface-strong: #ecece5;
+  --ink: #1b1c19;
+  --muted: #6a6d66;
+  --line: rgba(27, 28, 25, 0.18);
+  --accent: #c9f04d;
+  --accent-strong: #617d08;
+  background: var(--bg);
+}
+.gallery-page .site-header { min-height: 64px; border-bottom: 1px solid var(--line); }
+.gallery-page .wordmark { font-size: 1rem; letter-spacing: -0.06em; }
+.gallery-page .site-nav { gap: 18px; text-transform: lowercase; }
+.gallery-page .site-nav a:last-child { color: var(--ink); font-weight: 700; }
+.phasebound-home { grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr); gap: 48px; padding-block: 62px 56px; }
+.phasebound-home-copy { max-width: 390px; }
+.phasebound-home .eyebrow,
+.phasebound-home-copy::after,
+.phasebound-home .made-note,
+.phasebound-strip,
+.preview-topline,
+.phasebound-legend { display: none; }
+.phasebound-home h1 { margin-bottom: 14px; font-size: clamp(3.4rem, 6vw, 5.7rem); }
+.phasebound-rule { max-width: 260px; margin-bottom: 22px; color: var(--muted); font-size: 1.05rem; font-weight: 400; }
+.gallery-page .button-primary { background: var(--accent); color: var(--ink); border: 1px solid var(--ink); box-shadow: none; }
+.gallery-page .button-primary:hover { background: var(--ink); color: var(--accent); box-shadow: none; transform: translateY(-1px); }
+.phasebound-home-art { border: 1px solid var(--line); box-shadow: none; transform: none; }
+.gallery-page .leaderboard-section { grid-template-columns: minmax(220px, 0.72fr) minmax(320px, 1.28fr); gap: 48px; padding-block: 58px 64px; }
+.gallery-page .leaderboard-heading h2 { font-size: clamp(2.5rem, 4.8vw, 4.2rem); }
+.gallery-page .leaderboard-heading > p:last-child { max-width: 280px; color: var(--muted); }
+.gallery-page .leaderboard-panel { border-top: 1px solid var(--ink); }
+.gallery-page .name-form label { color: var(--muted); font-size: 0.78rem; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.gallery-page .name-form input { background: var(--surface); border: 1px solid var(--line); }
+.gallery-page .button-secondary { border: 1px solid var(--ink); }
+.gallery-page .leaderboard-list li { border-bottom-color: var(--line); }
+.gallery-page .developer-note,
+.gallery-page .history { display: none; }
+.gallery-page .site-footer { border-top: 1px solid var(--line); color: var(--muted); }
+
+.game-page { background: #24203b; }
+.game-page .game-header { border-bottom-width: 1px; }
+.game-page .game-heading { padding-bottom: 18px; }
+.game-page .game-heading h1 { margin: 0; }
+.game-page .game-blurb { max-width: 220px; color: #f4f0dc; font-weight: 400; }
+.game-page .game-frame { border: 1px solid #f4f0dc; box-shadow: none; }
+.game-page .game-notes { color: #aeb7d4; text-transform: none; letter-spacing: 0; }
+.game-page .route-leaderboard { padding-top: 52px; }
+.game-page .route-leaderboard .game-index { display: none; }
+.game-page .route-leaderboard h2 { margin-bottom: 10px; }
+
+@media (prefers-color-scheme: dark) {
+  .gallery-page { --bg: #1f211e; --surface: #282a26; --surface-strong: #32342e; --ink: #f1f2e9; --muted: #b3b6aa; --line: rgba(241, 242, 233, 0.22); --accent: #d4f56e; --accent-strong: #d4f56e; }
+  .gallery-page .button-primary { color: #1f211e; border-color: #d4f56e; }
+  .gallery-page .button-primary:hover { background: #f1f2e9; color: #1f211e; }
+}
+
+@media (max-width: 850px) {
+  .phasebound-home { grid-template-columns: 1fr; gap: 34px; }
+}
+
+@media (max-width: 600px) {
+  .gallery-page .site-header { min-height: 60px; }
+  .phasebound-home { gap: 30px; padding-block: 44px 38px; }
+  .phasebound-home h1 { font-size: clamp(3.4rem, 16.5vw, 5.2rem); }
+  .phasebound-home-art { box-shadow: none; }
+  .gallery-page .leaderboard-section { grid-template-columns: 1fr; gap: 30px; padding-block: 48px 54px; }
+}

@@ -26,54 +26,30 @@ function renderGallery() {
     <main>
       <section class="phasebound-home page-width" aria-labelledby="hero-title">
         <div class="phasebound-home-copy">
-          <p class="eyebrow">one game / 01</p>
           <h1 id="hero-title">Hot Dot</h1>
-          <p class="phasebound-rule">Grab cyan. Miss red. It gets quicker.</p>
-          <a class="button button-primary" href="${base}?game=phasebound">play it</a>
-          <p class="made-note">made for a quick break<br>keyboard or touch</p>
+          <p class="phasebound-rule">Grab cyan. Avoid red.</p>
+          <a class="button button-primary" href="${base}?game=phasebound">play</a>
         </div>
-        <div class="phasebound-home-art" aria-label="Live Hot Dot game preview">
-          <div class="preview-topline"><span>01 / 01</span><span>live run</span></div>
+        <div class="phasebound-home-art" aria-label="Hot Dot preview">
           <div id="phasebound-card-preview-root"></div>
-          <div class="phasebound-legend" aria-label="Hot Dot rules"><span><i class="legend-dot legend-cyan"></i>cyan = good</span><span><i class="legend-dot legend-red"></i>red = bad</span><span>faster after each hit</span></div>
         </div>
-      </section>
-
-      <section class="phasebound-strip page-width" aria-label="Hot Dot controls">
-        <span><b>keys</b> WASD / arrows</span><span><b>phase</b> Space</span><span><b>dash</b> Shift</span><span><b>pause</b> P</span>
-        <span class="bench-note">a small one-game site.</span>
       </section>
 
       <section class="leaderboard-section page-width" id="leaderboard" aria-labelledby="leaderboard-title">
         <div class="leaderboard-heading">
-          <p class="eyebrow">high scores</p>
-          <h2 id="leaderboard-title">who got far?</h2>
-          <p id="leaderboard-connection">This board stays in your browser for now.</p>
+          <h2 id="leaderboard-title">high scores</h2>
+          <p id="leaderboard-connection">Scores saved in this browser.</p>
         </div>
         <div class="leaderboard-panel">
           <form id="leaderboard-name-form" class="name-form">
-            <label for="leaderboard-name">your initials or name</label>
+            <label for="leaderboard-name">name or initials</label>
             <div><input id="leaderboard-name" name="name" maxlength="16" autocomplete="nickname" placeholder="ABC or your name"><button class="button button-secondary" type="submit">Save</button></div>
           </form>
           <div id="leaderboard-list" aria-live="polite"></div>
         </div>
       </section>
-
-      <section class="developer-note page-width" id="details" aria-labelledby="details-title">
-        <details>
-          <summary id="details-title">want to poke at it?</summary>
-          <div class="developer-note-body">
-            <p>Install the repo if you want to change a game.</p>
-            <div class="command-stack">
-              ${commandBlock("INSTALL", "git clone https://github.com/henryvn27/hvn-games.git\ncd hvn-games", "install")}
-              ${commandBlock("CHECK", "npm install\nnpm test", "setup")}
-              ${commandBlock("RUN", "npm run dev", "run")}
-            </div>
-          </div>
-        </details>
-      </section>
     </main>
-    <footer class="site-footer page-width"><span>HVN games</span><span>hot dot / 01</span></footer>
+    <footer class="site-footer page-width"><span>HVN games</span><span>Hot Dot</span></footer>
   `;
   setupCopyButtons();
   setupLeaderboard();
@@ -233,8 +209,8 @@ async function renderGame() {
     </header>
     <main class="game-main page-width">
       <div class="game-heading">
-        <div><p class="game-index">01 / hot dot</p><h1>Hot Dot</h1></div>
-        <p class="game-blurb">cyan good. red bad. gets quicker.</p>
+        <h1>Hot Dot</h1>
+        <p class="game-blurb">Grab cyan. Avoid red.</p>
       </div>
       <section class="game-frame" aria-label="Hot Dot game">
         <div class="hud" aria-live="polite">
@@ -271,8 +247,8 @@ async function renderGame() {
           <div class="touch-actions"><button type="button" data-input="phase" aria-label="Change phase">Phase</button><button type="button" data-input="dash" aria-label="Dash">Dash</button></div>
         </div>
       </section>
-      <div class="game-notes"><span><b>move</b> WASD / arrows</span><span><b>phase</b> Space</span><span><b>dash</b> Shift</span><span><b>pause</b> P</span></div>
-      <section class="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><p class="game-index">high scores</p><h2 id="route-leaderboard-title">scores</h2><p>Scores from this browser.</p></div><div id="phasebound-leaderboard"></div></section>
+      <div class="game-notes"><span>WASD / arrows move</span><span>Space phase</span><span>Shift dash</span><span>P pause</span></div>
+      <section class="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><h2 id="route-leaderboard-title">high scores</h2><p>Scores saved in this browser.</p></div><div id="phasebound-leaderboard"></div></section>
     </main>
   `;
 

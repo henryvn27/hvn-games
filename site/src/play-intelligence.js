@@ -100,14 +100,14 @@ export function createGameTracker(gameId, experimentId, variant, durationSeconds
 
 export function getPlayReport() {
   const data = readData();
-  const games = Object.entries(data.games).map(([gameId, value]) => ({
+  const games = Object.entries(data.games).filter(([gameId]) => gameId === "phasebound").map(([gameId, value]) => ({
     gameId,
     ...value,
     minutes: Math.round((value.seconds / 60) * 10) / 10,
     attentionScore: value.starts * 3 + (value.seconds / 60) + value.wins * 5,
   })).sort((left, right) => right.attentionScore - left.attentionScore);
   const favorite = games.find((game) => game.starts > 0)?.gameId || null;
-  const experiments = Object.values(data.experiments).map((experiment) => ({
+  const experiments = Object.values(data.experiments).filter((experiment) => experiment.gameId === "phasebound").map((experiment) => ({
     ...experiment,
     variants: Object.entries(experiment.variants).map(([variant, value]) => ({ variant, ...value })),
   }));

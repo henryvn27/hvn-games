@@ -621,7 +621,7 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .gallery-page .leaderboard-section { grid-template-columns: 1fr; gap: 30px; padding-block: 48px 54px; }
 }
 
-/* Hot Dot HUD: one score, one color, one energy bar. */
+/* Orbit HUD: one score, one color, one energy bar. */
 .game-page .game-main { padding-block: 28px 58px; }
 .game-page .game-heading { padding-bottom: 14px; }
 .game-page .game-heading h1 { font-size: clamp(2.6rem, 5vw, 4.4rem); }

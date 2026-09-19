@@ -10,7 +10,7 @@ Use a sky-blue game-flyer base, navy ink, and one coral action color. Let the ga
 
 ## First viewport
 
-The first viewport is just Hot Dot: a concrete rule, a direct play button, and the actual runtime in attract mode. The page should feel like a small game someone made, not a catalog trying to sell a catalog.
+The first viewport is just Orbit: a concrete rule, a direct play button, and the actual game route. The page should feel like a small game someone made, not a catalog trying to sell a catalog.
 
 ## Motion grammar
 
@@ -32,10 +32,10 @@ Sky-blue paper and navy ink in light mode, dark plum surfaces in dark mode, with
 
 The collection felt interchangeable because the shared timed-run shell flattened the experience. Every future game must own its objective shape, primary metric, failure condition, HUD vocabulary, and result language. A future game needs a one-sentence player fantasy and one primary decision that is visibly different before implementation.
 
-Applied here: Hot Dot is the public game. The old experiments are gone from the repo; a future game gets a separate visual language and runtime instead of inheriting Hot Dot's shell.
+Applied here: Orbit is the public game. The old experiments are gone from the repo; a future game gets a separate visual language and runtime instead of inheriting Orbit's shell.
 
-## Hot Dot direction
+## Orbit direction
 
-Hot Dot is the public game. It has no timer and no win target. The run ends when a hazard hits the player or the signal charge is spent. Each matching pickup raises heat: movement gets quicker, hazards move faster, and new hazards join the field. The HUD reports hits, heat, score, phase, and dash charge. A local top-ten board gives the run a reason to come back.
+Orbit is the public game. It has no timer and no win target. The run ends when a planet hits the player or the signal charge is spent. Each matching pickup raises heat: movement gets quicker, hazards move faster, and new hazards join the field. The HUD reports score, phase, and dash charge. A local top-ten board gives the run a reason to come back.
 
 The words stay plain: "Grab cyan. Avoid red." is enough. The three-second start count appears before every button-triggered run so the player has a clear first beat.

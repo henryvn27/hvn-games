@@ -23,7 +23,7 @@ const main = readFileSync(join(root, "site/src/main.js"), "utf8");
 for (const marker of ["phasebound", "copy", "play-intelligence", "overlay-detail", "score-save", "your initials or name", "leaderboard", "Grab cyan"]) {
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
 }
-if (main.includes("preview: true") || main.includes("phasebound-card-preview-root")) throw new Error("Landing page still mounts the Hot Dot demo");
+if (main.includes("preview: true") || main.includes("phasebound-card-preview-root")) throw new Error("Landing page still mounts the game demo");
 
 const styles = readFileSync(join(root, "site/src/styles.css"), "utf8");
 for (const marker of ["prefers-color-scheme", "prefers-reduced-motion"]) {

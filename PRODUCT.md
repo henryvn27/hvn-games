@@ -26,8 +26,8 @@ The gallery and every game are deployed together from the public `hvn-games` Git
 
 - The gallery links to playable routes in the same Pages deployment.
 - Each game must have a distinct mechanic, clear first action, readable outcome, and fast restart.
-- The public shelf currently shows Hot Dot only. The old experiments were removed instead of being kept as half-finished routes.
-- The current game is Hot Dot, an endless phase-matching run with movement, dash, hazards, score, heat, and a local best-run board.
+- The public shelf currently shows Orbit only. The old experiments were removed instead of being kept as half-finished routes.
+- The current game is Orbit, an endless phase-matching run with movement, dash, hazards, score, heat, and a local best-run board.
 - The gallery may store resettable aggregate play signals in browser localStorage only: starts, runs, time, outcomes, progress, experiment assignment, explicit feedback, a player-chosen local score name, and local leaderboard scores.
 - No account, third-party analytics, advertising, cookies, fingerprinting, public personal-data endpoint, or external runtime asset dependency.
 - The current leaderboard is deliberately local. A shared board needs a small hosted write API with rate limits and abuse handling before it can be public.
@@ -44,7 +44,7 @@ The gallery and every game are deployed together from the public `hvn-games` Git
 
 ## Evidence on Hand
 
-- Hot Dot is a live browser game in `games/phasebound/`.
+- Orbit is a live browser game in `games/phasebound/`.
 - The shared gallery is in `site/` and the integration contract is in `INTEGRATION.md`.
 - The current public deployment is <https://henryvn27.github.io/hvn-games/>.
 

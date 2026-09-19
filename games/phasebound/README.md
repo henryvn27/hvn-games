@@ -1,6 +1,6 @@
-# Hot Dot
+# Orbit
 
-Hot Dot is a color-matching run. Move, change phase with Space, and dash with Shift. Collect the dot that matches your current phase, avoid the red Xs, and deal with the field getting faster. A hazard hit or an empty signal charge ends the run.
+Orbit is a color-matching run. Move, change phase with Space, and dash with Shift. Collect the dot that matches your current phase, avoid the red planets, and deal with the field getting faster. A planet hit or an empty signal charge ends the run.
 
 ## Player verbs
 

@@ -26,7 +26,7 @@ function renderGallery() {
     <main>
       <section class="phasebound-home page-width" aria-labelledby="hero-title">
         <div class="phasebound-home-copy">
-          <h1 id="hero-title">Hot Dot</h1>
+          <h1 id="hero-title">Orbit</h1>
           <p class="phasebound-rule">Grab cyan. Avoid red.</p>
           <a class="button button-primary" href="${base}?game=phasebound">play</a>
         </div>
@@ -46,7 +46,7 @@ function renderGallery() {
         </div>
       </section>
     </main>
-    <footer class="site-footer page-width"><span>HVN games</span><span>Hot Dot</span></footer>
+    <footer class="site-footer page-width"><span>HVN games</span><span>Orbit</span></footer>
   `;
   setupCopyButtons();
   setupLeaderboard();
@@ -126,7 +126,7 @@ function renderLeaderboard(node, entries = getLeaderboard(LEADERBOARD_GAME)) {
   if (!entries.length) {
     const empty = document.createElement("p");
     empty.className = "leaderboard-empty";
-    empty.textContent = "No scores yet. Play Hot Dot and put one here.";
+    empty.textContent = "No scores yet. Play Orbit and put one here.";
     node.append(empty);
     return;
   }
@@ -199,10 +199,10 @@ async function renderGame() {
     </header>
     <main class="game-main page-width">
       <div class="game-heading">
-        <h1>Hot Dot</h1>
+        <h1>Orbit</h1>
         <p class="game-blurb">Grab cyan. Avoid red.</p>
       </div>
-      <section class="game-frame" aria-label="Hot Dot game">
+      <section class="game-frame" aria-label="Orbit game">
         <div class="hud" aria-live="polite">
           <div class="hud-group hud-score"><strong id="hud-score">0000</strong></div>
           <button id="phase-switch" class="phase-button" type="button" data-phase="cyan" aria-label="Switch color. Current color: cyan"><span aria-hidden="true"></span></button>

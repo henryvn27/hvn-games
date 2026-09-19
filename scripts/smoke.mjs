@@ -20,9 +20,10 @@ const html = readFileSync(join(root, "site/index.html"), "utf8");
 if (!html.includes("src/main.js")) throw new Error("Gallery entry point is not wired");
 
 const main = readFileSync(join(root, "site/src/main.js"), "utf8");
-for (const marker of ["phasebound", "copy", "play-intelligence", "overlay-detail", "score-save", "your initials or name", "preview: true", "leaderboard", "phasebound-card-preview-root", "Grab cyan"]) {
+for (const marker of ["phasebound", "copy", "play-intelligence", "overlay-detail", "score-save", "your initials or name", "leaderboard", "Grab cyan"]) {
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
 }
+if (main.includes("preview: true") || main.includes("phasebound-card-preview-root")) throw new Error("Landing page still mounts the Hot Dot demo");
 
 const styles = readFileSync(join(root, "site/src/styles.css"), "utf8");
 for (const marker of ["prefers-color-scheme", "prefers-reduced-motion"]) {

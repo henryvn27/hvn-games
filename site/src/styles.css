@@ -714,3 +714,11 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .game-page .game-blurb { font-size: 1rem; }
   .game-page .route-leaderboard { padding-top: 48px; }
 }
+
+/* The landing page is a title and a button now; the game starts on play. */
+.gallery-page .phasebound-home { display: block; padding-block: 96px 104px; }
+.gallery-page .phasebound-home-copy { max-width: 520px; }
+
+@media (max-width: 600px) {
+  .gallery-page .phasebound-home { padding-block: 72px 78px; }
+}

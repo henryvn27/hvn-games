@@ -30,9 +30,6 @@ function renderGallery() {
           <p class="phasebound-rule">Grab cyan. Avoid red.</p>
           <a class="button button-primary" href="${base}?game=phasebound">play</a>
         </div>
-        <div class="phasebound-home-art" aria-label="Hot Dot preview">
-          <div id="phasebound-card-preview-root"></div>
-        </div>
       </section>
 
       <section class="leaderboard-section page-width" id="leaderboard" aria-labelledby="leaderboard-title">
@@ -53,7 +50,6 @@ function renderGallery() {
   `;
   setupCopyButtons();
   setupLeaderboard();
-  startShelfPreview();
 }
 
 function commandBlock(label, command, id) {
@@ -191,11 +187,6 @@ function beginCountdown({ overlay, title, copy, detail, actionButton, message = 
     window.setTimeout(tick, 620);
   };
   tick();
-}
-
-async function startShelfPreview() {
-  const [{ startPhasebound }] = await Promise.all([import("../../games/phasebound/phasebound.js")]);
-  startPhasebound({ parent: "phasebound-card-preview-root", preview: true, pacing: "steady" });
 }
 
 async function renderGame() {

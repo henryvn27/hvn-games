@@ -204,7 +204,7 @@ async function renderGame() {
       </div>
       <section class="game-frame" aria-label="Orbit game">
         <div class="hud" aria-live="polite">
-          <div class="hud-group hud-score"><strong id="hud-score">0000</strong></div>
+          <div class="hud-group hud-score"><strong id="hud-score">0000</strong><span id="hud-lives" class="hud-lives" hidden></span></div>
           <button id="phase-switch" class="phase-button" type="button" data-phase="cyan" aria-label="Switch color. Current color: cyan"><span aria-hidden="true"></span></button>
           <button id="pause-button" class="pause-button" type="button" aria-label="Pause">Ⅱ</button>
         </div>
@@ -213,10 +213,11 @@ async function renderGame() {
           <div id="first-play-tutorial" class="first-play-tutorial" hidden>
             <p class="tutorial-kicker">first time here</p>
             <h2>Stay in the orbit.</h2>
-            <p class="tutorial-intro">Collect the dot that matches your color. Red planets end the run. There is no timer — last as long as you can while the field speeds up.</p>
+            <p class="tutorial-intro">Collect the dot that matches your color. Red planets cost a life; purple stars give one back. There is no timer — last as long as you can while the field speeds up.</p>
             <div class="tutorial-rules">
               <div class="tutorial-rule"><span class="tutorial-dot tutorial-dot-cyan" aria-hidden="true"></span><div><strong>match your color</strong><span>cyan collects cyan · amber collects amber</span></div></div>
-              <div class="tutorial-rule"><span class="tutorial-dot tutorial-dot-red" aria-hidden="true"></span><div><strong>avoid the planets</strong><span>one hit ends the run</span></div></div>
+              <div class="tutorial-rule"><span class="tutorial-dot tutorial-dot-red" aria-hidden="true"></span><div><strong>avoid the planets</strong><span>they cost a life</span></div></div>
+              <div class="tutorial-rule"><span class="tutorial-dot tutorial-dot-life" aria-hidden="true">+</span><div><strong>grab the purple star</strong><span>it gives you one extra hit</span></div></div>
             </div>
             <div class="tutorial-controls" aria-label="Controls">
               <div class="tutorial-control"><kbd>WASD</kbd><span>move</span></div>
@@ -254,6 +255,7 @@ async function renderGame() {
   const overlayCopy = document.querySelector("#overlay-copy");
   const overlayDetail = document.querySelector("#overlay-detail");
   const overlayAction = document.querySelector("#overlay-action");
+  const hudLives = document.querySelector("#hud-lives");
   const firstPlayTutorial = document.querySelector("#first-play-tutorial");
   const tutorialStart = document.querySelector("#tutorial-start");
   const phaseSwitch = document.querySelector("#phase-switch");
@@ -272,7 +274,7 @@ async function renderGame() {
   let api;
   let previousMode = "menu";
 
-  const tutorialStorageKey = "hvn-games:orbit-tutorial:v2";
+  const tutorialStorageKey = "hvn-games:orbit-tutorial:v3";
   const hasSeenTutorial = () => {
     try {
       return window.localStorage.getItem(tutorialStorageKey) === "seen";
@@ -352,6 +354,8 @@ async function renderGame() {
 
   function updateHud(state) {
     document.querySelector("#hud-score").textContent = String(state.score).padStart(4, "0");
+    hudLives.hidden = state.lives < 1;
+    hudLives.textContent = state.lives === 1 ? "1 extra life" : `${state.lives} extra lives`;
     phaseSwitch.dataset.phase = state.phase;
     phaseSwitch.setAttribute("aria-label", `Switch color. Current color: ${state.phase}`);
     pauseButton.textContent = state.mode === "pause" ? "▶" : "Ⅱ";

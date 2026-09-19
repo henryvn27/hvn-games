@@ -3,6 +3,7 @@ import Phaser from "phaser";
 const COLORS = {
   cyan: 0x72f6e3,
   amber: 0xffc857,
+  life: 0xff7ad9,
   ink: 0xf5f7ff,
   muted: 0x8e9bb4,
   danger: 0xff5f61,
@@ -10,6 +11,8 @@ const COLORS = {
 };
 
 const PHASES = ["cyan", "amber"];
+const EXTRA_LIFE_FIRST_SCORE = 1000;
+const EXTRA_LIFE_SCORE_STEP = 1500;
 
 export function startPhasebound(options = {}) {
   class HotDotScene extends Phaser.Scene {
@@ -28,6 +31,9 @@ export function startPhasebound(options = {}) {
       this.score = 0;
       this.streak = 0;
       this.packetsCollected = 0;
+      this.lives = 0;
+      this.nextLifeScore = EXTRA_LIFE_FIRST_SCORE;
+      this.lifePickup = null;
       this.heat = 1;
       this.energy = 100;
       this.elapsed = 0;
@@ -141,6 +147,9 @@ export function startPhasebound(options = {}) {
       this.score = 0;
       this.streak = 0;
       this.packetsCollected = 0;
+      this.lives = 0;
+      this.nextLifeScore = EXTRA_LIFE_FIRST_SCORE;
+      this.clearLifePickup();
       this.heat = 1;
       this.energy = 100;
       this.elapsed = 0;
@@ -206,6 +215,7 @@ export function startPhasebound(options = {}) {
       this.energy = Math.min(100, this.energy + dt * 2.4);
       this.updateMovement(dt);
       this.updatePackets(time);
+      this.updateLifePickup(time);
       this.updateDifficulty();
       this.updateHazardCollision();
       this.drawPlayer();
@@ -256,6 +266,7 @@ export function startPhasebound(options = {}) {
           this.packetsCollected += 1;
           this.energy = Math.min(100, this.energy + 8);
           this.burst(packet.x, packet.y, COLORS[packet.phase], 18);
+          this.maybeSpawnLifePickup();
         } else {
           this.streak = 0;
           this.energy -= 18;
@@ -289,15 +300,89 @@ export function startPhasebound(options = {}) {
       if (this.dashTime > 0 || this.hitCooldown > 0) return;
       for (const hazard of this.hazards) {
         if (Phaser.Math.Distance.Between(this.player.x, this.player.y, hazard.x, hazard.y) < hazard.size + 17) {
-          this.energy = 0;
           this.streak = 0;
           this.hitCooldown = 0.8;
           this.burst(this.player.x, this.player.y, COLORS.danger, 16);
           this.playerVelocity.scale(-0.6);
-          this.endRun("lost");
+          if (this.lives > 0) {
+            this.lives -= 1;
+            this.energy = 100;
+            this.publish();
+          } else {
+            this.energy = 0;
+            this.endRun("lost");
+          }
           break;
         }
       }
+    },
+
+    maybeSpawnLifePickup() {
+      if (this.lifePickup || this.score < this.nextLifeScore) return;
+      this.spawnLifePickup();
+      this.nextLifeScore += EXTRA_LIFE_SCORE_STEP;
+    },
+
+    spawnLifePickup() {
+      const minPacketSpacing = 76;
+      const minPlayerSpacing = 140;
+      const minHazardSpacing = 70;
+      const liveHazards = this.hazards.filter((hazard) => Number.isFinite(hazard.x) && Number.isFinite(hazard.y));
+      let bestPosition = { x: 480, y: 320 };
+      let bestClearance = -Infinity;
+
+      for (let attempt = 0; attempt < 80; attempt += 1) {
+        const candidate = {
+          x: Phaser.Math.Between(64, 896),
+          y: Phaser.Math.Between(70, 570),
+        };
+        const playerClearance = Phaser.Math.Distance.Between(candidate.x, candidate.y, this.player.x, this.player.y) - minPlayerSpacing;
+        const packetClearance = this.packets.length === 0
+          ? Infinity
+          : Math.min(...this.packets.map((packet) => Phaser.Math.Distance.Between(candidate.x, candidate.y, packet.x, packet.y))) - minPacketSpacing;
+        const hazardClearance = liveHazards.length === 0
+          ? Infinity
+          : Math.min(...liveHazards.map((hazard) => Phaser.Math.Distance.Between(candidate.x, candidate.y, hazard.x, hazard.y))) - minHazardSpacing;
+        const clearance = Math.min(playerClearance, packetClearance, hazardClearance);
+
+        if (clearance > bestClearance) {
+          bestClearance = clearance;
+          bestPosition = candidate;
+        }
+        if (clearance >= 0) break;
+      }
+
+      this.lifePickup = {
+        x: bestPosition.x,
+        y: bestPosition.y,
+        angle: Phaser.Math.FloatBetween(0, Math.PI * 2),
+        spin: Phaser.Math.FloatBetween(0.008, 0.018),
+        art: this.add.graphics().setDepth(3),
+      };
+      this.drawLifePickup(this.lifePickup, 0);
+    },
+
+    updateLifePickup(time) {
+      if (!this.lifePickup) return;
+      this.lifePickup.angle += this.lifePickup.spin;
+      this.drawLifePickup(this.lifePickup, time);
+      if (Phaser.Math.Distance.Between(this.player.x, this.player.y, this.lifePickup.x, this.lifePickup.y) > 30) return;
+      this.lives += 1;
+      this.burst(this.lifePickup.x, this.lifePickup.y, COLORS.life, 18);
+      this.removeLifePickup();
+      this.publish();
+    },
+
+    drawLifePickup(pickup, time) {
+      const pulse = 1 + Math.sin(time * 0.005 + pickup.angle) * 0.12;
+      const size = 15 * pulse;
+      pickup.art.clear();
+      pickup.art.fillStyle(COLORS.life, 1);
+      pickup.art.fillTriangle(pickup.x, pickup.y - size, pickup.x + size, pickup.y, pickup.x, pickup.y + size);
+      pickup.art.fillTriangle(pickup.x, pickup.y - size, pickup.x - size, pickup.y, pickup.x, pickup.y + size);
+      pickup.art.fillStyle(COLORS.ink, 0.95);
+      pickup.art.fillRect(pickup.x - 2, pickup.y - 7, 4, 14);
+      pickup.art.fillRect(pickup.x - 7, pickup.y - 2, 14, 4);
     },
 
     spawnPacket() {
@@ -385,6 +470,15 @@ export function startPhasebound(options = {}) {
       this.packets = [];
     },
 
+    removeLifePickup() {
+      this.lifePickup?.art.destroy();
+      this.lifePickup = null;
+    },
+
+    clearLifePickup() {
+      this.removeLifePickup();
+    },
+
     endRun(result) {
       if (this.mode !== "active") return;
       this.mode = "result";
@@ -395,7 +489,7 @@ export function startPhasebound(options = {}) {
     },
 
     publish() {
-      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, score: this.score, streak: this.streak, packets: this.packetsCollected, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed });
+      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed });
     },
   });
 

@@ -19,6 +19,13 @@ const PHASE_WARNING_MIN_DURATION = 1.3;
 const PHASE_TURN_SLOWDOWN_DURATION = 0.95;
 const PHASE_TURN_DURATION = 2.4;
 const PHASE_LABELS = ["steady", "turnaround", "tight orbit", "fast orbit", "rough orbit"];
+const ORBIT_RINGS = [[300, 132, 0.16, 2], [470, 220, 0.12, 1], [660, 320, 0.1, 1], [880, 430, 0.08, 1], [1_100, 540, 0.06, 1]];
+const ORBIT_FOCI = [
+  { x: 480, y: 320, scale: 1, color: 0x5c789f },
+  { x: 245, y: 220, scale: 0.58, color: 0x72f6e3 },
+  { x: 735, y: 250, scale: 0.64, color: 0xffc857 },
+  { x: 590, y: 470, scale: 0.72, color: 0xff7ad9 },
+];
 
 export function startPhasebound(options = {}) {
   class HotDotScene extends Phaser.Scene {
@@ -70,18 +77,8 @@ export function startPhasebound(options = {}) {
       this.backdrop.fillStyle(COLORS.field, 1);
       this.backdrop.fillRect(0, 0, 960, 640);
 
-      // Clear enough to read as an orbit map, quiet enough to keep pickups
-      // and the player as the only important shapes in the middle.
-      for (const [width, height, opacity, lineWidth] of [
-        [300, 132, 0.16, 2],
-        [470, 220, 0.12, 1],
-        [660, 320, 0.1, 1],
-        [880, 430, 0.08, 1],
-        [1_100, 540, 0.06, 1],
-      ]) {
-        this.backdrop.lineStyle(lineWidth, 0x5c789f, opacity);
-        this.backdrop.strokeEllipse(480, 320, width, height);
-      }
+      this.orbitMap = this.add.graphics().setDepth(0);
+      this.drawOrbitMap();
 
       // A few fixed pinpricks make the field feel like space without looking
       // like a particle effect or competing with the pickup colors.
@@ -99,6 +96,25 @@ export function startPhasebound(options = {}) {
       }
 
       this.stars = [];
+    },
+
+    getActiveOrbitCount() {
+      return Math.min(ORBIT_FOCI.length, this.phaseNumber);
+    },
+
+    drawOrbitMap() {
+      this.orbitMap.clear();
+      const activeOrbitCount = this.getActiveOrbitCount();
+      for (let focusIndex = 0; focusIndex < activeOrbitCount; focusIndex += 1) {
+        const focus = ORBIT_FOCI[focusIndex];
+        const focusOpacity = focusIndex === 0 ? 1 : 0.72;
+        for (const [width, height, opacity, lineWidth] of ORBIT_RINGS) {
+          this.orbitMap.lineStyle(lineWidth, focus.color, opacity * focusOpacity);
+          this.orbitMap.strokeEllipse(focus.x, focus.y, width * focus.scale, height * focus.scale);
+        }
+        this.orbitMap.fillStyle(focus.color, focusIndex === 0 ? 0.14 : 0.1);
+        this.orbitMap.fillCircle(focus.x, focus.y, focusIndex === 0 ? 4 : 3);
+      }
     },
 
     createPlayer() {
@@ -133,11 +149,16 @@ export function startPhasebound(options = {}) {
     },
 
     addHazard(index) {
+      const focusIndex = index % this.getActiveOrbitCount();
+      const focus = ORBIT_FOCI[focusIndex];
       this.hazards.push({
         angle: (Math.PI * 2 * index) / 5 + 0.35,
         radius: 130 + (index % 3) * 76,
         speed: 0.22 + index * 0.035,
         direction: this.phaseNumber % 2 === 0 ? -1 : 1,
+        focusIndex,
+        centerX: focus.x,
+        centerY: focus.y,
         size: index % 2 === 0 ? 15 : 11,
         wobble: index * 0.8,
         art: this.add.graphics().setDepth(2),
@@ -163,6 +184,9 @@ export function startPhasebound(options = {}) {
       this.phaseLabel = PHASE_LABELS[Math.min(this.phaseNumber - 1, PHASE_LABELS.length - 1)] || `phase ${this.phaseNumber}`;
       this.phaseWarning = false;
       this.phaseTransition = { elapsed: 0, switched: false };
+      const activeOrbitCount = this.getActiveOrbitCount();
+      for (const [index, hazard] of this.hazards.entries()) hazard.focusIndex = index % activeOrbitCount;
+      this.drawOrbitMap();
       this.burst(this.player.x, this.player.y, COLORS.ink, 12);
       this.publish();
     },
@@ -192,6 +216,7 @@ export function startPhasebound(options = {}) {
       this.dashTime = 0;
       this.dashCooldown = 0;
       this.player.setPosition(480, 320);
+      this.cameras.main.setZoom(1);
       this.playerVelocity.set(0, 0);
       this.pointerTarget = null;
       for (const hazard of this.hazards) hazard.direction = 1;
@@ -245,6 +270,7 @@ export function startPhasebound(options = {}) {
 
       this.elapsed += dt;
       this.updatePhaseTransition(dt);
+      this.updateCamera(dt);
       this.hitCooldown = Math.max(0, this.hitCooldown - dt);
       this.dashTime = Math.max(0, this.dashTime - dt);
       this.dashCooldown = Math.max(0, this.dashCooldown - dt);
@@ -325,11 +351,14 @@ export function startPhasebound(options = {}) {
         }
       }
       for (const hazard of this.hazards) {
+        const focus = ORBIT_FOCI[hazard.focusIndex];
+        hazard.centerX = Phaser.Math.Linear(hazard.centerX, focus.x, Math.min(1, dt * 2.2));
+        hazard.centerY = Phaser.Math.Linear(hazard.centerY, focus.y, Math.min(1, dt * 2.2));
         const speed = hazard.speed * phaseSpeed * transitionSpeed * (1 + Math.min(4.2, this.packetsCollected * 0.11 + this.elapsed * 0.018));
         hazard.angle += speed * hazard.direction * dt;
-        const wobble = Math.sin(time * 0.0012 + hazard.wobble) * 22;
-        hazard.x = 480 + Math.cos(hazard.angle) * (hazard.radius + wobble);
-        hazard.y = 320 + Math.sin(hazard.angle) * (hazard.radius + wobble) * 0.58;
+        const wobble = Math.sin(time * 0.0012 + hazard.wobble) * 22 * focus.scale;
+        hazard.x = hazard.centerX + Math.cos(hazard.angle) * (hazard.radius * focus.scale + wobble);
+        hazard.y = hazard.centerY + Math.sin(hazard.angle) * (hazard.radius * focus.scale + wobble) * 0.58;
         hazard.art.clear();
         const size = hazard.size + Math.sin(time * 0.004 + hazard.wobble) * 2;
         hazard.art.fillStyle(COLORS.danger, 0.96);
@@ -340,6 +369,11 @@ export function startPhasebound(options = {}) {
         hazard.art.lineStyle(1, 0xff9a8f, 0.34);
         hazard.art.strokeCircle(hazard.x, hazard.y, size * 0.78);
       }
+    },
+
+    updateCamera(dt) {
+      const targetZoom = Math.max(0.72, 1 - (this.phaseNumber - 1) * 0.09);
+      this.cameras.main.zoom = Phaser.Math.Linear(this.cameras.main.zoom, targetZoom, Math.min(1, dt * 3));
     },
 
     updatePhaseTransition(dt) {

@@ -167,13 +167,12 @@ function setupLeaderboard() {
   });
 }
 
-function beginCountdown({ overlay, title, copy, detail, actionButton, feedback, message = "Match the color.", next }) {
+function beginCountdown({ overlay, title, copy, detail, actionButton, message = "Match the color.", next }) {
   const countdownId = String(Date.now());
   overlay.dataset.countdownId = countdownId;
   overlay.classList.remove("is-hidden");
   overlay.classList.add("is-countdown");
   actionButton.hidden = true;
-  feedback.hidden = true;
   let step = 3;
   const tick = () => {
     if (overlay.dataset.countdownId !== countdownId) return;
@@ -214,23 +213,16 @@ async function renderGame() {
       </div>
       <section class="game-frame" aria-label="Hot Dot game">
         <div class="hud" aria-live="polite">
-          <div class="hud-group"><span class="hud-label">phase</span><strong id="hud-phase">cyan</strong></div>
-          <div class="hud-group"><span class="hud-label">hits</span><strong id="hud-packets">00</strong></div>
-          <div class="hud-group"><span class="hud-label">heat</span><strong id="hud-heat">01</strong></div>
-          <div class="hud-group"><span class="hud-label">score</span><strong id="hud-score">0000</strong></div>
-          <div class="hud-group hud-time"><span class="hud-label">dash</span><strong id="hud-dash">ready</strong></div>
+          <div class="hud-group hud-score"><span class="hud-label">score</span><strong id="hud-score">0000</strong></div>
+          <div class="hud-group hud-phase"><span class="hud-label">grab</span><strong id="hud-phase">cyan</strong></div>
         </div>
         <div id="game-root"></div>
-        <div class="energy-wrap"><span class="hud-label">signal</span><div class="energy-track"><span id="hud-energy"></span></div></div>
+        <div class="energy-wrap"><span class="hud-label">energy</span><div class="energy-track"><span id="hud-energy"></span></div></div>
         <div id="game-overlay" class="game-overlay">
           <h2 id="overlay-title">Ready?</h2>
           <p id="overlay-copy">Grab cyan. Avoid red.</p>
           <button id="overlay-action" class="button button-primary" type="button">Start</button>
           <p id="overlay-detail" class="overlay-detail">move with WASD or arrows · Space changes phase · Shift dashes</p>
-          <div id="overlay-feedback" class="overlay-feedback" hidden>
-            <span>How was it?</span>
-            <div><button type="button" data-feedback="keep">Keep it</button><button type="button" data-feedback="hard">Too hard</button><button type="button" data-feedback="easy">Too easy</button><button type="button" data-feedback="skip">Not for me</button></div>
-          </div>
           <div id="score-save" class="score-save" hidden>
             <p id="score-save-question">Save this score?</p>
             <div class="score-save-actions"><button id="score-save-button" class="button button-primary" type="button">save it</button><button id="score-skip-button" class="text-button" type="button">not this time</button></div>
@@ -247,7 +239,6 @@ async function renderGame() {
           <div class="touch-actions"><button type="button" data-input="phase" aria-label="Change phase">Phase</button><button type="button" data-input="dash" aria-label="Dash">Dash</button></div>
         </div>
       </section>
-      <div class="game-notes"><span>WASD / arrows move</span><span>Space phase</span><span>Shift dash</span><span>P pause</span></div>
       <section class="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><h2 id="route-leaderboard-title">high scores</h2><p>Scores saved in this browser.</p></div><div id="phasebound-leaderboard"></div></section>
     </main>
   `;
@@ -260,7 +251,6 @@ async function renderGame() {
   const overlayCopy = document.querySelector("#overlay-copy");
   const overlayDetail = document.querySelector("#overlay-detail");
   const overlayAction = document.querySelector("#overlay-action");
-  const overlayFeedback = document.querySelector("#overlay-feedback");
   const scoreSave = document.querySelector("#score-save");
   const scoreSaveQuestion = document.querySelector("#score-save-question");
   const scoreSaveButton = document.querySelector("#score-save-button");
@@ -282,7 +272,6 @@ async function renderGame() {
     overlayAction.textContent = label;
     overlayAction.hidden = false;
     action = next;
-    overlayFeedback.hidden = true;
     scoreSave.hidden = true;
     overlay.classList.remove("is-hidden", "is-countdown");
   }
@@ -322,14 +311,11 @@ async function renderGame() {
   function updateHud(state) {
     document.querySelector("#hud-phase").textContent = state.phase;
     document.querySelector("#hud-phase").className = `phase-${state.phase}`;
-    document.querySelector("#hud-packets").textContent = String(state.packets).padStart(2, "0");
-    document.querySelector("#hud-heat").textContent = String(state.heat).padStart(2, "0");
     document.querySelector("#hud-score").textContent = String(state.score).padStart(4, "0");
-    document.querySelector("#hud-dash").textContent = state.dashCooldown > 0 ? `${state.dashCooldown.toFixed(1)}s` : "ready";
     document.querySelector("#hud-energy").style.transform = `scaleX(${Math.max(0, state.energy) / 100})`;
   }
 
-  const startWithCountdown = () => beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, feedback: overlayFeedback, message: "Grab cyan.", next: () => api.start() });
+  const startWithCountdown = () => beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, message: "Grab cyan.", next: () => api.start() });
 
   api = startPhasebound({
     parent: "game-root",
@@ -345,7 +331,6 @@ async function renderGame() {
       if (state.mode === "result" && previousMode !== "result") {
         const won = state.result === "won";
         showOverlay({ title: won ? "Still playing?" : "Run over.", copy: `Score ${state.score}.`, detail: won ? "It gets faster." : "Try again if you want.", label: "Run it again", next: startWithCountdown });
-        overlayFeedback.hidden = false;
         showScoreSave(state);
       }
       previousMode = state.mode;
@@ -371,12 +356,5 @@ async function renderGame() {
     button.addEventListener("pointerup", release);
     button.addEventListener("pointercancel", release);
     button.addEventListener("pointerleave", release);
-  }
-  for (const button of document.querySelectorAll("[data-feedback]")) {
-    button.addEventListener("click", () => {
-      tracker.feedback(button.dataset.feedback);
-      button.closest(".overlay-feedback").querySelectorAll("button").forEach((item) => { item.disabled = true; });
-      button.textContent = "Saved";
-    });
   }
 }

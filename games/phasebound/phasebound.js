@@ -577,15 +577,27 @@ export function startPhasebound(options = {}) {
     const { width, height } = game.scale.gameSize;
     game.canvas.width = Math.round(width * canvasDensity);
     game.canvas.height = Math.round(height * canvasDensity);
-    game.renderer.width = game.canvas.width;
-    game.renderer.height = game.canvas.height;
+    // Keep Phaser's renderer dimensions logical. Camera and input math use
+    // these values; only the canvas backing store should be density-scaled.
+    game.renderer.width = width;
+    game.renderer.height = height;
   };
 
   game.events.once("ready", () => {
     applyCanvasDensity();
-    game.renderer.on("prerender", () => {
-      game.renderer.gameContext.scale(canvasDensity, canvasDensity);
-    });
+    const context = game.renderer.gameContext;
+    const originalSetTransform = context.setTransform.bind(context);
+    let scaleTransforms = false;
+    context.setTransform = (...args) => {
+      if (scaleTransforms && args.length === 6) {
+        const [a, b, c, d, e, f] = args;
+        originalSetTransform(a * canvasDensity, b * canvasDensity, c * canvasDensity, d * canvasDensity, e * canvasDensity, f * canvasDensity);
+        return;
+      }
+      originalSetTransform(...args);
+    };
+    game.renderer.on("prerender", () => { scaleTransforms = true; });
+    game.renderer.on("postrender", () => { scaleTransforms = false; });
     game.scale.on("resize", applyCanvasDensity);
   });
 

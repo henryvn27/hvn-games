@@ -355,7 +355,8 @@ async function renderGame() {
 
   function updateHud(state) {
     document.querySelector("#hud-score").textContent = String(state.score).padStart(4, "0");
-    hudPhase.textContent = `phase ${state.phaseNumber} · ${state.phaseLabel}`;
+    hudPhase.textContent = state.phaseTurning ? "turning..." : state.phaseWarning ? "turning soon" : `phase ${state.phaseNumber} · ${state.phaseLabel}`;
+    hudPhase.classList.toggle("is-warning", state.phaseWarning || state.phaseTurning);
     hudLives.hidden = state.lives < 1;
     hudLives.textContent = state.lives === 1 ? "1 extra life" : `${state.lives} extra lives`;
     phaseSwitch.dataset.phase = state.phase;

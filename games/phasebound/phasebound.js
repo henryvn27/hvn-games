@@ -11,9 +11,13 @@ const COLORS = {
 };
 
 const PHASES = ["cyan", "amber"];
-const EXTRA_LIFE_FIRST_SCORE = 1000;
-const EXTRA_LIFE_SCORE_STEP = 1500;
-const PHASE_SCORE_STEP = 1500;
+const EXTRA_LIFE_FIRST_SCORE = 1800;
+const EXTRA_LIFE_SCORE_STEP = 3000;
+const PHASE_SCORE_STEP = 3000;
+const PHASE_WARNING_SCORE = 550;
+const PHASE_WARNING_MIN_DURATION = 1.3;
+const PHASE_TURN_SLOWDOWN_DURATION = 0.95;
+const PHASE_TURN_DURATION = 2.4;
 const PHASE_LABELS = ["steady", "turnaround", "tight orbit", "fast orbit", "rough orbit"];
 
 export function startPhasebound(options = {}) {
@@ -31,6 +35,9 @@ export function startPhasebound(options = {}) {
       this.phase = "cyan";
       this.phaseNumber = 1;
       this.phaseLabel = PHASE_LABELS[0];
+      this.phaseWarning = false;
+      this.phaseWarningStartedAt = 0;
+      this.phaseTransition = null;
       this.result = null;
       this.score = 0;
       this.streak = 0;
@@ -144,11 +151,18 @@ export function startPhasebound(options = {}) {
     },
 
     updatePhase() {
-      const nextPhase = Math.floor(this.score / PHASE_SCORE_STEP) + 1;
-      if (nextPhase <= this.phaseNumber) return;
-      this.phaseNumber = nextPhase;
-      this.phaseLabel = PHASE_LABELS[Math.min(nextPhase - 1, PHASE_LABELS.length - 1)] || `phase ${nextPhase}`;
-      for (const hazard of this.hazards) hazard.direction *= -1;
+      const threshold = this.phaseNumber * PHASE_SCORE_STEP;
+      if (!this.phaseWarning && this.score >= threshold - PHASE_WARNING_SCORE) {
+        this.phaseWarning = true;
+        this.phaseWarningStartedAt = this.elapsed;
+        this.publish();
+      }
+      if (this.score < threshold || this.elapsed - this.phaseWarningStartedAt < PHASE_WARNING_MIN_DURATION) return;
+
+      this.phaseNumber += 1;
+      this.phaseLabel = PHASE_LABELS[Math.min(this.phaseNumber - 1, PHASE_LABELS.length - 1)] || `phase ${this.phaseNumber}`;
+      this.phaseWarning = false;
+      this.phaseTransition = { elapsed: 0, switched: false };
       this.burst(this.player.x, this.player.y, COLORS.ink, 12);
       this.publish();
     },
@@ -161,6 +175,9 @@ export function startPhasebound(options = {}) {
       this.phase = "cyan";
       this.phaseNumber = 1;
       this.phaseLabel = PHASE_LABELS[0];
+      this.phaseWarning = false;
+      this.phaseWarningStartedAt = 0;
+      this.phaseTransition = null;
       this.score = 0;
       this.streak = 0;
       this.packetsCollected = 0;
@@ -177,6 +194,7 @@ export function startPhasebound(options = {}) {
       this.player.setPosition(480, 320);
       this.playerVelocity.set(0, 0);
       this.pointerTarget = null;
+      for (const hazard of this.hazards) hazard.direction = 1;
       const openingPackets = this.pacing === "busy" ? 6 : 5;
       for (let index = 0; index < openingPackets; index += 1) this.spawnPacket();
       this.publish();
@@ -226,6 +244,7 @@ export function startPhasebound(options = {}) {
       if (this.mode !== "active") return;
 
       this.elapsed += dt;
+      this.updatePhaseTransition(dt);
       this.hitCooldown = Math.max(0, this.hitCooldown - dt);
       this.dashTime = Math.max(0, this.dashTime - dt);
       this.dashCooldown = Math.max(0, this.dashCooldown - dt);
@@ -297,8 +316,16 @@ export function startPhasebound(options = {}) {
 
     updateHazards(time, dt) {
       const phaseSpeed = 1 + Math.min(2.4, (this.phaseNumber - 1) * 0.22);
+      let transitionSpeed = 1;
+      if (this.phaseTransition) {
+        if (this.phaseTransition.elapsed < PHASE_TURN_SLOWDOWN_DURATION) {
+          transitionSpeed = 1 - this.phaseTransition.elapsed / PHASE_TURN_SLOWDOWN_DURATION;
+        } else {
+          transitionSpeed = Math.min(1, (this.phaseTransition.elapsed - PHASE_TURN_SLOWDOWN_DURATION) / (PHASE_TURN_DURATION - PHASE_TURN_SLOWDOWN_DURATION));
+        }
+      }
       for (const hazard of this.hazards) {
-        const speed = hazard.speed * phaseSpeed * (1 + Math.min(4.2, this.packetsCollected * 0.11 + this.elapsed * 0.018));
+        const speed = hazard.speed * phaseSpeed * transitionSpeed * (1 + Math.min(4.2, this.packetsCollected * 0.11 + this.elapsed * 0.018));
         hazard.angle += speed * hazard.direction * dt;
         const wobble = Math.sin(time * 0.0012 + hazard.wobble) * 22;
         hazard.x = 480 + Math.cos(hazard.angle) * (hazard.radius + wobble);
@@ -312,6 +339,19 @@ export function startPhasebound(options = {}) {
         hazard.art.fillCircle(hazard.x + size * 0.28, hazard.y + size * 0.3, size * 0.16);
         hazard.art.lineStyle(1, 0xff9a8f, 0.34);
         hazard.art.strokeCircle(hazard.x, hazard.y, size * 0.78);
+      }
+    },
+
+    updatePhaseTransition(dt) {
+      if (!this.phaseTransition) return;
+      this.phaseTransition.elapsed += dt;
+      if (!this.phaseTransition.switched && this.phaseTransition.elapsed >= PHASE_TURN_SLOWDOWN_DURATION) {
+        for (const hazard of this.hazards) hazard.direction *= -1;
+        this.phaseTransition.switched = true;
+      }
+      if (this.phaseTransition.elapsed >= PHASE_TURN_DURATION) {
+        this.phaseTransition = null;
+        this.publish();
       }
     },
 
@@ -502,13 +542,15 @@ export function startPhasebound(options = {}) {
       if (this.mode !== "active") return;
       this.mode = "result";
       this.result = result;
+      this.phaseWarning = false;
+      this.phaseTransition = null;
       this.playerVelocity.set(0, 0);
       this.pointerTarget = null;
       this.publish();
     },
 
     publish() {
-      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, phaseNumber: this.phaseNumber, phaseLabel: this.phaseLabel, score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed });
+      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, phaseNumber: this.phaseNumber, phaseLabel: this.phaseLabel, phaseWarning: this.phaseWarning, phaseTurning: Boolean(this.phaseTransition), score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed });
     },
   });
 

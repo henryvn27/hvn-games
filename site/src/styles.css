@@ -672,7 +672,9 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .game-page .hud-phase { color: #8e9bb4; font-size: 0.68rem; letter-spacing: 0.02em; }
 .game-page .hud-phase.is-warning { color: #ffc857; font-weight: 700; }
 .game-page .hud-lives { margin-top: 3px; color: #ff7ad9; font-size: 0.68rem; letter-spacing: 0.02em; }
-.game-page .phase-button { position: absolute; top: 6px; left: 0; width: 22px; height: 22px; padding: 0; border: 1px solid rgba(224, 232, 255, 0.32); border-radius: 3px; background: #4cddf2; cursor: pointer; pointer-events: auto; }
+.game-page .phase-control { position: absolute; top: 6px; left: 0; display: flex; align-items: center; gap: 9px; }
+.game-page .hud-streak { color: #8e9bb4; font-size: 0.68rem; letter-spacing: 0.02em; white-space: nowrap; }
+.game-page .phase-button { position: static; width: 22px; height: 22px; padding: 0; border: 1px solid rgba(224, 232, 255, 0.32); border-radius: 3px; background: #4cddf2; cursor: pointer; pointer-events: auto; }
 .game-page .phase-button[data-phase="amber"] { background: #ffc447; }
 .game-page .phase-button:hover { border-color: #f5f7ff; }
 .game-page .phase-button:active { transform: scale(0.9); }
@@ -686,7 +688,8 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .game-page .game-frame { border-radius: 0; }
   .game-page .hud { inset: 14px 16px auto; }
   .game-page .hud-score strong { font-size: 2.15rem; }
-  .game-page .phase-button { top: 4px; width: 20px; height: 20px; }
+  .game-page .phase-control { top: 4px; }
+  .game-page .phase-button { width: 20px; height: 20px; }
   .game-page .pause-button { top: -3px; width: 40px; height: 40px; font-size: 1rem; }
 }
 

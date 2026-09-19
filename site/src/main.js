@@ -207,7 +207,7 @@ async function renderGame() {
       <section class="game-frame" aria-label="Orbit game">
         <div class="hud" aria-live="polite">
           <div class="hud-group hud-score"><strong id="hud-score">0000</strong><span id="hud-phase" class="hud-phase">phase 1 · steady</span><span id="hud-lives" class="hud-lives" hidden></span></div>
-          <button id="phase-switch" class="phase-button" type="button" data-phase="cyan" aria-label="Switch color. Current color: cyan"><span aria-hidden="true"></span></button>
+          <div class="phase-control"><button id="phase-switch" class="phase-button" type="button" data-phase="cyan" aria-label="Switch color. Current color: cyan"><span aria-hidden="true"></span></button><span id="hud-streak" class="hud-streak">streak 0</span></div>
           <button id="pause-button" class="pause-button" type="button" aria-label="Pause">Ⅱ</button>
         </div>
         <div id="game-root"></div>
@@ -259,6 +259,7 @@ async function renderGame() {
   const overlayAction = document.querySelector("#overlay-action");
   const hudPhase = document.querySelector("#hud-phase");
   const hudLives = document.querySelector("#hud-lives");
+  const hudStreak = document.querySelector("#hud-streak");
   const firstPlayTutorial = document.querySelector("#first-play-tutorial");
   const tutorialStart = document.querySelector("#tutorial-start");
   const phaseSwitch = document.querySelector("#phase-switch");
@@ -361,6 +362,7 @@ async function renderGame() {
     hudPhase.classList.toggle("is-warning", state.phaseWarning || state.phaseTurning);
     hudLives.hidden = state.lives < 1;
     hudLives.textContent = state.lives === 1 ? "1 extra life" : `${state.lives} extra lives`;
+    hudStreak.textContent = `streak ${state.streak}`;
     phaseSwitch.dataset.phase = state.phase;
     phaseSwitch.setAttribute("aria-label", `Switch color. Current color: ${state.phase}`);
     pauseButton.textContent = state.mode === "pause" ? "▶" : "Ⅱ";

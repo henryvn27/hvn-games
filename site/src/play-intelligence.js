@@ -2,7 +2,7 @@ const STORAGE_KEY = "hvn-games:play-intelligence:v1";
 const MAX_FEEDBACK = 60;
 
 function blankData() {
-  return { games: {}, experiments: {}, feedback: [], leaderboards: {}, playerName: "YOU" };
+  return { games: {}, experiments: {}, feedback: [], leaderboards: {}, playerName: "" };
 }
 
 function readData() {
@@ -151,12 +151,13 @@ function removeRapidDuplicates(entries) {
 
 export function getPlayerName() {
   const data = readData();
-  return data.playerName || "YOU";
+  return data.playerName || "";
 }
 
 export function setPlayerName(value) {
   const data = readData();
-  const name = String(value || "YOU").trim().replace(/\s+/g, " ").slice(0, 16) || "YOU";
+  const raw = String(value || "").trim().replace(/\s+/g, " ").slice(0, 16);
+  const name = /^[a-zA-Z]{3}$/.test(raw) ? raw.toUpperCase() : raw;
   data.playerName = name;
   writeData(data);
   return name;

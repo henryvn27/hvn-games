@@ -2,7 +2,7 @@
 
 A small browser game made to be played, not just shown.
 
-The public page currently opens with [Phasebound](https://henryvn27.github.io/hvn-games/?game=phasebound). The other experiments are still in the repo, but they are off the shelf while they are being tuned.
+The public page currently opens with [Phasebound](https://henryvn27.github.io/hvn-games/?game=phasebound). It is the only game in this repo for now; a second game should earn its own stack and point of view before it joins the page.
 
 ## Install and run
 
@@ -24,7 +24,7 @@ Each game can opt into one small experiment at a time. Assignments stay stable o
 ## Structure
 
 - `site/` is the shared gallery and browser entry point.
-- `games/<slug>/` contains each game runtime and design notes.
+- `games/<slug>/` contains the current game runtime and design notes.
 - `scripts/` contains repository smoke checks.
 
 ## Design read

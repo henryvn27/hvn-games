@@ -409,7 +409,7 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .phasebound-home-copy { position: relative; max-width: 430px; }
 .phasebound-home-copy::after { content: "hi"; position: absolute; top: -18px; right: 12px; color: var(--accent-strong); font: 1.2rem/1 var(--hand-font, "Comic Sans MS", cursive); transform: rotate(9deg); }
 .phasebound-home .eyebrow { margin-bottom: 18px; color: var(--ink); }
-.phasebound-home h1 { margin-bottom: 18px; font-size: clamp(4rem, 8vw, 7.4rem); letter-spacing: -0.09em; }
+.phasebound-home h1 { margin-bottom: 18px; font-size: clamp(3.8rem, 6vw, 6.2rem); letter-spacing: -0.09em; }
 .phasebound-rule { max-width: 300px; margin-bottom: 26px; font-size: 1.1rem; line-height: 1.35; }
 .made-note { margin: 28px 0 0; color: var(--muted); font: 0.92rem/1.35 var(--hand-font, "Comic Sans MS", cursive); transform: rotate(-3deg); }
 .phasebound-home .button-primary { border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); text-transform: lowercase; }
@@ -458,4 +458,36 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .phasebound-home-art { box-shadow: 5px 5px 0 var(--ink); }
   .phasebound-strip { gap: 8px 15px; font-size: 0.7rem; }
   .gallery-page .leaderboard-section { padding-block: 58px 52px; }
+}
+
+.phasebound-home-art { aspect-ratio: 16 / 10; min-height: clamp(300px, calc(100svh - 220px), 520px); }
+#phasebound-card-preview-root { min-height: 0; }
+#phasebound-card-preview-root canvas { height: 100% !important; object-fit: contain; }
+
+.score-save { margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(237, 242, 237, 0.18); }
+.score-save p { margin: 0; }
+.score-save-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.score-save-form { margin-top: 12px; }
+.score-save-form > div { display: flex; gap: 8px; margin-top: 7px; }
+.score-save-form input { width: min(100%, 240px); }
+.score-save-error { min-height: 1.3em; margin-top: 7px !important; color: #ff9d8d; font-size: 0.82rem; }
+.score-save-status { margin-top: 10px !important; color: var(--accent-strong); font-size: 0.84rem; }
+.game-overlay [hidden] { display: none !important; }
+
+@media (max-aspect-ratio: 4 / 5) and (min-width: 601px) {
+  .phasebound-home { padding-block: 42px 34px; gap: 30px; }
+  .phasebound-home h1 { font-size: clamp(3.8rem, 9vw, 6rem); }
+  .phasebound-home-art { min-height: 280px; }
+}
+
+@media (min-aspect-ratio: 2 / 1) {
+  .phasebound-home { padding-block: 42px 34px; }
+  .phasebound-home-art { min-height: 280px; }
+}
+
+@media (max-width: 600px) {
+  .phasebound-home-art { aspect-ratio: 4 / 3; min-height: 0; }
+  #phasebound-card-preview-root { min-height: 0; }
+  .score-save-form > div { align-items: stretch; flex-direction: column; }
+  .score-save-form input { width: 100%; }
 }

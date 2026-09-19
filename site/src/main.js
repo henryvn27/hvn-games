@@ -27,19 +27,19 @@ function renderGallery() {
       <section class="phasebound-home page-width" aria-labelledby="hero-title">
         <div class="phasebound-home-copy">
           <p class="eyebrow">one game / 01</p>
-          <h1 id="hero-title">Phasebound</h1>
+          <h1 id="hero-title">Hot Dot</h1>
           <p class="phasebound-rule">Grab cyan. Miss red. It gets quicker.</p>
           <a class="button button-primary" href="${base}?game=phasebound">play it</a>
           <p class="made-note">made for a quick break<br>keyboard or touch</p>
         </div>
-        <div class="phasebound-home-art" aria-label="Live Phasebound game preview">
+        <div class="phasebound-home-art" aria-label="Live Hot Dot game preview">
           <div class="preview-topline"><span>01 / 01</span><span>live run</span></div>
           <div id="phasebound-card-preview-root"></div>
-          <div class="phasebound-legend" aria-label="Phasebound rules"><span><i class="legend-dot legend-cyan"></i>cyan = good</span><span><i class="legend-dot legend-red"></i>red = bad</span><span>faster after each hit</span></div>
+          <div class="phasebound-legend" aria-label="Hot Dot rules"><span><i class="legend-dot legend-cyan"></i>cyan = good</span><span><i class="legend-dot legend-red"></i>red = bad</span><span>faster after each hit</span></div>
         </div>
       </section>
 
-      <section class="phasebound-strip page-width" aria-label="Phasebound controls">
+      <section class="phasebound-strip page-width" aria-label="Hot Dot controls">
         <span><b>keys</b> WASD / arrows</span><span><b>phase</b> Space</span><span><b>dash</b> Shift</span><span><b>pause</b> P</span>
         <span class="bench-note">a small one-game site.</span>
       </section>
@@ -73,7 +73,7 @@ function renderGallery() {
         </details>
       </section>
     </main>
-    <footer class="site-footer page-width"><span>HVN games</span><span>phasebound / 01</span></footer>
+    <footer class="site-footer page-width"><span>HVN games</span><span>hot dot / 01</span></footer>
   `;
   setupCopyButtons();
   setupLeaderboard();
@@ -154,7 +154,7 @@ function renderLeaderboard(node, entries = getLeaderboard(LEADERBOARD_GAME)) {
   if (!entries.length) {
     const empty = document.createElement("p");
     empty.className = "leaderboard-empty";
-    empty.textContent = "No scores yet. Play Phasebound and put one here.";
+    empty.textContent = "No scores yet. Play Hot Dot and put one here.";
     node.append(empty);
     return;
   }
@@ -233,10 +233,10 @@ async function renderGame() {
     </header>
     <main class="game-main page-width">
       <div class="game-heading">
-        <div><p class="game-index">01 / phasebound</p><h1>Phasebound</h1></div>
+        <div><p class="game-index">01 / hot dot</p><h1>Hot Dot</h1></div>
         <p class="game-blurb">cyan good. red bad. gets quicker.</p>
       </div>
-      <section class="game-frame" aria-label="Phasebound game">
+      <section class="game-frame" aria-label="Hot Dot game">
         <div class="hud" aria-live="polite">
           <div class="hud-group"><span class="hud-label">phase</span><strong id="hud-phase">cyan</strong></div>
           <div class="hud-group"><span class="hud-label">hits</span><strong id="hud-packets">00</strong></div>

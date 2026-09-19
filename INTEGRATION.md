@@ -2,7 +2,7 @@
 
 ## Host flow
 
-The host flow is the public `HVN games` page. A visitor opens the page and the Play action loads Phasebound in the same Pages deployment. It is the only game route currently shipped.
+The host flow is the public `HVN games` page. A visitor opens the page and the Play action loads Hot Dot in the same Pages deployment. It is the only game route currently shipped.
 
 ## Trigger and input
 
@@ -25,9 +25,9 @@ The host flow is the public `HVN games` page. A visitor opens the page and the P
 - Experiment rule: one clearly named variable per game at a time, stable assignment per browser, and variant results kept separate. Treat the results as directional for one player until a consented multi-player data path exists.
 - Adoption point: `site/src/play-intelligence.js` is the shared client layer.
 
-The current public shelf has one game: Phasebound, with color matching and escalating hazards. New games should add a new verb or decision, not another skin for the same loop.
+The current public shelf has one game: Hot Dot, with color matching and escalating hazards. New games should add a new verb or decision, not another skin for the same loop.
 
-## Phasebound proof contract
+## Hot Dot proof contract
 
 The gallery preview and `?game=phasebound` route both call `startPhasebound`. The route uses button-triggered 3/2/1/GO countdowns, records a completed score only after the player chooses to save it, and exposes `mode`, `score`, `packets`, `heat`, `energy`, `dashCooldown`, and `elapsed`. It has no packet target or time limit.
 
@@ -41,4 +41,4 @@ The proof run must build the site, boot it through the intended local or Pages r
 
 ## Manual fallback and rollback
 
-If the gallery route is unavailable, run the repo locally with `npm install` followed by `npm run dev`. A bad game can be disabled by removing its gallery entry and route while preserving Phasebound. Never rewrite history; revert the scoped commit if a published change needs to be withdrawn.
+If the gallery route is unavailable, run the repo locally with `npm install` followed by `npm run dev`. A bad game can be disabled by removing its gallery entry and route while preserving Hot Dot. Never rewrite history; revert the scoped commit if a published change needs to be withdrawn.

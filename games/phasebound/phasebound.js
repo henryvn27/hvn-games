@@ -12,13 +12,13 @@ const COLORS = {
 const PHASES = ["cyan", "amber"];
 
 export function startPhasebound(options = {}) {
-  class PhaseboundScene extends Phaser.Scene {
+  class HotDotScene extends Phaser.Scene {
     constructor() {
-      super("Phasebound");
+      super("HotDot");
     }
   }
 
-  Object.assign(PhaseboundScene.prototype, {
+  Object.assign(HotDotScene.prototype, {
     create() {
       this.mode = "menu";
       this.preview = Boolean(options.preview);
@@ -379,10 +379,10 @@ export function startPhasebound(options = {}) {
     render: { antialias: true, pixelArt: false, roundPixels: true },
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     input: { activePointers: 3 },
-    scene: PhaseboundScene,
+    scene: HotDotScene,
   });
 
-  const getScene = () => game.scene.getScene("Phasebound");
+  const getScene = () => game.scene.getScene("HotDot");
   return {
     start: () => getScene()?.startRun(),
     resume: () => getScene()?.resumeRun(),

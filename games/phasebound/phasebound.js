@@ -249,6 +249,7 @@ export function startPhasebound(options = {}) {
     togglePause() {
       if (this.mode === "active") {
         this.mode = "pause";
+        this.tweens.pauseAll();
         this.publish();
       } else if (this.mode === "pause") {
         this.resumeRun();
@@ -258,6 +259,7 @@ export function startPhasebound(options = {}) {
     resumeRun() {
       if (this.mode !== "pause") return;
       this.mode = "active";
+      this.tweens.resumeAll();
       this.publish();
     },
 
@@ -267,9 +269,9 @@ export function startPhasebound(options = {}) {
 
     update(time, delta) {
       const dt = Math.min(delta / 1000, 0.04);
+      if (this.mode !== "active") return;
       for (const star of this.stars) star.object.setAlpha(0.16 + (Math.sin(time * 0.001 + star.phase) + 1) * 0.11);
       this.updateBursts(dt);
-      if (this.mode !== "active") return;
       if (this.hitFreeze > 0) {
         this.hitFreeze = Math.max(0, this.hitFreeze - dt);
         return;

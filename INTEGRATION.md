@@ -6,7 +6,7 @@ The host flow is the public `HVN games` page. A visitor opens the page and the P
 
 ## Trigger and input
 
-- Trigger: open the gallery or use a game link such as `?game=phasebound`.
+- Trigger: open the gallery or use the Orbit game link `?game=orbit`.
 - Input: keyboard, pointer, or touch controls inside the game.
 - Authorized data: none. The game is local-only and uses no accounts, tracking, uploads, or network calls at runtime.
 
@@ -29,7 +29,7 @@ The current public shelf has one game: Orbit, with color matching and escalating
 
 ## Orbit proof contract
 
-The gallery preview and `?game=phasebound` route both call `startPhasebound`. The route uses button-triggered 3/2/1/GO countdowns, records a completed score only after the player chooses to save it, and exposes `mode`, `score`, `packets`, `heat`, `energy`, `dashCooldown`, and `elapsed`. It has no packet target or time limit.
+The gallery preview and `?game=orbit` route both call `startPhasebound`. The legacy `?game=phasebound` route remains accepted for old links. The route uses button-triggered 3/2/1/GO countdowns, records a completed score only after the player chooses to save it, and exposes `mode`, `score`, `packets`, `heat`, `energy`, `dashCooldown`, and `elapsed`. It has no packet target or time limit.
 
 ## Leaderboard boundary
 

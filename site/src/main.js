@@ -4,6 +4,8 @@ import { createGameTracker, getExperimentAssignment, getLeaderboard, getPlayRepo
 const app = document.querySelector("#app");
 const base = import.meta.env.BASE_URL;
 const params = new URLSearchParams(window.location.search);
+const ORBIT_ROUTE = "orbit";
+const LEGACY_ORBIT_ROUTE = "phasebound";
 const LEADERBOARD_GAME = "phasebound";
 
 if (params.get("game")) {
@@ -20,7 +22,7 @@ function renderGallery() {
       <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="#leaderboard">scores</a>
-        <a href="${base}?game=phasebound">play</a>
+        <a href="${base}?game=${ORBIT_ROUTE}">play</a>
       </nav>
     </header>
     <main>
@@ -28,7 +30,7 @@ function renderGallery() {
         <div class="phasebound-home-copy">
           <h1 id="hero-title">Orbit</h1>
           <p class="phasebound-rule">Grab cyan. Avoid red.</p>
-          <a class="button button-primary" href="${base}?game=phasebound">play</a>
+          <a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play</a>
         </div>
       </section>
 
@@ -190,7 +192,7 @@ function beginCountdown({ overlay, title, copy, detail, actionButton, message = 
 }
 
 async function renderGame() {
-  if (params.get("game") !== "phasebound") return renderGallery();
+  if (![ORBIT_ROUTE, LEGACY_ORBIT_ROUTE].includes(params.get("game"))) return renderGallery();
   document.body.className = "game-page game-phasebound";
   app.innerHTML = `
     <header class="game-header page-width">

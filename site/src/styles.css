@@ -686,3 +686,31 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .game-page .phase-button { top: 4px; width: 20px; height: 20px; }
   .game-page .pause-button { top: -3px; width: 40px; height: 40px; font-size: 1rem; }
 }
+
+/* Landing-page play shell. */
+.game-page { background: #f6f6f1; color: #1b1c19; }
+.game-page .game-header { min-height: 64px; border-bottom: 1px solid rgba(27, 28, 25, 0.18); }
+.game-page .game-header .wordmark { color: #1b1c19; }
+.game-page .site-nav { gap: 18px; color: #1b1c19; text-transform: lowercase; }
+.game-page .site-nav a:hover { color: #6a6d66; }
+.game-page .game-main { padding-block: 62px 64px; }
+.game-page .game-heading { padding-bottom: 22px; }
+.game-page .game-heading h1 { color: #1b1c19; font-size: clamp(3.4rem, 6vw, 5.7rem); letter-spacing: -0.09em; }
+.game-page .game-blurb { max-width: 260px; color: #6a6d66; font-size: 1.05rem; }
+.game-page .game-frame { border: 1px solid #1b1c19; background: #071124; box-shadow: none; }
+.game-page .game-overlay { color: #f5f7ff; background: rgba(7, 17, 36, 0.86); backdrop-filter: none; }
+.game-page .game-overlay > p:not(.eyebrow):not(.overlay-detail) { color: #8e9bb4; }
+.game-page .button-primary { background: #c9f04d; color: #1b1c19; border: 1px solid #1b1c19; }
+.game-page .button-primary:hover { background: #1b1c19; color: #c9f04d; }
+.game-page .route-leaderboard { padding-top: 58px; color: #1b1c19; }
+.game-page .route-leaderboard > div:last-child { border-top: 1px solid #1b1c19; }
+.game-page .route-leaderboard p { color: #6a6d66; }
+.game-page .route-leaderboard .leaderboard-list li { border-bottom-color: rgba(27, 28, 25, 0.18); }
+
+@media (max-width: 600px) {
+  .game-page .game-main { padding-block: 44px 52px; }
+  .game-page .game-heading { gap: 8px; }
+  .game-page .game-heading h1 { font-size: clamp(3.4rem, 16.5vw, 5.2rem); }
+  .game-page .game-blurb { font-size: 1rem; }
+  .game-page .route-leaderboard { padding-top: 48px; }
+}

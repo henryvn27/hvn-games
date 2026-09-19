@@ -204,7 +204,7 @@ async function renderGame() {
   app.innerHTML = `
     <header class="game-header page-width">
       <a class="wordmark" href="${base}">HVN games</a>
-      <a class="back-link" href="${base}">Back to shelf</a>
+      <nav class="site-nav" aria-label="Primary navigation"><a href="#route-leaderboard">scores</a><a href="${base}">home</a></nav>
     </header>
     <main class="game-main page-width">
       <div class="game-heading">
@@ -235,7 +235,7 @@ async function renderGame() {
           </div>
         </div>
       </section>
-      <section class="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><h2 id="route-leaderboard-title">high scores</h2><p>Scores saved in this browser.</p></div><div id="phasebound-leaderboard"></div></section>
+      <section class="route-leaderboard" id="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><h2 id="route-leaderboard-title">high scores</h2><p>Scores saved in this browser.</p></div><div id="phasebound-leaderboard"></div></section>
     </main>
   `;
 

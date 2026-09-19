@@ -13,6 +13,8 @@ const COLORS = {
 const PHASES = ["cyan", "amber"];
 const EXTRA_LIFE_FIRST_SCORE = 1000;
 const EXTRA_LIFE_SCORE_STEP = 1500;
+const PHASE_SCORE_STEP = 1500;
+const PHASE_LABELS = ["steady", "turnaround", "tight orbit", "fast orbit", "rough orbit"];
 
 export function startPhasebound(options = {}) {
   class HotDotScene extends Phaser.Scene {
@@ -27,6 +29,8 @@ export function startPhasebound(options = {}) {
       this.preview = Boolean(options.preview);
       this.pacing = options.pacing === "busy" ? "busy" : "steady";
       this.phase = "cyan";
+      this.phaseNumber = 1;
+      this.phaseLabel = PHASE_LABELS[0];
       this.result = null;
       this.score = 0;
       this.streak = 0;
@@ -126,6 +130,7 @@ export function startPhasebound(options = {}) {
         angle: (Math.PI * 2 * index) / 5 + 0.35,
         radius: 130 + (index % 3) * 76,
         speed: 0.22 + index * 0.035,
+        direction: this.phaseNumber % 2 === 0 ? -1 : 1,
         size: index % 2 === 0 ? 15 : 11,
         wobble: index * 0.8,
         art: this.add.graphics().setDepth(2),
@@ -138,12 +143,24 @@ export function startPhasebound(options = {}) {
       while (this.hazards.length < desiredHazards) this.addHazard(this.hazards.length);
     },
 
+    updatePhase() {
+      const nextPhase = Math.floor(this.score / PHASE_SCORE_STEP) + 1;
+      if (nextPhase <= this.phaseNumber) return;
+      this.phaseNumber = nextPhase;
+      this.phaseLabel = PHASE_LABELS[Math.min(nextPhase - 1, PHASE_LABELS.length - 1)] || `phase ${nextPhase}`;
+      for (const hazard of this.hazards) hazard.direction *= -1;
+      this.burst(this.player.x, this.player.y, COLORS.ink, 12);
+      this.publish();
+    },
+
     startRun() {
       this.clearPackets();
       this.clearBursts();
       this.mode = "active";
       this.result = null;
       this.phase = "cyan";
+      this.phaseNumber = 1;
+      this.phaseLabel = PHASE_LABELS[0];
       this.score = 0;
       this.streak = 0;
       this.packetsCollected = 0;
@@ -262,6 +279,7 @@ export function startPhasebound(options = {}) {
         if (distance > 30) continue;
         if (packet.phase === this.phase) {
           this.score += 100 + this.streak * 25 + this.heat * 12;
+          this.updatePhase();
           this.streak += 1;
           this.packetsCollected += 1;
           this.energy = Math.min(100, this.energy + 8);
@@ -278,9 +296,10 @@ export function startPhasebound(options = {}) {
     },
 
     updateHazards(time, dt) {
+      const phaseSpeed = 1 + Math.min(2.4, (this.phaseNumber - 1) * 0.22);
       for (const hazard of this.hazards) {
-        const speed = hazard.speed * (1 + Math.min(4.2, this.packetsCollected * 0.11 + this.elapsed * 0.018));
-        hazard.angle += speed * dt;
+        const speed = hazard.speed * phaseSpeed * (1 + Math.min(4.2, this.packetsCollected * 0.11 + this.elapsed * 0.018));
+        hazard.angle += speed * hazard.direction * dt;
         const wobble = Math.sin(time * 0.0012 + hazard.wobble) * 22;
         hazard.x = 480 + Math.cos(hazard.angle) * (hazard.radius + wobble);
         hazard.y = 320 + Math.sin(hazard.angle) * (hazard.radius + wobble) * 0.58;
@@ -489,7 +508,7 @@ export function startPhasebound(options = {}) {
     },
 
     publish() {
-      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed });
+      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, phaseNumber: this.phaseNumber, phaseLabel: this.phaseLabel, score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed });
     },
   });
 

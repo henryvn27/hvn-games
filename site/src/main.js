@@ -204,7 +204,7 @@ async function renderGame() {
       </div>
       <section class="game-frame" aria-label="Orbit game">
         <div class="hud" aria-live="polite">
-          <div class="hud-group hud-score"><strong id="hud-score">0000</strong><span id="hud-lives" class="hud-lives" hidden></span></div>
+          <div class="hud-group hud-score"><strong id="hud-score">0000</strong><span id="hud-phase" class="hud-phase">phase 1 · steady</span><span id="hud-lives" class="hud-lives" hidden></span></div>
           <button id="phase-switch" class="phase-button" type="button" data-phase="cyan" aria-label="Switch color. Current color: cyan"><span aria-hidden="true"></span></button>
           <button id="pause-button" class="pause-button" type="button" aria-label="Pause">Ⅱ</button>
         </div>
@@ -213,7 +213,7 @@ async function renderGame() {
           <div id="first-play-tutorial" class="first-play-tutorial" hidden>
             <p class="tutorial-kicker">first time here</p>
             <h2>Stay in the orbit.</h2>
-            <p class="tutorial-intro">Collect the dot that matches your color. Red planets cost a life; purple stars give one back. There is no timer — last as long as you can while the field speeds up.</p>
+            <p class="tutorial-intro">Collect the dot that matches your color. Red planets cost a life; purple stars give one back. The orbit changes at each phase, but there is no timer.</p>
             <div class="tutorial-rules">
               <div class="tutorial-rule"><span class="tutorial-dot tutorial-dot-cyan" aria-hidden="true"></span><div><strong>match your color</strong><span>cyan collects cyan · amber collects amber</span></div></div>
               <div class="tutorial-rule"><span class="tutorial-dot tutorial-dot-red" aria-hidden="true"></span><div><strong>avoid the planets</strong><span>they cost a life</span></div></div>
@@ -255,6 +255,7 @@ async function renderGame() {
   const overlayCopy = document.querySelector("#overlay-copy");
   const overlayDetail = document.querySelector("#overlay-detail");
   const overlayAction = document.querySelector("#overlay-action");
+  const hudPhase = document.querySelector("#hud-phase");
   const hudLives = document.querySelector("#hud-lives");
   const firstPlayTutorial = document.querySelector("#first-play-tutorial");
   const tutorialStart = document.querySelector("#tutorial-start");
@@ -274,7 +275,7 @@ async function renderGame() {
   let api;
   let previousMode = "menu";
 
-  const tutorialStorageKey = "hvn-games:orbit-tutorial:v3";
+  const tutorialStorageKey = "hvn-games:orbit-tutorial:v4";
   const hasSeenTutorial = () => {
     try {
       return window.localStorage.getItem(tutorialStorageKey) === "seen";
@@ -354,6 +355,7 @@ async function renderGame() {
 
   function updateHud(state) {
     document.querySelector("#hud-score").textContent = String(state.score).padStart(4, "0");
+    hudPhase.textContent = `phase ${state.phaseNumber} · ${state.phaseLabel}`;
     hudLives.hidden = state.lives < 1;
     hudLives.textContent = state.lives === 1 ? "1 extra life" : `${state.lives} extra lives`;
     phaseSwitch.dataset.phase = state.phase;

@@ -667,8 +667,9 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .game-page .game-frame { border: 1px solid rgba(224, 232, 255, 0.18); border-radius: 0; background: #071124; }
 .game-page #game-root { min-height: min(70vh, 680px); }
 .game-page .hud { inset: 18px 24px auto; display: block; text-align: center; }
-.game-page .hud-score { justify-content: center; }
+.game-page .hud-score { flex-direction: column; align-items: center; justify-content: center; gap: 0; }
 .game-page .hud-score strong { color: #f5f7ff; font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 500; letter-spacing: 0.02em; }
+.game-page .hud-phase { color: #8e9bb4; font-size: 0.68rem; letter-spacing: 0.02em; }
 .game-page .hud-lives { margin-top: 3px; color: #ff7ad9; font-size: 0.68rem; letter-spacing: 0.02em; }
 .game-page .phase-button { position: absolute; top: 6px; left: 0; width: 22px; height: 22px; padding: 0; border: 1px solid rgba(224, 232, 255, 0.32); border-radius: 3px; background: #4cddf2; cursor: pointer; pointer-events: auto; }
 .game-page .phase-button[data-phase="amber"] { background: #ffc447; }

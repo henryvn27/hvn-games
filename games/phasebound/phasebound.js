@@ -285,16 +285,31 @@ export function startPhasebound(options = {}) {
     },
 
     spawnPacket() {
-      let x = 480;
-      let y = 320;
-      for (let attempt = 0; attempt < 12; attempt += 1) {
-        x = Phaser.Math.Between(64, 896);
-        y = Phaser.Math.Between(70, 570);
-        if (Phaser.Math.Distance.Between(x, y, this.player.x, this.player.y) > 120) break;
+      const minPacketSpacing = 58;
+      const minPlayerSpacing = 120;
+      let bestPosition = { x: 480, y: 320 };
+      let bestClearance = -Infinity;
+
+      for (let attempt = 0; attempt < 80; attempt += 1) {
+        const candidate = {
+          x: Phaser.Math.Between(64, 896),
+          y: Phaser.Math.Between(70, 570),
+        };
+        const playerClearance = Phaser.Math.Distance.Between(candidate.x, candidate.y, this.player.x, this.player.y) - minPlayerSpacing;
+        const packetClearance = this.packets.length === 0
+          ? Infinity
+          : Math.min(...this.packets.map((packet) => Phaser.Math.Distance.Between(candidate.x, candidate.y, packet.x, packet.y))) - minPacketSpacing;
+        const clearance = Math.min(playerClearance, packetClearance);
+
+        if (clearance > bestClearance) {
+          bestClearance = clearance;
+          bestPosition = candidate;
+        }
+        if (clearance >= 0) break;
       }
       const packet = {
-        x,
-        y,
+        x: bestPosition.x,
+        y: bestPosition.y,
         phase: PHASES[Phaser.Math.Between(0, 1)],
         angle: Phaser.Math.FloatBetween(0, Math.PI * 2),
         spin: Phaser.Math.FloatBetween(0.008, 0.018),

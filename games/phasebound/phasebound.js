@@ -316,9 +316,12 @@ export function startPhasebound(options = {}) {
     drawPlayer() {
       const color = COLORS[this.phase];
       this.playerArt.clear();
-      const size = this.dashTime > 0 ? 18 : 14;
+      const radius = this.dashTime > 0 ? 18 : 14;
+      const halfWidth = Math.sqrt(3) * radius / 2;
       this.playerArt.fillStyle(color, 1);
-      this.playerArt.fillTriangle(0, -size * 1.35, size * 0.9, size, -size * 0.9, size);
+      // These vertices share the same circumradius, making all three sides
+      // equal while the point stays at the top of the local coordinate space.
+      this.playerArt.fillTriangle(0, -radius, halfWidth, radius / 2, -halfWidth, radius / 2);
     },
 
     burst(x, y, color, count) {

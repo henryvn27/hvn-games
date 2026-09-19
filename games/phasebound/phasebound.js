@@ -53,26 +53,16 @@ export function startPhasebound(options = {}) {
       this.backdrop.fillStyle(COLORS.field, 1);
       this.backdrop.fillRect(0, 0, 960, 640);
 
-      // A little shape and depth keeps the field from feeling like an empty
-      // canvas. The edges stay quieter than the play area so targets remain
-      // the first thing the eye finds.
-      this.backdrop.fillStyle(0x0d1b33, 0.88);
-      this.backdrop.fillCircle(-80, 70, 250);
-      this.backdrop.fillCircle(1_030, 570, 300);
-      this.backdrop.fillStyle(0x10223f, 0.62);
-      this.backdrop.fillCircle(820, -70, 170);
-      this.backdrop.fillCircle(120, 700, 145);
-
-      this.backdrop.fillStyle(0x6a7892, 0.14);
-      for (const [x, y, size] of [
-        [92, 236, 3],
-        [208, 96, 2],
-        [814, 226, 3],
-        [736, 566, 2],
-        [432, 112, 2],
-        [556, 586, 2],
+      // Very faint orbits give the field a little motion and make the red
+      // hazards feel like planets without turning the game into a diagram.
+      for (const [width, height, opacity] of [
+        [330, 150, 0.08],
+        [520, 250, 0.07],
+        [740, 370, 0.06],
+        [1_020, 520, 0.05],
       ]) {
-        this.backdrop.fillCircle(x, y, size);
+        this.backdrop.lineStyle(1, 0x6a7892, opacity);
+        this.backdrop.strokeEllipse(480, 320, width, height);
       }
 
       this.stars = [];
@@ -115,7 +105,6 @@ export function startPhasebound(options = {}) {
         radius: 130 + (index % 3) * 76,
         speed: 0.22 + index * 0.035,
         size: index % 2 === 0 ? 15 : 11,
-        shape: index % 3,
         wobble: index * 0.8,
         art: this.add.graphics().setDepth(2),
       });
@@ -271,21 +260,12 @@ export function startPhasebound(options = {}) {
         hazard.art.clear();
         const size = hazard.size + Math.sin(time * 0.004 + hazard.wobble) * 2;
         hazard.art.fillStyle(COLORS.danger, 0.96);
-        if (hazard.shape === 0) {
-          hazard.art.fillTriangle(hazard.x, hazard.y - size * 1.25, hazard.x + size, hazard.y + size, hazard.x - size, hazard.y + size);
-        } else if (hazard.shape === 1) {
-          hazard.art.lineStyle(5, COLORS.danger, 0.96);
-          hazard.art.lineBetween(hazard.x - size, hazard.y - size, hazard.x + size, hazard.y + size);
-          hazard.art.lineBetween(hazard.x + size, hazard.y - size, hazard.x - size, hazard.y + size);
-        } else {
-          const points = [];
-          for (let index = 0; index < 16; index += 1) {
-            const pointSize = index % 2 === 0 ? size * 1.25 : size * 0.48;
-            const angle = (Math.PI * 2 * index) / 16;
-            points.push(new Phaser.Geom.Point(hazard.x + Math.cos(angle) * pointSize, hazard.y + Math.sin(angle) * pointSize));
-          }
-          hazard.art.fillPoints(points, true);
-        }
+        hazard.art.fillCircle(hazard.x, hazard.y, size);
+        hazard.art.fillStyle(0xa83f4f, 0.85);
+        hazard.art.fillCircle(hazard.x - size * 0.35, hazard.y - size * 0.2, size * 0.22);
+        hazard.art.fillCircle(hazard.x + size * 0.28, hazard.y + size * 0.3, size * 0.16);
+        hazard.art.lineStyle(1, 0xff9a8f, 0.34);
+        hazard.art.strokeCircle(hazard.x, hazard.y, size * 0.78);
       }
     },
 
@@ -338,7 +318,7 @@ export function startPhasebound(options = {}) {
       this.playerArt.clear();
       const size = this.dashTime > 0 ? 18 : 14;
       this.playerArt.fillStyle(color, 1);
-      this.playerArt.fillCircle(0, 0, size);
+      this.playerArt.fillTriangle(0, -size * 1.35, size * 0.9, size, -size * 0.9, size);
     },
 
     burst(x, y, color, count) {

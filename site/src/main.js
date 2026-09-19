@@ -272,7 +272,7 @@ async function renderGame() {
   let api;
   let previousMode = "menu";
 
-  const tutorialStorageKey = "hvn-games:orbit-tutorial:v1";
+  const tutorialStorageKey = "hvn-games:orbit-tutorial:v2";
   const hasSeenTutorial = () => {
     try {
       return window.localStorage.getItem(tutorialStorageKey) === "seen";

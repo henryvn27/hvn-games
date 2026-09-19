@@ -53,16 +53,32 @@ export function startPhasebound(options = {}) {
       this.backdrop.fillStyle(COLORS.field, 1);
       this.backdrop.fillRect(0, 0, 960, 640);
 
-      // Very faint orbits give the field a little motion and make the red
-      // hazards feel like planets without turning the game into a diagram.
-      for (const [width, height, opacity] of [
-        [330, 150, 0.08],
-        [520, 250, 0.07],
-        [740, 370, 0.06],
-        [1_020, 520, 0.05],
+      // Clear enough to read as an orbit map, quiet enough to keep pickups
+      // and the player as the only important shapes in the middle.
+      for (const [width, height, opacity, lineWidth] of [
+        [300, 132, 0.16, 2],
+        [470, 220, 0.12, 1],
+        [660, 320, 0.1, 1],
+        [880, 430, 0.08, 1],
+        [1_100, 540, 0.06, 1],
       ]) {
-        this.backdrop.lineStyle(1, 0x6a7892, opacity);
+        this.backdrop.lineStyle(lineWidth, 0x5c789f, opacity);
         this.backdrop.strokeEllipse(480, 320, width, height);
+      }
+
+      // A few fixed pinpricks make the field feel like space without looking
+      // like a particle effect or competing with the pickup colors.
+      const stars = [
+        [62, 92, 1.5, 0.28], [146, 118, 1, 0.2], [274, 72, 1.5, 0.25],
+        [682, 86, 1, 0.2], [824, 116, 1.5, 0.3], [912, 196, 1, 0.22],
+        [88, 332, 1, 0.2], [146, 512, 1.5, 0.25], [306, 584, 1, 0.22],
+        [644, 576, 1.5, 0.26], [810, 508, 1, 0.2], [900, 392, 1.5, 0.28],
+        [350, 106, 1, 0.18], [592, 124, 1.5, 0.22], [756, 332, 1, 0.18],
+        [202, 430, 1, 0.18],
+      ];
+      for (const [x, y, radius, opacity] of stars) {
+        this.backdrop.fillStyle(0xb5d0f2, opacity);
+        this.backdrop.fillCircle(x, y, radius);
       }
 
       this.stars = [];

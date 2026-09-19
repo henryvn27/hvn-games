@@ -52,6 +52,29 @@ export function startPhasebound(options = {}) {
       this.backdrop = this.add.graphics();
       this.backdrop.fillStyle(COLORS.field, 1);
       this.backdrop.fillRect(0, 0, 960, 640);
+
+      // A little shape and depth keeps the field from feeling like an empty
+      // canvas. The edges stay quieter than the play area so targets remain
+      // the first thing the eye finds.
+      this.backdrop.fillStyle(0x0d1b33, 0.88);
+      this.backdrop.fillCircle(-80, 70, 250);
+      this.backdrop.fillCircle(1_030, 570, 300);
+      this.backdrop.fillStyle(0x10223f, 0.62);
+      this.backdrop.fillCircle(820, -70, 170);
+      this.backdrop.fillCircle(120, 700, 145);
+
+      this.backdrop.fillStyle(0x6a7892, 0.14);
+      for (const [x, y, size] of [
+        [92, 236, 3],
+        [208, 96, 2],
+        [814, 226, 3],
+        [736, 566, 2],
+        [432, 112, 2],
+        [556, 586, 2],
+      ]) {
+        this.backdrop.fillCircle(x, y, size);
+      }
+
       this.stars = [];
     },
 

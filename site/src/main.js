@@ -402,15 +402,21 @@ async function renderGame() {
   function showScoreSave(state) {
     pendingScore = { score: state.score, packets: state.packets, elapsed: state.elapsed };
     const savedName = getPlayerName();
-    scoreSaveQuestion.textContent = savedName ? `Save this as ${savedName}?` : "Save this score?";
-    scoreSaveButton.textContent = savedName ? `save as ${savedName}` : "save it";
+    scoreSaveQuestion.textContent = savedName ? `saved as ${savedName}` : "add your initials or name once";
     scoreSaveName.value = savedName;
     scoreSaveError.textContent = "";
     scoreSaveStatus.textContent = "";
-    scoreSaveForm.hidden = true;
-    scoreSaveButton.hidden = false;
-    scoreSkipButton.hidden = false;
+    scoreSaveButton.hidden = true;
+    scoreSkipButton.hidden = true;
+    scoreSaveForm.hidden = Boolean(savedName);
     scoreSave.hidden = false;
+    if (savedName) {
+      recordLeaderboardScore("phasebound", pendingScore.score, pendingScore.packets, pendingScore.elapsed);
+      renderLeaderboard(document.querySelector("#phasebound-leaderboard"));
+      scoreSaveStatus.textContent = "saved automatically.";
+    } else {
+      scoreSaveName.focus();
+    }
   }
 
   function savePendingScore(value) {
@@ -427,7 +433,7 @@ async function renderGame() {
     scoreSaveButton.hidden = true;
     scoreSkipButton.hidden = true;
     scoreSaveForm.hidden = true;
-    scoreSaveStatus.textContent = "next run, this name is already here.";
+    scoreSaveStatus.textContent = "saved automatically from now on.";
   }
 
   function updateHud(state) {
@@ -494,13 +500,6 @@ async function renderGame() {
   }, { capture: true });
   phaseSwitch.addEventListener("click", () => api.togglePhase());
   pauseButton.addEventListener("click", () => api.togglePause());
-  scoreSaveButton.addEventListener("click", () => {
-    const savedName = getPlayerName();
-    if (savedName) savePendingScore(savedName);
-    else scoreSaveForm.hidden = false;
-    if (!savedName) scoreSaveName.focus();
-  });
-  scoreSkipButton.addEventListener("click", () => { scoreSave.hidden = true; });
   scoreSaveForm.addEventListener("submit", (event) => { event.preventDefault(); savePendingScore(scoreSaveName.value); });
   if (!hasSeenTutorial()) showTutorial();
 }

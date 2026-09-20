@@ -246,6 +246,34 @@ function reaction(){
   let state='ready',start=0,pending=null;
   shell('Reaction Test','Wait for green, then tap as fast as you can.',`<div class="panel"><button class="reaction" id="react">Click to start</button><div class="controls"><button onclick="reaction()">Reset</button></div></div>`);
   const e=document.querySelector('#react'),runSession=GameRuns.session('reaction');
+  const panel=e.closest('.panel');
+  panel.insertAdjacentHTML('beforeend',`<section class="reaction-leaderboard" aria-labelledby="reaction-leaderboard-title"><div class="reaction-leaderboard-heading"><h2 id="reaction-leaderboard-title">best times</h2><span>fastest wins</span></div><ol id="reaction-leaderboard-list"></ol><form id="reaction-name-form" hidden><label for="reaction-name">name or initials</label><div><input id="reaction-name" maxlength="16" autocomplete="nickname" placeholder="ABC or your name"><button type="submit">save time</button></div><p id="reaction-name-status" role="status"></p></form></section>`);
+  const leaderboardList=document.querySelector('#reaction-leaderboard-list'),nameForm=document.querySelector('#reaction-name-form'),nameInput=document.querySelector('#reaction-name'),nameStatus=document.querySelector('#reaction-name-status');
+  let pendingScore=null;
+  const renderLeaderboard=()=>{
+    const entries=ShelfLeaderboard.get('reaction');
+    leaderboardList.replaceChildren();
+    if(!entries.length){const empty=document.createElement('li');empty.className='reaction-leaderboard-empty';empty.textContent='No times yet. Be the first.';leaderboardList.append(empty);return;}
+    entries.forEach((entry,i)=>{
+      const row=document.createElement('li');
+      row.textContent=`${String(i+1).padStart(2,'0')} ${entry.name} ${entry.score} ms`;
+      leaderboardList.append(row);
+    });
+  };
+  const saveScore=ms=>{
+    const name=ShelfLeaderboard.getName();
+    if(name){ShelfLeaderboard.record('reaction',ms);renderLeaderboard();return;}
+    pendingScore=ms;nameForm.hidden=false;nameInput.focus();nameStatus.textContent='Add your initials once to put this time on the board.';
+  };
+  nameInput.value=ShelfLeaderboard.getName();
+  renderLeaderboard();
+  nameForm.addEventListener('submit',event=>{
+    event.preventDefault();
+    const name=ShelfLeaderboard.setName(nameInput.value);
+    if(!name){nameStatus.textContent='Type three letters or a name first.';nameInput.focus();return;}
+    if(pendingScore!==null)ShelfLeaderboard.record('reaction',pendingScore);
+    pendingScore=null;nameForm.hidden=true;nameStatus.textContent=`Saved as ${name}.`;renderLeaderboard();
+  });
   e.onclick=()=>{
     if(state==='ready'){
       runSession.reset();runSession.start('signal');state='wait';e.textContent='Wait for green…';e.style.background='#ff5d8f';
@@ -254,7 +282,7 @@ function reaction(){
       clearTimeout(pending);state='ready';e.textContent='Too early — try again.';e.style.background='#e5e8ed';
     }else if(state==='go'){
       const ms=Math.round(performance.now()-start);state='ready';e.textContent=`${ms} ms — click to go again`;e.style.background='#e5e8ed';
-      if(ms>0){Shelf.record('reaction_result',{ms});runSession.finish({ms});}
+      if(ms>0){Shelf.record('reaction_result',{ms});runSession.finish({ms});saveScore(ms);}
     }
   };
   const blur=()=>{if(state!=='ready'){clearTimeout(pending);state='ready';e.textContent='Round paused — click to try again.';e.style.background='#e5e8ed';}};

@@ -1,6 +1,7 @@
 import "./styles.css";
 import { createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlayerName } from "./play-intelligence.js";
 import orbitPolicyArtifact from "../../games/phasebound/orbit-policy.json";
+import { renderGameShelf } from "./shelf.js";
 
 const app = document.querySelector("#app");
 const base = import.meta.env.BASE_URL;
@@ -8,6 +9,7 @@ const params = new URLSearchParams(window.location.search);
 const ORBIT_ROUTE = "orbit";
 const LEGACY_ORBIT_ROUTE = "phasebound";
 const ORBIT_RL_ROUTE = "orbit-rl";
+const SHELF_ROUTE = "shelf";
 const LEADERBOARD_GAME = "phasebound";
 
 if (params.get("game")) {
@@ -24,6 +26,7 @@ function renderGallery() {
       <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="#leaderboard">scores</a>
+        <a href="${base}?game=${SHELF_ROUTE}">more games</a>
         <a href="${base}?game=${ORBIT_ROUTE}">play</a>
       </nav>
     </header>
@@ -32,7 +35,7 @@ function renderGallery() {
         <div class="phasebound-home-copy">
           <h1 id="hero-title">Orbit</h1>
           <p class="phasebound-rule">Match your color. Dodge the red planets.</p>
-          <a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play</a>
+          <div class="hero-actions"><a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play Orbit</a><a class="button button-secondary" href="${base}?game=${SHELF_ROUTE}">more games</a></div>
         </div>
       </section>
 
@@ -270,6 +273,7 @@ async function renderRLWriteup() {
 }
 
 async function renderGame() {
+  if (params.get("game") === SHELF_ROUTE) return renderGameShelf({ app, base });
   if (params.get("game") === ORBIT_RL_ROUTE) return renderRLWriteup();
   if (![ORBIT_ROUTE, LEGACY_ORBIT_ROUTE].includes(params.get("game"))) return renderGallery();
   document.body.className = "game-page game-phasebound";

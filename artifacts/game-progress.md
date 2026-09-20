@@ -8,4 +8,4 @@ The isolated route uses procedural Three.js geometry, deterministic wave logic, 
 
 Completed: worktree setup, route, playable loop, responsive HUD, pause/retry, touch/keyboard intent wiring, build, smoke checks, and browser playthrough.
 
-Evidence note: desktop browser playthrough and production static preview are verified. A fresh device-viewport capture was unavailable after the browser session reset, so mobile runtime is not overstated as passed.
+Evidence note: desktop and 390x844 production-preview playthroughs are verified, including touch placement and pause behavior.

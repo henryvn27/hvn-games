@@ -674,6 +674,7 @@ class NeonBastion {
       energy: Math.floor(this.energy),
       activeEnemies: this.enemies.length,
       framesAdvanced: this.frames,
+      simulationTime: Number(this.elapsed.toFixed(3)),
       fps: Math.round(this.fpsSample.value),
       playerPosition: { x: this.core.position.x, y: this.core.position.z },
       renderer: info ? { calls: info.render.calls, triangles: info.render.triangles, geometries: info.memory.geometries, textures: info.memory.textures, pixelRatio: this.renderer.getPixelRatio() } : null,

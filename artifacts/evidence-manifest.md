@@ -27,6 +27,6 @@
 ## QA scope
 
 - Browser: manual real-input desktop playthrough covered start, placement, wave launch, targeting, reward, upgrade, pause, fail, and retry.
-- Mobile: responsive CSS has explicit 900px and 560px layouts; runtime device capture is not claimed because the browser session reset before viewport emulation could be attached.
+- Mobile: production preview verified at 390x844; touch-style canvas placement reduced energy from 300 to 230, the wave launched, and the corrected vertical control stack had no overlap.
 - Audio: synthesized Web Audio tones are wired behind user gestures; no external audio asset or key is required.
 - Physics: not in scope; movement uses authored lane/path interpolation and deterministic collision checks.

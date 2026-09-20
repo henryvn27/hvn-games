@@ -18,4 +18,4 @@ Average: 3.0. No scorecard category is below 2.
 
 ## Known evidence boundary
 
-The game is source-verified and locally browser-played in development, and its production bundle/static preview is verified. It is not deployed or published by this task. A fresh device-emulation capture was unavailable after the browser session reset, so mobile runtime is not overstated as passed.
+The game is source-verified, browser-played in development, and verified on the production static preview at desktop and 390x844 phone-sized dimensions. It is not deployed or published by this task.

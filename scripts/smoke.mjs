@@ -20,7 +20,7 @@ const html = readFileSync(join(root, "site/index.html"), "utf8");
 if (!html.includes("src/main.js")) throw new Error("Gallery entry point is not wired");
 
 const main = readFileSync(join(root, "site/src/main.js"), "utf8");
-for (const marker of ["phasebound", "ORBIT_ROUTE", "?game=${ORBIT_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Grab cyan"]) {
+for (const marker of ["phasebound", "ORBIT_ROUTE", "?game=${ORBIT_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "saved automatically", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Grab cyan"]) {
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
 }
 if (main.includes("preview: true") || main.includes("phasebound-card-preview-root")) throw new Error("Landing page still mounts the game demo");

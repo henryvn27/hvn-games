@@ -674,6 +674,7 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .game-page .hud-lives { margin-top: 3px; color: #ff7ad9; font-size: 0.68rem; letter-spacing: 0.02em; }
 .game-page .phase-control { position: absolute; top: 6px; left: 0; display: flex; align-items: center; gap: 9px; }
 .game-page .hud-streak { color: #8e9bb4; font-size: 0.68rem; letter-spacing: 0.02em; white-space: nowrap; }
+.game-page .hud-streak { color: #c4d1e7; font-weight: 600; }
 .game-page .phase-button { position: static; width: 22px; height: 22px; padding: 0; border: 1px solid rgba(224, 232, 255, 0.32); border-radius: 3px; background: #4cddf2; cursor: pointer; pointer-events: auto; }
 .game-page .phase-button[data-phase="amber"] { background: #ffc447; }
 .game-page .phase-button:hover { border-color: #f5f7ff; }

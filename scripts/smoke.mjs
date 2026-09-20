@@ -24,7 +24,7 @@ const html = readFileSync(join(root, "site/index.html"), "utf8");
 if (!html.includes("src/main.js")) throw new Error("Gallery entry point is not wired");
 
 const main = readFileSync(join(root, "site/src/main.js"), "utf8");
-for (const marker of ["phasebound", "ORBIT_ROUTE", "ORBIT_RL_ROUTE", "renderRLWriteup", "reinforcement learning writeup", "?game=${ORBIT_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "saved automatically", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Grab cyan"]) {
+for (const marker of ["phasebound", "ORBIT_ROUTE", "ORBIT_RL_ROUTE", "renderRLWriteup", "reinforcement learning writeup", "?game=${ORBIT_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "saved automatically", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Match your color"]) {
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
 }
 const gallerySource = main.slice(0, main.indexOf("async function renderRLWriteup"));

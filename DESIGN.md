@@ -38,4 +38,4 @@ Applied here: Orbit is the public game. The old experiments are gone from the re
 
 Orbit is the public game. It has no timer and no win target. The run ends when a planet hits the player or the signal charge is spent. Each matching pickup raises heat: movement gets quicker, hazards move faster, and new hazards join the field. The HUD reports score, phase, and dash charge. A local top-ten board gives the run a reason to come back.
 
-The words stay plain: "Grab cyan. Avoid red." is enough. The three-second start count appears before every button-triggered run so the player has a clear first beat.
+The words stay plain: "Match your color. Dodge the red planets." gives the goal without naming one specific collectible color. The three-second start count appears before every button-triggered run so the player has a clear first beat.

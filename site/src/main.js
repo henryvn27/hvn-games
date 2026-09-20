@@ -31,7 +31,7 @@ function renderGallery() {
       <section class="phasebound-home page-width" aria-labelledby="hero-title">
         <div class="phasebound-home-copy">
           <h1 id="hero-title">Orbit</h1>
-          <p class="phasebound-rule">Grab cyan. Avoid red.</p>
+          <p class="phasebound-rule">Match your color. Dodge the red planets.</p>
           <a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play</a>
         </div>
       </section>
@@ -246,6 +246,7 @@ async function renderRLWriteup() {
   const scoreNode = document.querySelector("#rl-score");
   const phaseNode = document.querySelector("#rl-phase");
   const statusNode = document.querySelector("#rl-status");
+  const demoTitle = document.querySelector("#rl-demo-title");
   const noteNode = document.querySelector("#rl-demo-note");
   const restartButton = document.querySelector("#rl-restart");
   let bestScore = 0;
@@ -257,7 +258,10 @@ async function renderRLWriteup() {
     onState: (state) => {
       scoreNode.textContent = String(state.score).padStart(4, "0");
       phaseNode.textContent = state.phaseTurning ? "turning" : `phase ${state.phaseNumber}`;
-      statusNode.textContent = state.mode === "result" ? "run over" : state.mode === "pause" ? "paused" : "running";
+      const isResult = state.mode === "result";
+      const isPaused = state.mode === "pause";
+      statusNode.textContent = isResult ? "run over" : isPaused ? "paused" : "running";
+      demoTitle.textContent = isResult ? "Run over." : isPaused ? "Model paused." : "The model is playing.";
       if (state.score > bestScore) bestScore = state.score;
       noteNode.textContent = state.mode === "result" ? `Run ended at ${state.score}. Start another live run whenever you want.` : `live score ${state.score} · best this visit ${bestScore}`;
     },
@@ -277,7 +281,7 @@ async function renderGame() {
     <main class="game-main page-width">
       <div class="game-heading">
         <h1>Orbit</h1>
-        <p class="game-blurb">Grab cyan. Avoid red.</p>
+        <p class="game-blurb">Match your color. Dodge the red planets.</p>
       </div>
       <section class="game-frame" aria-label="Orbit game">
         <div class="hud" aria-live="polite">
@@ -299,7 +303,7 @@ async function renderGame() {
             <button id="tutorial-start" class="button button-primary" type="button" disabled>move to continue</button>
           </div>
           <h2 id="overlay-title">Ready?</h2>
-          <p id="overlay-copy">Grab cyan. Avoid red.</p>
+          <p id="overlay-copy">Match your color. Dodge the red planets.</p>
           <button id="overlay-action" class="button button-primary" type="button">Start</button>
           <p id="overlay-detail" class="overlay-detail">move with WASD or arrows · tap the square or press Space</p>
           <div id="score-save" class="score-save" hidden>
@@ -530,7 +534,7 @@ async function renderGame() {
     tutorialActive = false;
     markTutorialSeen();
     hideTutorial();
-    beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, message: "Grab cyan.", next: () => api.start() });
+    beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, message: "Match your color.", next: () => api.start() });
   };
 
   api = startPhasebound({

@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { createOrbitPolicy } from "./orbit-policy.js";
 
 const COLORS = {
   cyan: 0x72f6e3,
@@ -40,6 +41,8 @@ export function startPhasebound(options = {}) {
     create() {
       this.mode = options.tutorial ? "tutorial" : "menu";
       this.preview = Boolean(options.preview);
+      this.autoplay = Boolean(options.autoplay);
+      this.policy = options.policy ?? createOrbitPolicy();
       this.pacing = options.pacing === "busy" ? "busy" : "steady";
       this.phase = "cyan";
       this.phaseNumber = 1;
@@ -63,6 +66,8 @@ export function startPhasebound(options = {}) {
       this.hitFreeze = 0;
       this.dashTime = 0;
       this.dashCooldown = 0;
+      this.autoplayClock = 0;
+      this.autoplayDirection = new Phaser.Math.Vector2();
       this.touch = { up: false, down: false, left: false, right: false };
       this.packets = [];
       this.hazards = [];
@@ -72,7 +77,7 @@ export function startPhasebound(options = {}) {
       this.createInput();
       this.createHazards();
       this.publish();
-      if (this.preview) this.startRun();
+      if (this.preview || this.autoplay) this.startRun();
       else if (options.tutorial) this.startTutorial();
     },
 
@@ -220,6 +225,8 @@ export function startPhasebound(options = {}) {
       this.hitFreeze = 0;
       this.dashTime = 0;
       this.dashCooldown = 0;
+      this.autoplayClock = 0;
+      this.autoplayDirection.set(0, 0);
       this.player.setPosition(480, 320);
       this.cameras.main.setZoom(1);
       this.playerVelocity.set(0, 0);
@@ -329,6 +336,7 @@ export function startPhasebound(options = {}) {
       this.dashTime = Math.max(0, this.dashTime - dt);
       this.dashCooldown = Math.max(0, this.dashCooldown - dt);
       this.energy = Math.min(100, this.energy + dt * 2.4);
+      this.applyAutoplay(dt);
       this.updateMovement(dt);
       this.updatePackets(time);
       this.updateLifePickup(time);
@@ -346,10 +354,15 @@ export function startPhasebound(options = {}) {
     updateMovement(dt) {
       let x = 0;
       let y = 0;
-      if (this.cursors.left.isDown || this.keys.A.isDown || this.touch.left) x -= 1;
-      if (this.cursors.right.isDown || this.keys.D.isDown || this.touch.right) x += 1;
-      if (this.cursors.up.isDown || this.keys.W.isDown || this.touch.up) y -= 1;
-      if (this.cursors.down.isDown || this.keys.S.isDown || this.touch.down) y += 1;
+      if (this.autoplay && this.autoplayDirection.lengthSq() > 0.001) {
+        x = this.autoplayDirection.x;
+        y = this.autoplayDirection.y;
+      } else {
+        if (this.cursors.left.isDown || this.keys.A.isDown || this.touch.left) x -= 1;
+        if (this.cursors.right.isDown || this.keys.D.isDown || this.touch.right) x += 1;
+        if (this.cursors.up.isDown || this.keys.W.isDown || this.touch.up) y -= 1;
+        if (this.cursors.down.isDown || this.keys.S.isDown || this.touch.down) y += 1;
+      }
       if (x || y) {
         const length = Math.hypot(x, y) || 1;
         const runSpeed = 235 + Math.min(90, this.packetsCollected * 2.2);
@@ -368,6 +381,33 @@ export function startPhasebound(options = {}) {
       this.player.x = Phaser.Math.Clamp(this.player.x + this.playerVelocity.x * dt, 34, 926);
       this.player.y = Phaser.Math.Clamp(this.player.y + this.playerVelocity.y * dt, 34, 606);
       if (this.playerVelocity.length() > 10) this.player.rotation = Math.atan2(this.playerVelocity.y, this.playerVelocity.x) + Math.PI / 2;
+    },
+
+    applyAutoplay(dt) {
+      if (!this.autoplay || !this.policy) return;
+      this.autoplayClock -= dt;
+      if (this.autoplayClock > 0) return;
+      const action = this.policy.act(this.getPolicyObservation());
+      this.autoplayClock = 0.05;
+      this.autoplayDirection.x = Phaser.Math.Clamp(Number(action.dx) || 0, -1, 1);
+      this.autoplayDirection.y = Phaser.Math.Clamp(Number(action.dy) || 0, -1, 1);
+      if (action.toggle) this.togglePhase();
+      if (action.dash) this.dash();
+    },
+
+    getPolicyObservation() {
+      return {
+        player: { x: this.player.x, y: this.player.y },
+        phase: this.phase,
+        phaseNumber: this.phaseNumber,
+        score: this.score,
+        energy: this.energy,
+        lives: this.lives,
+        elapsed: this.elapsed,
+        packets: this.packets.map((packet) => ({ x: packet.x, y: packet.y, phase: packet.phase })),
+        hazards: this.hazards.map((hazard) => ({ x: hazard.x, y: hazard.y, size: hazard.size })),
+        lifePickup: this.lifePickup ? { x: this.lifePickup.x, y: this.lifePickup.y } : null,
+      };
     },
 
     updatePackets(time) {
@@ -640,7 +680,7 @@ export function startPhasebound(options = {}) {
     },
 
     publish() {
-      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, phaseNumber: this.phaseNumber, phaseLabel: this.phaseLabel, phaseWarning: this.phaseWarning, phaseTurning: Boolean(this.phaseTransition), score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed });
+      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, phaseNumber: this.phaseNumber, phaseLabel: this.phaseLabel, phaseWarning: this.phaseWarning, phaseTurning: Boolean(this.phaseTransition), score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed, autoplay: this.autoplay, policy: this.policy?.name || null });
     },
   });
 

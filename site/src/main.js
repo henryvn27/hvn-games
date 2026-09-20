@@ -10,6 +10,7 @@ const ORBIT_ROUTE = "orbit";
 const LEGACY_ORBIT_ROUTE = "phasebound";
 const ORBIT_RL_ROUTE = "orbit-rl";
 const SHELF_ROUTE = "shelf";
+const TOWER_DEFENSE_ROUTE = "neon-bastion";
 const LEADERBOARD_GAME = "phasebound";
 
 if (params.get("game")) {
@@ -27,6 +28,7 @@ function renderGallery() {
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="#leaderboard">scores</a>
         <a href="${base}?game=${SHELF_ROUTE}">more games</a>
+        <a href="${base}?game=${TOWER_DEFENSE_ROUTE}">defense</a>
         <a href="${base}?game=${ORBIT_ROUTE}">play</a>
       </nav>
     </header>
@@ -274,6 +276,7 @@ async function renderRLWriteup() {
 
 async function renderGame() {
   if (params.get("game") === SHELF_ROUTE) return renderGameShelf({ app, base });
+  if (params.get("game") === TOWER_DEFENSE_ROUTE) return renderTowerDefense();
   if (params.get("game") === ORBIT_RL_ROUTE) return renderRLWriteup();
   if (![ORBIT_ROUTE, LEGACY_ORBIT_ROUTE].includes(params.get("game"))) return renderGallery();
   document.body.className = "game-page game-phasebound";
@@ -586,4 +589,13 @@ async function renderGame() {
   pauseButton.addEventListener("click", () => api.togglePause());
   scoreSaveForm.addEventListener("submit", (event) => { event.preventDefault(); savePendingScore(scoreSaveName.value); });
   if (!hasSeenTutorial()) showTutorial();
+}
+
+function renderTowerDefense() {
+  document.body.className = "tower-defense-page";
+  app.innerHTML = `<main id="tower-defense-root"><p class="tower-defense-loading">loading the board…</p></main>`;
+  import("./tower-defense.js").then(({ startNeonBastion }) => {
+    const game = startNeonBastion({ parent: "tower-defense-root", base });
+    game.installTestHooks();
+  });
 }

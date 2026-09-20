@@ -722,7 +722,12 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .game-page .phase-button[data-phase="amber"] { background: #ffc447; }
 .game-page .phase-button:hover { border-color: #f5f7ff; }
 .game-page .phase-button:active { transform: scale(0.9); }
-.game-page .pause-button { position: absolute; top: -2px; right: 0; display: grid; place-items: center; width: 44px; height: 44px; padding: 0 0 2px 1px; border: 1px solid rgba(224, 232, 255, 0.3); border-radius: 50%; background: transparent; color: #f5f7ff; font: 700 1.1rem/1 var(--ui-font); cursor: pointer; pointer-events: auto; }
+.game-page .game-actions { position: absolute; top: -2px; right: 0; display: flex; align-items: center; gap: 8px; pointer-events: auto; }
+.game-page .slow-button { min-width: 66px; min-height: 34px; padding: 0 9px; border: 1px solid rgba(224, 232, 255, 0.3); background: transparent; color: #f5f7ff; font: 600 0.68rem/1 var(--ui-font); letter-spacing: 0.01em; white-space: nowrap; cursor: pointer; }
+.game-page .slow-button:hover { border-color: #f5f7ff; background: rgba(224, 232, 255, 0.08); }
+.game-page .slow-button.is-active { border-color: #ffc857; background: #ffc857; color: #071124; }
+.game-page .slow-button:disabled { cursor: default; opacity: 0.45; }
+.game-page .pause-button { position: static; display: grid; place-items: center; width: 44px; height: 44px; padding: 0 0 2px 1px; border: 1px solid rgba(224, 232, 255, 0.3); border-radius: 50%; background: transparent; color: #f5f7ff; font: 700 1.1rem/1 var(--ui-font); cursor: pointer; pointer-events: auto; }
 .game-page .pause-button:hover { border-color: #f5f7ff; background: rgba(224, 232, 255, 0.08); }
 .game-page .touch-controls { display: none !important; }
 .game-page .game-overlay { border-radius: 0; background: rgba(7, 17, 36, 0.86); }
@@ -734,7 +739,9 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .game-page .hud-score strong { font-size: 2.15rem; }
   .game-page .phase-control { top: 4px; }
   .game-page .phase-button { width: 20px; height: 20px; }
-  .game-page .pause-button { top: -3px; width: 40px; height: 40px; font-size: 1rem; }
+  .game-page .pause-button { width: 40px; height: 40px; font-size: 1rem; }
+  .game-page .game-actions { top: -3px; gap: 6px; }
+  .game-page .slow-button { min-width: 58px; min-height: 32px; padding-inline: 7px; font-size: 0.62rem; }
 }
 
 /* Landing-page play shell. */

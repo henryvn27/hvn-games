@@ -294,7 +294,7 @@ async function renderGame() {
         <div class="hud" aria-live="polite">
           <div class="hud-group hud-score"><strong id="hud-score">0000</strong><span id="hud-phase" class="hud-phase">phase 1 · steady</span><span id="hud-lives" class="hud-lives" hidden></span></div>
           <div class="phase-control"><button id="phase-switch" class="phase-button" type="button" data-phase="cyan" aria-label="Switch color. Current color: cyan"><span aria-hidden="true"></span></button><span id="hud-streak" class="hud-streak">streak 0</span></div>
-          <button id="pause-button" class="pause-button" type="button" aria-label="Pause">Ⅱ</button>
+          <div class="game-actions"><button id="slow-button" class="slow-button" type="button" aria-pressed="false" aria-label="Turn slow mode on. It costs points">slow</button><button id="pause-button" class="pause-button" type="button" aria-label="Pause">Ⅱ</button></div>
         </div>
         <div id="game-root"></div>
         <div id="game-overlay" class="game-overlay">
@@ -312,7 +312,7 @@ async function renderGame() {
           <h2 id="overlay-title">Ready?</h2>
           <p id="overlay-copy">Match your color. Dodge the red planets.</p>
           <button id="overlay-action" class="button button-primary" type="button">Start</button>
-          <p id="overlay-detail" class="overlay-detail">move with WASD or arrows · tap the square or press Space</p>
+          <p id="overlay-detail" class="overlay-detail">move with WASD or arrows · square or Space changes color · slow costs points</p>
           <div id="score-save" class="score-save" hidden>
             <p id="score-save-question">Save this score?</p>
             <div class="score-save-actions"><button id="score-save-button" class="button button-primary" type="button">save it</button><button id="score-skip-button" class="text-button" type="button">not this time</button></div>
@@ -358,6 +358,7 @@ async function renderGame() {
   const scoreSaveName = document.querySelector("#score-save-name");
   const scoreSaveError = document.querySelector("#score-save-error");
   const scoreSaveStatus = document.querySelector("#score-save-status");
+  const slowButton = document.querySelector("#slow-button");
   const experiment = getExperimentAssignment("phasebound", "opening-load", ["steady", "busy"]);
   const tracker = createGameTracker("phasebound", "opening-load", experiment);
   let action = () => api.start();
@@ -487,7 +488,7 @@ async function renderGame() {
 
   let pendingScore = null;
   function showScoreSave(state) {
-    pendingScore = { score: state.score, packets: state.packets, elapsed: state.elapsed };
+    pendingScore = { score: Math.max(0, Math.floor(state.score)), packets: state.packets, elapsed: state.elapsed };
     const savedName = getPlayerName();
     scoreSaveQuestion.textContent = savedName ? `saved as ${savedName}` : "add your initials or name once";
     scoreSaveName.value = savedName;
@@ -524,7 +525,8 @@ async function renderGame() {
   }
 
   function updateHud(state) {
-    document.querySelector("#hud-score").textContent = String(state.score).padStart(4, "0");
+    const displayedScore = Math.max(0, Math.floor(state.score));
+    document.querySelector("#hud-score").textContent = String(displayedScore).padStart(4, "0");
     hudPhase.textContent = state.phaseTurning ? "turning..." : state.phaseWarning ? "turning soon" : `phase ${state.phaseNumber} · ${state.phaseLabel}`;
     hudPhase.classList.toggle("is-warning", state.phaseWarning || state.phaseTurning);
     hudLives.hidden = state.lives < 1;
@@ -533,6 +535,12 @@ async function renderGame() {
     phaseSwitch.dataset.phase = state.phase;
     tutorialSwatch.dataset.phase = state.phase;
     phaseSwitch.setAttribute("aria-label", `Switch color. Current color: ${state.phase}`);
+    const slowRate = Math.max(0, Math.round(state.slowModeRate || 0));
+    slowButton.textContent = state.slowMode ? `slow · −${slowRate}/s` : "slow";
+    slowButton.classList.toggle("is-active", state.slowMode);
+    slowButton.disabled = state.mode !== "active";
+    slowButton.setAttribute("aria-pressed", String(state.slowMode));
+    slowButton.setAttribute("aria-label", state.slowMode ? `Turn slow mode off. Losing about ${slowRate} points per second` : `Turn slow mode on. It costs about ${slowRate} points per second`);
     pauseButton.textContent = state.mode === "pause" ? "▶" : "Ⅱ";
     pauseButton.setAttribute("aria-label", state.mode === "pause" ? "Resume" : "Pause");
   }
@@ -558,7 +566,7 @@ async function renderGame() {
       }
       if (state.mode === "result" && previousMode !== "result") {
         const won = state.result === "won";
-        showOverlay({ title: won ? "Still playing?" : "Run over.", copy: `Score ${state.score}.`, detail: won ? "It gets faster." : "Try again if you want.", label: "Run it again", next: startWithCountdown });
+        showOverlay({ title: won ? "Still playing?" : "Run over.", copy: `Score ${Math.max(0, Math.floor(state.score))}.`, detail: won ? "It gets faster." : "Try again if you want.", label: "Run it again", next: startWithCountdown });
         showScoreSave(state);
       }
       previousMode = state.mode;
@@ -586,6 +594,7 @@ async function renderGame() {
     }
   }, { capture: true });
   phaseSwitch.addEventListener("click", () => api.togglePhase());
+  slowButton.addEventListener("click", () => api.toggleSlowMode());
   pauseButton.addEventListener("click", () => api.togglePause());
   scoreSaveForm.addEventListener("submit", (event) => { event.preventDefault(); savePendingScore(scoreSaveName.value); });
   if (!hasSeenTutorial()) showTutorial();

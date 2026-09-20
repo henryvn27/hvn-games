@@ -21,6 +21,9 @@ const PHASE_TURN_SLOWDOWN_DURATION = 0.95;
 const PHASE_TURN_DURATION = 2.4;
 const HIT_FREEZE_DURATION = 0.5;
 const HIT_FLASH_DURATION = 420;
+const SLOW_MODE_TIME_SCALE = 0.45;
+const SLOW_MODE_DEFAULT_SCORE_RATE = 500;
+const SLOW_MODE_RATE_SAMPLE_DURATION = 1;
 const PHASE_LABELS = ["steady", "turnaround", "tight orbit", "fast orbit", "rough orbit"];
 const ORBIT_RINGS = [[300, 132, 0.16, 2], [470, 220, 0.12, 1], [660, 320, 0.1, 1], [880, 430, 0.08, 1], [1_100, 540, 0.06, 1]];
 const ORBIT_FOCI = [
@@ -60,6 +63,10 @@ export function startPhasebound(options = {}) {
       this.heat = 1;
       this.energy = 100;
       this.elapsed = 0;
+      this.slowMode = false;
+      this.normalScoreRate = SLOW_MODE_DEFAULT_SCORE_RATE;
+      this.normalScoreSampleElapsed = 0;
+      this.normalScoreSamplePoints = 0;
       this.spawnClock = 0;
       this.publishClock = 0;
       this.hitCooldown = 0;
@@ -140,6 +147,7 @@ export function startPhasebound(options = {}) {
       this.input.keyboard.on("keydown-SPACE", () => this.togglePhase());
       this.input.keyboard.on("keydown-SHIFT", () => this.dash());
       this.input.keyboard.on("keydown-P", () => this.togglePause());
+      this.input.keyboard.on("keydown-Q", () => this.toggleSlowMode());
       this.input.keyboard.on("keydown-R", () => {
         if (this.mode === "result" || this.mode === "menu") this.startRun();
       });
@@ -220,6 +228,10 @@ export function startPhasebound(options = {}) {
       this.heat = 1;
       this.energy = 100;
       this.elapsed = 0;
+      this.slowMode = false;
+      this.normalScoreRate = SLOW_MODE_DEFAULT_SCORE_RATE;
+      this.normalScoreSampleElapsed = 0;
+      this.normalScoreSamplePoints = 0;
       this.spawnClock = 0;
       this.hitCooldown = 0;
       this.hitFreeze = 0;
@@ -257,6 +269,10 @@ export function startPhasebound(options = {}) {
       this.heat = 1;
       this.energy = 100;
       this.elapsed = 0;
+      this.slowMode = false;
+      this.normalScoreRate = SLOW_MODE_DEFAULT_SCORE_RATE;
+      this.normalScoreSampleElapsed = 0;
+      this.normalScoreSamplePoints = 0;
       this.spawnClock = 0;
       this.hitCooldown = 0;
       this.hitFreeze = 0;
@@ -298,6 +314,12 @@ export function startPhasebound(options = {}) {
       }
     },
 
+    toggleSlowMode() {
+      if (this.mode !== "active") return;
+      this.slowMode = !this.slowMode;
+      this.publish();
+    },
+
     resumeRun() {
       if (this.mode !== "pause") return;
       this.mode = "active";
@@ -310,23 +332,25 @@ export function startPhasebound(options = {}) {
     },
 
     update(time, delta) {
-      const dt = Math.min(delta / 1000, 0.04);
+      const realDt = Math.min(delta / 1000, 0.04);
       if (this.mode === "tutorial") {
-        this.dashTime = Math.max(0, this.dashTime - dt);
-        this.dashCooldown = Math.max(0, this.dashCooldown - dt);
-        this.energy = Math.min(100, this.energy + dt * 2.4);
-        this.updateHazards(time, dt);
-        this.updateMovement(dt);
+        this.dashTime = Math.max(0, this.dashTime - realDt);
+        this.dashCooldown = Math.max(0, this.dashCooldown - realDt);
+        this.energy = Math.min(100, this.energy + realDt * 2.4);
+        this.updateHazards(time, realDt);
+        this.updateMovement(realDt);
         this.drawPlayer();
         return;
       }
       if (this.mode !== "active") return;
       for (const star of this.stars) star.object.setAlpha(0.16 + (Math.sin(time * 0.001 + star.phase) + 1) * 0.11);
-      this.updateBursts(dt);
+      this.updateBursts(realDt);
       if (this.hitFreeze > 0) {
-        this.hitFreeze = Math.max(0, this.hitFreeze - dt);
+        this.hitFreeze = Math.max(0, this.hitFreeze - realDt);
         return;
       }
+      const dt = realDt * (this.slowMode ? SLOW_MODE_TIME_SCALE : 1);
+      const scoreBefore = this.score;
       this.updateHazards(time, dt);
 
       this.elapsed += dt;
@@ -342,13 +366,31 @@ export function startPhasebound(options = {}) {
       this.updateLifePickup(time);
       this.updateDifficulty();
       this.updateHazardCollision();
+      this.updateSlowMode(realDt, scoreBefore);
       this.drawPlayer();
-      this.publishClock += dt;
+      this.publishClock += realDt;
       if (this.publishClock > 0.1) {
         this.publishClock = 0;
         this.publish();
       }
       if (this.energy <= 0) this.endRun("lost");
+    },
+
+    updateSlowMode(realDt, scoreBefore) {
+      if (this.slowMode) {
+        this.score = Math.max(0, this.score - this.normalScoreRate * realDt);
+        return;
+      }
+
+      const scoreGain = Math.max(0, this.score - scoreBefore);
+      this.normalScoreSampleElapsed += realDt;
+      this.normalScoreSamplePoints += scoreGain;
+      if (this.normalScoreSampleElapsed < SLOW_MODE_RATE_SAMPLE_DURATION) return;
+
+      const measuredRate = this.normalScoreSamplePoints / this.normalScoreSampleElapsed;
+      this.normalScoreRate = Phaser.Math.Linear(this.normalScoreRate, measuredRate, 0.55);
+      this.normalScoreSampleElapsed = 0;
+      this.normalScoreSamplePoints = 0;
     },
 
     updateMovement(dt) {
@@ -427,6 +469,7 @@ export function startPhasebound(options = {}) {
         } else {
           this.streak = 0;
           this.energy -= 18;
+          this.cameras.main.flash(110, 255, 255, 255, false);
           this.burst(packet.x, packet.y, COLORS.danger, 10);
         }
         this.removePacket(packet);
@@ -672,6 +715,7 @@ export function startPhasebound(options = {}) {
       if (this.mode !== "active") return;
       this.mode = "result";
       this.result = result;
+      this.slowMode = false;
       this.phaseWarning = false;
       this.phaseTransition = null;
       this.playerVelocity.set(0, 0);
@@ -680,7 +724,7 @@ export function startPhasebound(options = {}) {
     },
 
     publish() {
-      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, phaseNumber: this.phaseNumber, phaseLabel: this.phaseLabel, phaseWarning: this.phaseWarning, phaseTurning: Boolean(this.phaseTransition), score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed, autoplay: this.autoplay, policy: this.policy?.name || null });
+      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, phaseNumber: this.phaseNumber, phaseLabel: this.phaseLabel, phaseWarning: this.phaseWarning, phaseTurning: Boolean(this.phaseTransition), score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed, slowMode: this.slowMode, slowModeRate: this.normalScoreRate, autoplay: this.autoplay, policy: this.policy?.name || null });
     },
   });
 
@@ -738,6 +782,7 @@ export function startPhasebound(options = {}) {
     resume: () => getScene()?.resumeRun(),
     togglePhase: () => getScene()?.togglePhase(),
     togglePause: () => getScene()?.togglePause(),
+    toggleSlowMode: () => getScene()?.toggleSlowMode(),
     dash: () => getScene()?.dash(),
     setTouchDirection: (direction, pressed) => getScene()?.setTouchDirection(direction, pressed),
     destroy: () => game.destroy(true),

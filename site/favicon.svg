@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="HVN games mark">
-  <rect width="64" height="64" rx="16" fill="#141b20"/>
-  <circle cx="32" cy="32" r="19" fill="none" stroke="#72f6e3" stroke-width="4" stroke-dasharray="60 18" transform="rotate(-32 32 32)"/>
-  <circle cx="32" cy="32" r="8" fill="#ffc857"/>
+  <rect width="64" height="64" rx="15" fill="#101923"/>
+  <path d="M18 16v32M46 16v32M18 32h28" fill="none" stroke="#f5f1e8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M10 39c4-13 15-22 28-23 9-1 16 3 17 10 2 9-5 19-16 24-9 4-19 3-25-2" fill="none" stroke="#4bd4e8" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="48" cy="18" r="4" fill="#ffc857"/>
 </svg>

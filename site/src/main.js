@@ -1,11 +1,13 @@
 import "./styles.css";
 import { createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlayerName } from "./play-intelligence.js";
+import orbitPolicyArtifact from "../../games/phasebound/orbit-policy.json";
 
 const app = document.querySelector("#app");
 const base = import.meta.env.BASE_URL;
 const params = new URLSearchParams(window.location.search);
 const ORBIT_ROUTE = "orbit";
 const LEGACY_ORBIT_ROUTE = "phasebound";
+const ORBIT_RL_ROUTE = "orbit-rl";
 const LEADERBOARD_GAME = "phasebound";
 
 if (params.get("game")) {
@@ -29,7 +31,7 @@ function renderGallery() {
       <section class="phasebound-home page-width" aria-labelledby="hero-title">
         <div class="phasebound-home-copy">
           <h1 id="hero-title">Orbit</h1>
-          <p class="phasebound-rule">Grab cyan. Avoid red.</p>
+          <p class="phasebound-rule">Match your color. Dodge the red planets.</p>
           <a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play</a>
         </div>
       </section>
@@ -191,7 +193,84 @@ function beginCountdown({ overlay, title, copy, detail, actionButton, message = 
   tick();
 }
 
+async function renderRLWriteup() {
+  document.body.className = "rl-page";
+  app.innerHTML = `
+    <header class="site-header page-width">
+      <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
+      <nav class="site-nav" aria-label="Page navigation"><a href="${base}?game=${ORBIT_ROUTE}">back to Orbit</a></nav>
+    </header>
+    <main class="rl-main page-width">
+      <section class="rl-hero" aria-labelledby="rl-title">
+        <p class="rl-kicker">Orbit / technical note 01</p>
+        <h1 id="rl-title">Teaching Orbit<br><em>to keep going.</em></h1>
+        <p class="rl-dek">A small policy trained in Python, then moved into the browser. It watches the same playfield you do and chooses where to steer next.</p>
+      </section>
+
+      <section class="rl-demo-layout" aria-labelledby="rl-demo-title">
+        <div class="rl-demo-panel">
+          <div class="rl-demo-heading"><div><p class="rl-label">live demo</p><h2 id="rl-demo-title">The model is playing.</h2></div><span id="rl-status" class="rl-status">running</span></div>
+          <div class="rl-demo-frame" aria-label="Orbit reinforcement learning autoplay demo">
+            <div id="rl-game-root"></div>
+            <div class="rl-demo-hud"><span>score <b id="rl-score">0000</b></span><span id="rl-phase">phase 1</span></div>
+          </div>
+          <div class="rl-demo-footer"><p id="rl-demo-note">This is a live run, not a recorded video.</p><button id="rl-restart" class="button button-secondary" type="button">restart model</button></div>
+        </div>
+        <aside class="rl-facts" aria-label="Model facts">
+          <p class="rl-label">model facts</p>
+          <dl>
+            <div><dt>policy</dt><dd>${orbitPolicyArtifact.name}</dd></div>
+            <div><dt>training</dt><dd>${orbitPolicyArtifact.training.algorithm}</dd></div>
+            <div><dt>input</dt><dd>player, dots, planets, energy</dd></div>
+            <div><dt>output</dt><dd>steer, switch, dash</dd></div>
+            <div><dt>inference</dt><dd>20 times / second</dd></div>
+          </dl>
+        </aside>
+      </section>
+
+      <article class="rl-paper" aria-label="Orbit reinforcement learning writeup">
+        <section class="rl-paper-section rl-paper-intro"><p class="rl-label">abstract</p><p>The goal is simple: collect dots that match the triangle, stay away from the red planets, and keep the run alive. The agent gets the game state as numbers, turns those numbers into a short steering command, and repeats the loop many times per second.</p></section>
+        <div class="rl-paper-grid">
+          <section class="rl-paper-section"><p class="rl-label">01 / the problem</p><h2>Find a good dot before the orbit catches up.</h2><p>Orbit is awkward for a bot because the best path changes while the bot is moving. A dot can be close but unsafe. A planet can be far away but moving into the same space. The policy has to value progress and room to escape at the same time.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">02 / what it sees</p><h2>A small view of the board.</h2><p>Each observation contains the triangle position, every dot's position and color, every planet's position, the current color, energy, lives, score, and elapsed time. It does not read pixels or click the page.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">03 / what it can do</p><h2>Continuous steering, two useful buttons.</h2><p>The policy outputs a direction between left/right and up/down. It can also switch color or spend energy on a dash. A light safety filter adds space around nearby planets so the movement stays fluid instead of snapping between waypoints.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">04 / training</p><h2>Reward the run, not the pose.</h2><p>Python runs short episodes in a dependency-free simulator. Matching dots earn reward, a longer streak helps, and collisions cost reward. A cross-entropy search keeps the better policies and samples the next group around them. The resulting coefficients are exported as a small JSON artifact for the browser.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">05 / browser handoff</p><h2>The demo uses the real game loop.</h2><p>Once loaded, the model is given the same authoritative state that drives the human game. Phaser still owns collisions, score, phases, lives, and rendering. The policy only chooses the next action, so the demo remains a real run rather than a precomputed animation.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">06 / limits</p><h2>Good at this board. Not magic.</h2><p>The training simulator is intentionally smaller than the full game, so this is a research demo, not a claim that the agent has solved every possible Orbit layout. The score above is measured live in this browser session. Refreshing the page starts a new run.</p></section>
+        </div>
+      </article>
+    </main>
+  `;
+
+  const { startPhasebound } = await import("../../games/phasebound/phasebound.js");
+  const scoreNode = document.querySelector("#rl-score");
+  const phaseNode = document.querySelector("#rl-phase");
+  const statusNode = document.querySelector("#rl-status");
+  const demoTitle = document.querySelector("#rl-demo-title");
+  const noteNode = document.querySelector("#rl-demo-note");
+  const restartButton = document.querySelector("#rl-restart");
+  let bestScore = 0;
+  let api;
+  api = startPhasebound({
+    parent: "rl-game-root",
+    preview: true,
+    autoplay: true,
+    onState: (state) => {
+      scoreNode.textContent = String(state.score).padStart(4, "0");
+      phaseNode.textContent = state.phaseTurning ? "turning" : `phase ${state.phaseNumber}`;
+      const isResult = state.mode === "result";
+      const isPaused = state.mode === "pause";
+      statusNode.textContent = isResult ? "run over" : isPaused ? "paused" : "running";
+      demoTitle.textContent = isResult ? "Run over." : isPaused ? "Model paused." : "The model is playing.";
+      if (state.score > bestScore) bestScore = state.score;
+      noteNode.textContent = state.mode === "result" ? `Run ended at ${state.score}. Start another live run whenever you want.` : `live score ${state.score} · best this visit ${bestScore}`;
+    },
+  });
+  restartButton.addEventListener("click", () => api.start());
+}
+
 async function renderGame() {
+  if (params.get("game") === ORBIT_RL_ROUTE) return renderRLWriteup();
   if (![ORBIT_ROUTE, LEGACY_ORBIT_ROUTE].includes(params.get("game"))) return renderGallery();
   document.body.className = "game-page game-phasebound";
   app.innerHTML = `
@@ -202,7 +281,7 @@ async function renderGame() {
     <main class="game-main page-width">
       <div class="game-heading">
         <h1>Orbit</h1>
-        <p class="game-blurb">Grab cyan. Avoid red.</p>
+        <p class="game-blurb">Match your color. Dodge the red planets.</p>
       </div>
       <section class="game-frame" aria-label="Orbit game">
         <div class="hud" aria-live="polite">
@@ -224,7 +303,7 @@ async function renderGame() {
             <button id="tutorial-start" class="button button-primary" type="button" disabled>move to continue</button>
           </div>
           <h2 id="overlay-title">Ready?</h2>
-          <p id="overlay-copy">Grab cyan. Avoid red.</p>
+          <p id="overlay-copy">Match your color. Dodge the red planets.</p>
           <button id="overlay-action" class="button button-primary" type="button">Start</button>
           <p id="overlay-detail" class="overlay-detail">move with WASD or arrows · tap the square or press Space</p>
           <div id="score-save" class="score-save" hidden>
@@ -240,6 +319,7 @@ async function renderGame() {
         </div>
       </section>
       <section class="route-leaderboard" id="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><h2 id="route-leaderboard-title">high scores</h2><p>Scores saved in this browser.</p></div><div id="phasebound-leaderboard"></div></section>
+      <a class="button button-secondary rl-link" href="${base}?game=${ORBIT_RL_ROUTE}">reinforcement learning writeup</a>
     </main>
   `;
 
@@ -454,7 +534,7 @@ async function renderGame() {
     tutorialActive = false;
     markTutorialSeen();
     hideTutorial();
-    beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, message: "Grab cyan.", next: () => api.start() });
+    beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, message: "Match your color.", next: () => api.start() });
   };
 
   api = startPhasebound({

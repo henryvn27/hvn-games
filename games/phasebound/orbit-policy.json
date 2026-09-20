@@ -1,0 +1,21 @@
+{
+  "name": "orbit-steer-v1",
+  "version": 1,
+  "weights": {
+    "match": 3.951863,
+    "near": 1.819196,
+    "risk": -2.666118,
+    "life": 0.104319,
+    "avoid": 3.024311
+  },
+  "training": {
+    "algorithm": "cross-entropy policy search",
+    "seed": 20260919,
+    "iterations": 18,
+    "population": 20,
+    "episodes_per_candidate": 4,
+    "best_surrogate_return": 33.8823,
+    "observation": "player, packet positions/colors, hazard positions, energy, lives, elapsed time",
+    "action": "continuous steering plus color toggle and dash"
+  }
+}

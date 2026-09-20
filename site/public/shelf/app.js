@@ -350,7 +350,7 @@ function word(){
   clean=()=>{runSession.dispose();clearTimeout(timer);removeEventListener('keydown',keydown);};save();render();
 }
 function checkers(){
-  let b=Array(64).fill(0),sel=null,turn='red',level='medium',note='Your turn',over=false,mustCapture=null,pending=null;
+  let b=Array(64).fill(0),sel=null,turn='red',level='medium',playMode='computer',note='Your turn',over=false,mustCapture=null,pending=null;
   for(let i=0;i<24;i++)if((i+Math.floor(i/8))%2)b[i]='black';
   for(let i=40;i<64;i++)if((i+Math.floor(i/8))%2)b[i]='red';
 
@@ -366,9 +366,9 @@ function checkers(){
   };
   let allMoves=color=>b.flatMap((p,i)=>p&&p[0]===color?moves(i):[]);
   let legalMovesFor=i=>{
-    if(over||turn!=='red')return[];
+    if(over||(playMode==='computer'&&turn!=='red'))return[];
     if(mustCapture!==null)return i===mustCapture?moves(i).filter(m=>m.cap):[];
-    let caps=allMoves('r').filter(m=>m.cap),opts=moves(i);
+    let caps=allMoves(turn==='red'?'r':'b').filter(m=>m.cap),opts=moves(i);
     return caps.length?opts.filter(m=>m.cap):opts;
   };
   let apply=m=>{
@@ -383,7 +383,10 @@ function checkers(){
   let render=()=>{
     let targets=(!over&&sel!==null)?legalMovesFor(sel).map(m=>m.to):[];
     shell('Checkers','Capture every opposing piece. Pick how tactical the computer should be.',`<div class="difficulty">${['easy','medium','hard'].map(x=>`<button class="choice ${x===level?'active':''}" data-lvl="${x}" ${turn==='black'&&!over?'disabled':''}>${x}</button>`).join('')}</div><div class="stats">${note}</div><div class="checkers">${b.map((p,i)=>`<button class="square ${(i+(i>>3))%2?'dark':''}${i===sel?' selected':''}${targets.includes(i)?' move':''}" data-i="${i}">${p?`<span class="piece ${p[0]==='r'?'red':''}${p.endsWith('K')?' king':''}"></span>`:''}</button>`).join('')}</div><div class="controls"><button onclick="checkers()">New game</button></div>`);
-    document.querySelectorAll('[data-lvl]').forEach(x=>x.onclick=()=>{if(turn==='black'&&!over)return;level=x.dataset.lvl;render()});
+    document.querySelector('.game-wrap>p').textContent=playMode==='computer'?'Capture every opposing piece. Pick how tactical the computer should be.':'Take turns on the same board. Red moves first.';
+    const modeRow=document.createElement('div');modeRow.className='difficulty';modeRow.innerHTML=`<button class="choice ${playMode==='computer'?'active':''}" data-checkers-mode="computer">computer</button><button class="choice ${playMode==='local'?'active':''}" data-checkers-mode="local">2 players</button>`;document.querySelector('.difficulty').before(modeRow);
+    document.querySelectorAll('[data-lvl]').forEach(x=>x.onclick=()=>{if(playMode==='computer'&&turn==='black'&&!over)return;level=x.dataset.lvl;render()});
+    document.querySelectorAll('[data-checkers-mode]').forEach(x=>x.onclick=()=>{playMode=x.dataset.checkersMode;b=Array(64).fill(0);for(let i=0;i<24;i++)if((i+Math.floor(i/8))%2)b[i]='black';for(let i=40;i<64;i++)if((i+Math.floor(i/8))%2)b[i]='red';sel=null;turn='red';over=false;mustCapture=null;note='Your turn';render()});
     document.querySelectorAll('.square').forEach(x=>x.onclick=()=>click(+x.dataset.i));
     clean=()=>clearTimeout(pending);
   };
@@ -397,13 +400,22 @@ function checkers(){
     if(allMoves('r').length===0){note='Bot wins! You have no moves left.';over=true;return render()}
     turn='red';note='Your turn';render();
   };
+  let finishHumanTurn=()=>{
+    if(playMode==='computer')return advanceToBot();
+    let next=turn==='red'?'black':'red';
+    if(allMoves(next==='red'?'r':'b').length===0){note=turn==='red'?'Red wins!':'Black wins!';over=true;return render()}
+    turn=next;note=turn==='red'?'Red’s turn':'Black’s turn';render();
+  };
   let botStep=forcedFrom=>{
     let opts;
     if(forcedFrom!=null)opts=moves(forcedFrom).filter(m=>m.cap);
     else{let caps=allMoves('b').filter(m=>m.cap);opts=caps.length?caps:allMoves('b')}
     if(!opts.length)return afterBot();
-    if(level==='hard'&&forcedFrom==null)opts=[...opts].sort((x,y)=>(y.cap?2:0)-(x.cap?2:0));
-    let pick=forcedFrom!=null?opts[Math.floor(Math.random()*opts.length)]:opts[Math.floor(Math.random()*Math.min(opts.length,level==='easy'?opts.length:3))];
+    if(level==='hard'&&forcedFrom==null){
+      const moveScore=m=>{const before=b;b=b.slice();apply(m);const score=(m.cap?20:0)+(b[m.to]?.endsWith('K')?8:0)-allMoves('r').filter(x=>x.cap).length*12;b=before;return score};
+      opts=[...opts].sort((x,y)=>moveScore(y)-moveScore(x));
+    }
+    let pick=forcedFrom!=null?opts[Math.floor(Math.random()*opts.length)]:opts[Math.floor(Math.random()*Math.min(opts.length,level==='easy'?opts.length:level==='medium'?3:1))];
     apply(pick);
     note=pick.cap?'Bot captured your piece!':'Bot moved.';
     render();
@@ -415,10 +427,10 @@ function checkers(){
   };
 
   let click=i=>{
-    if(over||turn!=='red')return;
+    if(over||(playMode==='computer'&&turn!=='red'))return;
     let p=b[i];
     if(mustCapture!==null){
-      if(i===mustCapture||(p&&p[0]==='r'))return;
+      if(i===mustCapture||(p&&p[0]===(turn==='red'?'r':'b')))return;
       let m=legalMovesFor(mustCapture).find(x=>x.to===i);
       if(!m)return;
       apply(m);
@@ -427,11 +439,11 @@ function checkers(){
         if(follow.length){sel=m.to;mustCapture=m.to;note='Capture again with the same piece.';return render()}
       }
       sel=null;mustCapture=null;
-      return advanceToBot();
+      return finishHumanTurn();
     }
-    if(p&&p[0]==='r'){
+    if(p&&p[0]===(turn==='red'?'r':'b')){
       if(legalMovesFor(i).length===0){
-        note=allMoves('r').some(m=>m.cap)?'A capture is available — choose a piece that can capture.':'That piece has no legal moves.';
+        note=allMoves(turn==='red'?'r':'b').some(m=>m.cap)?'A capture is available — choose a piece that can capture.':'That piece has no legal moves.';
         sel=null;return render();
       }
       sel=i;note='Choose a highlighted square to move to.';return render();
@@ -445,7 +457,7 @@ function checkers(){
       if(follow.length){sel=m.to;mustCapture=m.to;note='Capture again with the same piece.';return render()}
     }
     sel=null;
-    advanceToBot();
+    finishHumanTurn();
   };
 
   render();
@@ -476,10 +488,10 @@ function trade(){
   ];
   const HOUSE_LIMIT=4,START_CASH=1000,PASS_BONUS=150;
   const EVENTS=[{delta:120,text:'Tourism boom — extra visitors spend big.'},{delta:-60,text:'Unexpected repair bill.'},{delta:80,text:'City grant received.'},{delta:-40,text:'Parking fine issued.'},{delta:150,text:'Investor windfall!'},{delta:-90,text:'Storm damage cleanup.'}];
-  const AVATARS=['🧑','🤖','🐙','🦊'];
+  const AVATARS=['🧑','🧑‍🎨','🤖','🐙'];
   const cap=s=>s[0].toUpperCase()+s.slice(1);
 
-  let stage='setup',botCount=2,difficulty='normal';
+  let stage='setup',humanCount=1,botCount=2,difficulty='normal';
   let board=[],players=[],current=0,turnPhase='idle',log=[],pendingTimer=null,lastRoll=null;
 
   const rentOf=t=>t.rentBase*(t.houses+1);
@@ -492,10 +504,10 @@ function trade(){
 
   function startGame(){
     board=newBoard();
-    players=[{id:0,name:'You',human:true,cash:START_CASH,pos:0,avatar:AVATARS[0]}];
-    for(let i=0;i<botCount;i++)players.push({id:i+1,name:'Bot '+(i+1),human:false,cash:START_CASH,pos:0,avatar:AVATARS[i+1]});
+    players=Array.from({length:humanCount},(_,i)=>({id:i,name:humanCount===1?'You':`Player ${i+1}`,human:true,cash:START_CASH,pos:0,avatar:AVATARS[i]}));
+    for(let i=0;i<botCount;i++)players.push({id:humanCount+i,name:'Bot '+(i+1),human:false,cash:START_CASH,pos:0,avatar:AVATARS[humanCount+i]});
     current=0;turnPhase='idle';log=[];lastRoll=null;
-    addLog(`New game: You vs ${botCount} bot${botCount>1?'s':''} (${difficulty} difficulty).`);
+    addLog(`New game: ${humanCount} local player${humanCount>1?'s':''} and ${botCount} bot${botCount===1?'':'s'} (${difficulty} difficulty).`);
     stage='playing';
     render();
   }
@@ -588,6 +600,10 @@ function trade(){
         <p class="setup-note">You'll play as <b>You</b> against ${botCount} computer opponent${botCount>1?'s':''} set to <b>${difficulty}</b> difficulty.</p>
         <div class="controls"><button class="action" id="startTradeBtn">Start game</button></div>
       </div>`);
+    const peopleRow=document.createElement('div');peopleRow.className='setup-row';peopleRow.innerHTML=`<span class="setup-label">People at this computer</span><div class="difficulty"><button class="choice ${humanCount===1?'active':''}" data-people="1">1</button><button class="choice ${humanCount===2?'active':''}" data-people="2">2</button></div>`;document.querySelector('.setup-row').before(peopleRow);
+    const zero=document.createElement('button');zero.className=`choice ${botCount===0?'active':''}`;zero.dataset.bots='0';zero.textContent='0';zero.setAttribute('aria-label','No computer opponents');document.querySelector('[data-bots]').before(zero);
+    document.querySelector('.setup-note').innerHTML=`${humanCount} local player${humanCount>1?'s':''} and ${botCount} computer opponent${botCount===1?'':'s'} set to <b>${difficulty}</b> difficulty.`;
+    document.querySelectorAll('[data-people]').forEach(b=>b.onclick=()=>{humanCount=+b.dataset.people;botCount=Math.min(botCount,4-humanCount);renderSetup()});
     document.querySelectorAll('[data-bots]').forEach(b=>b.onclick=()=>{botCount=+b.dataset.bots;renderSetup()});
     document.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{difficulty=b.dataset.diff;renderSetup()});
     document.querySelector('#startTradeBtn').onclick=startGame;
@@ -599,7 +615,7 @@ function trade(){
     let canBuyHouse=p.human&&turnPhase==='moved'&&tile.type==='property'&&tile.owner===p.id&&tile.houses<HOUSE_LIMIT&&p.cash>=houseCost(tile);
     let canRoll=p.human&&turnPhase==='idle';
     let canEnd=p.human&&turnPhase==='moved';
-    shell('City Trader',`You vs ${players.length-1} bot${players.length>2?'s':''} · Difficulty: ${cap(difficulty)}`,`
+    shell('City Trader',`${humanCount} local player${humanCount>1?'s':''} · ${botCount} bot${botCount===1?'':'s'} · ${cap(difficulty)}`,`
       <div class="trade-shell">
         <div class="turn-banner" role="status">${p.human?'Your turn':`${p.name}'s turn (thinking…)`} — standing on <b>${tile.name}</b>${turnPhase==='moved'&&lastRoll?` (rolled a ${lastRoll})`:''}</div>
         <div class="trade-layout">
@@ -666,7 +682,6 @@ function trade(){
   render();
 }
 function clicker(){expeditionCamp();}
-function tic(){let b=Array(9).fill(''),note='Your turn',wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]],won=()=>wins.find(x=>x.every(i=>b[i]&&b[i]===b[x[0]]));let render=()=>{shell('Tic-Tac-Toe','You are X. Can you beat the computer?',`<div class="panel"><div class="stats">${note}</div><div class="memory" style="grid-template-columns:repeat(3,1fr);max-width:300px">${b.map((x,i)=>`<button data-t="${i}" style="height:92px">${x}</button>`).join('')}</div><div class="controls"><button onclick="tic()">New game</button></div></div>`);document.querySelectorAll('[data-t]').forEach(x=>x.onclick=()=>move(+x.dataset.t))};let move=i=>{if(b[i]||won())return;b[i]='X';if(won()){note='You win!';Shelf.record('tic_win',{});return render()}if(b.every(Boolean)){note='Draw.';return render()}let open=b.map((x,i)=>x?'':i).filter(x=>x!==''),pick=open.find(i=>{b[i]='O';let yes=!!won();b[i]='';return yes})??open[Math.floor(Math.random()*open.length)];b[pick]='O';note=won()?'Computer wins.':'Your turn';render()};render()}
 function flappy(){
   shell('Sky Flyer','A sunset, a little prop plane, and a sky full of close calls.',`
     <div class="panel arcade-panel flyer-panel"><div class="arcade-banner"><span>SKY PATROL / 1986</span><span>02 / FLYER</span></div>
@@ -769,6 +784,19 @@ function flappy(){
   $('#start-game').onclick=()=>{$('#start-game').blur();run();};$('#restart-game').onclick=()=>{reset(true);$('#restart-game').blur();};$('#pause-game').onclick=()=>{pause();$('#pause-game').blur();};
   runSession.mount(()=>crash());
   clean=()=>{runSession.dispose();cancelAnimationFrame(raf);removeEventListener('keydown',keydown);removeEventListener('keyup',keyup);removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);};reset();raf=requestAnimationFrame(loop);
+}
+function tic(){
+  const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  let board=Array(9).fill(''),mode='computer',turn='X',note='Your turn',pending=null;
+  const result=()=>{const line=lines.find(([a,b,c])=>board[a]&&board[a]===board[b]&&board[a]===board[c]);return line?board[line[0]]:board.every(Boolean)?'draw':null;};
+  const value=()=>{const r=result();return r==='O'?10:r==='X'?-10:r==='draw'?0:null;};
+  const search=(max,depth=0)=>{const v=value();if(v!==null)return v+(v>0?-depth:v<0?depth:0);const open=board.map((m,i)=>m?null:i).filter(i=>i!==null);const scores=open.map(i=>{board[i]=max?'O':'X';const s=search(!max,depth+1);board[i]='';return s;});return max?Math.max(...scores):Math.min(...scores);};
+  const botMove=()=>{const open=board.map((m,i)=>m?null:i).filter(i=>i!==null);let best=-Infinity,choice=open[0];open.forEach(i=>{board[i]='O';const s=search(false);board[i]='';if(s>best){best=s;choice=i;}});return choice;};
+  const finish=r=>{if(r==='X'){note=mode==='computer'?'You win!':'Player 1 wins!';Shelf.record('tic_win',{});}else if(r==='O')note=mode==='computer'?'The computer wins.':'Player 2 wins!';else note='Draw.';};
+  const move=i=>{if(board[i]||result()||(mode==='computer'&&turn==='O'))return;board[i]=turn;const r=result();if(r){finish(r);return render();}if(mode==='computer'){turn='O';note='Computer thinking';render();pending=setTimeout(computerTurn,260);return;}turn=turn==='X'?'O':'X';note='Next player';render();};
+  const computerTurn=()=>{const i=botMove();if(i!==undefined)board[i]='O';turn='X';const r=result();if(r)finish(r);else note='Your turn';render();};
+  const render=()=>{shell('Tic-Tac-Toe','The computer plays perfect moves. Or pass the same board to a second person.',`<div class="panel"><div class="difficulty"><button class="choice ${mode==='computer'?'active':''}" data-tic-mode="computer">computer</button><button class="choice ${mode==='local'?'active':''}" data-tic-mode="local">2 players</button></div><div class="stats" role="status">${note}</div><div class="memory tic-board" style="grid-template-columns:repeat(3,1fr);max-width:300px">${board.map((mark,i)=>`<button data-t="${i}" aria-label="Square ${i+1}" style="height:92px" ${mark||result()||(mode==='computer'&&turn==='O')?'disabled':''}>${mark}</button>`).join('')}</div><div class="controls"><button onclick="tic()">New game</button></div></div>`);document.querySelectorAll('[data-tic-mode]').forEach(button=>button.onclick=()=>{mode=button.dataset.ticMode;board=Array(9).fill('');turn='X';note='Your turn';render();});document.querySelectorAll('[data-t]').forEach(button=>button.onclick=()=>move(+button.dataset.t));clean=()=>clearTimeout(pending);};
+  render();
 }
 function platform(){trailPlatformer();}
 

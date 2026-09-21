@@ -48,7 +48,7 @@ for (const marker of ["prefers-color-scheme", "prefers-reduced-motion"]) {
 }
 
 const ads = readFileSync(join(root, "site/src/ads.js"), "utf8");
-for (const marker of ["ca-pub-1123012671033143", "pauseAdRequests", "requestNonPersonalizedAds", "ads-consent", "data-ads-settings"]) {
+for (const marker of ["pauseAdRequests", "requestNonPersonalizedAds", "ads-consent", "data-ads-settings", "localStorage.getItem", "window.location.reload"]) {
   if (!ads.includes(marker)) throw new Error(`Ads integration is missing marker: ${marker}`);
 }
 

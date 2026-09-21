@@ -1,4 +1,3 @@
-const PUBLISHER_ID = "ca-pub-1123012671033143";
 const CONSENT_KEY = "hvn-games:ads-consent:v1";
 
 function readConsent() {
@@ -19,9 +18,7 @@ function writeConsent(value) {
 
 function startAds() {
   window.adsbygoogle = window.adsbygoogle || [];
-  // Keep the first integration conservative until a certified CMP is configured.
   window.adsbygoogle.requestNonPersonalizedAds = 1;
-  window.adsbygoogle.push({ google_ad_client: PUBLISHER_ID, enable_page_level_ads: true });
   window.adsbygoogle.pauseAdRequests = 0;
 }
 
@@ -34,8 +31,7 @@ function addSettingsLink() {
   link.textContent = "ad settings";
   link.addEventListener("click", () => {
     try { window.localStorage.removeItem(CONSENT_KEY); } catch { /* keep the banner usable */ }
-    document.querySelector(".ads-consent")?.remove();
-    mountAdsConsent();
+    window.location.reload();
   });
   document.body.append(link);
 }
@@ -68,9 +64,7 @@ export function mountAdsConsent() {
   `;
   banner.querySelector("[data-ads-allow]").addEventListener("click", () => {
     writeConsent("allow");
-    banner.remove();
-    startAds();
-    addSettingsLink();
+    window.location.reload();
   });
   banner.querySelector("[data-ads-decline]").addEventListener("click", () => {
     writeConsent("decline");

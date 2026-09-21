@@ -1,11 +1,11 @@
 const app=document.querySelector('#app');let clean=()=>{},carIndex=0,carTimer=null;
-const games=[['golf','⛳','Mini Golf','Six holes. Find your perfect line.'],['snake','🐍','Snake','Four ways to eat, grow, and go.'],['dodger','🚀','Space Dodger','Defend Mars. Survive the fleet.'],['memory','🃏','Memory Match','Find every pair.'],['reaction','⚡','Reaction Test','How quick are you?'],['word','🔤','Word Vault','Six attempts. Crack the code.'],['clicker','🪙','Clicker Adventure','Build a camp. Explore three worlds.'],['flappy','🐦','Sky Flyer','A pixel-plane sunset run.'],['platform','🕹️','Mini Platformer','Twelve levels. Three worlds. Every star.'],['tic','❌','Tic-Tac-Toe','Take on the computer.'],['checkers','♟','Checkers','Three bot difficulties.'],['trade','🏘️','City Trader','Buy streets, beat the bots.']];
+const games=[['golf','⛳','Mini Golf','Six holes. Find your perfect line.'],['snake','🐍','Snake','Four ways to eat, grow, and go.'],['dodger','🚀','Space Dodger','Defend Mars. Survive the fleet.'],['memory','🧰','Field Kit','Inventory a field kit by pairing every piece.'],['reaction','🚦','Signal Watch','Keep watch at the crossing.'],['word','🔤','Word Vault','Six attempts. Crack the code.'],['clicker','🧭','Field Station','Build a station. Send out surveys.'],['flappy','🐦','Sky Flyer','A pixel-plane sunset run.'],['platform','🏙️','Rooftop Run','Twelve routes. Three districts. Every star.'],['tic','❌','Tic-Tac-Toe','Take on the computer.'],['checkers','♟','Checkers','Three bot difficulties.'],['trade','🏘️','City Trader','Buy streets, beat the bots.']];
 function cards(filter='all'){return games.filter(g=>filter==='all'||(filter==='board'?['checkers','trade'].includes(g[0]):!['checkers','trade'].includes(g[0]))).map(g=>`<article class="card"><div class="art">${g[1]}</div><h3>${g[2]}</h3><p>${g[3]}</p><button onclick="play('${g[0]}')">Play now →</button></article>`).join('')}
 function carousel(){return `<section class="carousel" aria-roledescription="carousel" aria-label="Browse all games"><div class="section-title"><div><span class="eyebrow">Spin the shelf</span><h2>Browse them all</h2></div><div class="car-controls"><button class="car-btn" id="carPrev" aria-label="Previous game">←</button><button class="car-btn" id="carNext" aria-label="Next game">→</button></div></div><div class="car-viewport"><div class="car-track" id="carTrack">${games.map(g=>`<article class="card car-slide"><div class="art">${g[1]}</div><h3>${g[2]}</h3><p>${g[3]}</p><button onclick="play('${g[0]}')">Play now →</button></article>`).join('')}</div></div><div class="car-dots" id="carDots">${games.map((_,i)=>`<button data-i="${i}" class="${i===0?'active':''}" aria-label="Go to slide ${i+1}"></button>`).join('')}</div></section>`}
 function initCarousel(){let track=document.querySelector('#carTrack'),dots=[...document.querySelectorAll('#carDots button')],box=document.querySelector('.carousel'),gap=parseFloat(getComputedStyle(track).columnGap)||15;carIndex=0;let step=()=>track.children[0].getBoundingClientRect().width+gap;let go=i=>{carIndex=(i+games.length)%games.length;track.style.transform=`translateX(-${carIndex*step()}px)`;dots.forEach((d,j)=>d.classList.toggle('active',j===carIndex))};let next=()=>go(carIndex+1);let start=()=>carTimer=setInterval(next,3500);let restart=()=>{clearInterval(carTimer);start()};document.querySelector('#carNext').onclick=()=>{next();restart()};document.querySelector('#carPrev').onclick=()=>{go(carIndex-1);restart()};dots.forEach(d=>d.onclick=()=>{go(+d.dataset.i);restart()});box.onmouseenter=()=>clearInterval(carTimer);box.onmouseleave=start;box.ontouchstart=()=>clearInterval(carTimer);box.ontouchend=start;let onResize=()=>go(carIndex);addEventListener('resize',onResize);start();clean=()=>{clearInterval(carTimer);removeEventListener('resize',onResize)}}
 function home(){clean();app.innerHTML=`<section class="hero"><div><span class="eyebrow">A little collection of browser games</span><h1>Pick a game.<br><em>Make a moment.</em></h1><p>Twelve games for a quick break. Chase high scores, collect trophies, and make the shelf your own.</p></div><aside class="feature"><span class="kicker">New on the shelf</span><b>Mini Golf ⛳</b><p>Six little greens. Banks, bunkers, and a perfect putt waiting to happen.</p><button onclick="play('golf')">Play Mini Golf →</button></aside></section>${DailyChallenges.homeSummary()}${Shelf.summary()}${carousel()}<div class="section-title"><div><span class="eyebrow">The full shelf</span><h2>Choose your challenge</h2></div></div><section class="grid">${cards()}</section>`;initCarousel()}
 function list(view){clean();clean=()=>{};let t=view==='board'?'Board games':'Arcade games';app.innerHTML=`<div class="game-head"><button class="back" onclick="home()">←</button><h1>${t}</h1></div><section class="grid">${cards(view)}</section>`}
-function shell(title,sub,body){clean();clean=()=>{};app.innerHTML=`<div class="game-head"><div><span class="eyebrow">HVN side room</span><h1>${title}</h1></div></div><div class="game-wrap"><p>${sub}</p>${body}</div>`}
+function shell(title,sub,body){clean();clean=()=>{};app.innerHTML=`<div class="game-head"><div><span class="eyebrow">HVN games</span><h1>${title}</h1></div></div><div class="game-wrap"><p>${sub}</p>${body}</div>`}
 window.play=id=>{const game={golf,snake,dodger,memory,reaction,word,clicker,flappy,platform,tic,checkers,trade}[id];if(typeof game!=='function')return;game();Shelf.record('game_play',{id});};window.home=home;document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>b.dataset.view==='home'?home():b.dataset.view==='rewards'?Shelf.render():b.dataset.view==='daily'?DailyChallenges.render():b.dataset.view==='cup'?ArcadeCup.render():list(b.dataset.view));
 // Scores are optional: games still work when browser storage is unavailable.
 function arcadeBest(key, score=0){
@@ -222,10 +222,10 @@ function dodger(){
 }
 function memory(){
   const runSession=GameRuns.session('memory');
-  const icons=['🌙','🌙','🍒','🍒','🪐','🪐','🎲','🎲','🌵','🌵','🎯','🎯','🦋','🦋','🎸','🎸'];
+  const icons=['🔭','🔭','🧭','🧭','🗺️','🗺️','🪨','🪨','🦴','🦴','🌿','🌿','🧪','🧪','📓','📓'];
   for(let i=icons.length-1;i>0;i--){const j=Math.floor(runSession.random()*(i+1));[icons[i],icons[j]]=[icons[j],icons[i]];}
   let open=[],moves=0,pairs=0,pending=null,over=false,paused=false;
-  shell('Memory Match','Find the eight pairs in as few moves as you can.',`<div class="panel"><div class="stats">MOVES <b id="score">0</b></div><div class="memory-stage"><div class="memory">${icons.map((_,i)=>`<button data-i="${i}" aria-label="Hidden card ${i+1}">?</button>`).join('')}</div><div class="memory-cover" hidden><h2>Take a breather.</h2><button class="action" id="memory-resume">Resume game</button></div></div><p id="memory-note" role="status">Find your first pair.</p><div class="controls">${runSession.cup?'<button id="memory-pause">Pause</button>':''}<button data-cup-restart onclick="memory()">New game</button></div></div>`);
+  shell('Field Kit','Inventory the station kit by finding each matching piece in as few moves as you can.',`<div class="panel field-kit-panel"><div class="stats"><span>ITEMS LOGGED <b id="score">0</b></span><span>FIELD KIT · 08 PAIRS</span></div><div class="memory-stage"><div class="memory">${icons.map((_,i)=>`<button data-i="${i}" aria-label="Covered field kit item ${i+1}">?</button>`).join('')}</div><div class="memory-cover" hidden><h2>Inventory paused.</h2><button class="action" id="memory-resume">Resume inventory</button></div></div><p id="memory-note" role="status">Open two covers to start the inventory.</p><div class="controls">${runSession.cup?'<button id="memory-pause">Pause</button>':''}<button data-cup-restart onclick="memory()">New inventory</button></div></div>`);
   const buttons=[...document.querySelectorAll('.memory button')],note=document.querySelector('#memory-note');
   buttons.forEach((b,i)=>b.onclick=()=>{
     if(paused||over||b.classList.contains('open')||b.classList.contains('done')||open.length===2)return;
@@ -235,11 +235,11 @@ function memory(){
     const [a,z]=open;
     if(icons[a]===icons[z]){
       [a,z].forEach(q=>{buttons[q].classList.replace('open','done');buttons[q].disabled=true;});open=[];pairs++;
-      note.textContent=pairs===8?`You won in ${moves} moves!`:`${pairs} of 8 pairs found.`;
+      note.textContent=pairs===8?`Kit inventoried in ${moves} moves.`:`${pairs} of 8 items logged.`;
       runSession.progress({pairs,moves});
       if(pairs===8){over=true;Shelf.record('memory_win',{moves});runSession.finish({pairs,moves,complete:true});if(runSession.cup)document.querySelector('#memory-pause').disabled=true;}
     }else{
-      note.textContent='Not a match. Try to remember those cards.';
+      note.textContent='Not a match. Check the shelf and try again.';
       pending=setTimeout(()=>{[a,z].forEach(q=>{buttons[q].textContent='?';buttons[q].classList.remove('open');buttons[q].setAttribute('aria-label',`Hidden card ${q+1}`);});open=[];},650);
     }
   });
@@ -253,7 +253,7 @@ function memory(){
 
 function reaction(){
   let state='ready',start=0,pending=null;
-  shell('Reaction Test','Wait for green, then tap as fast as you can.',`<div class="panel"><button class="reaction" id="react">Click to start</button><div class="controls"><button onclick="reaction()">Reset</button></div></div>`);
+  shell('Signal Watch','Keep watch at the crossing. Tap the instant the signal turns green.',`<div class="panel signal-panel"><div class="signal-board"><span class="signal-lamp" aria-hidden="true"></span><span><b>WEST CROSSING</b><small>WAIT FOR THE CLEAR</small></span></div><button class="reaction" id="react">Arm the signal</button><div class="controls"><button onclick="reaction()">Reset watch</button></div></div>`);
   const e=document.querySelector('#react'),runSession=GameRuns.session('reaction');
   const panel=e.closest('.panel');
   panel.insertAdjacentHTML('beforeend',`<section class="reaction-leaderboard" aria-labelledby="reaction-leaderboard-title"><div class="reaction-leaderboard-heading"><h2 id="reaction-leaderboard-title">best times</h2><span>fastest wins</span></div><ol id="reaction-leaderboard-list"></ol><form id="reaction-name-form" hidden><label for="reaction-name">name or initials</label><div><input id="reaction-name" maxlength="16" autocomplete="nickname" placeholder="ABC or your name"><button type="submit">save time</button></div><p id="reaction-name-status" role="status"></p></form></section>`);
@@ -285,12 +285,14 @@ function reaction(){
   });
   e.onclick=()=>{
     if(state==='ready'){
-      runSession.reset();runSession.start('signal');state='wait';e.textContent='Wait for green…';e.style.background='#ff5d8f';
-      pending=setTimeout(()=>{state='go';start=performance.now();e.textContent='CLICK!';e.style.background='#67e2b1';},1800+Math.random()*2500);
+      runSession.reset();runSession.start('signal');state='wait';e.textContent='Signal is red — wait';e.style.background='#f0c4b6';panel.classList.remove('signal-clear');
+      pending=setTimeout(()=>{state='go';start=performance.now();e.textContent='CLEAR — TAP NOW';e.style.background='#9de1a8';panel.classList.add('signal-clear');},1800+Math.random()*2500);
     }else if(state==='wait'){
-      clearTimeout(pending);state='ready';e.textContent='Too early — try again.';e.style.background='#e5e8ed';
+      clearTimeout(pending);state='ready';e.textContent='Too early — reset the watch';e.style.background='#e5e8ed';panel.classList.remove('signal-clear');
     }else if(state==='go'){
+      e.textContent=`${Math.round(performance.now()-start)} ms — arm it again`;
       const ms=Math.round(performance.now()-start);state='ready';e.textContent=`${ms} ms — click to go again`;e.style.background='#e5e8ed';
+      e.textContent=`${ms} ms — arm it again`;
       if(ms>0){Shelf.record('reaction_result',{ms});runSession.finish({ms});saveScore(ms);}
     }
   };

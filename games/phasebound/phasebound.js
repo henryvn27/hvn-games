@@ -21,6 +21,11 @@ const PHASE_TURN_SLOWDOWN_DURATION = 0.95;
 const PHASE_TURN_DURATION = 2.4;
 const HIT_FREEZE_DURATION = 0.5;
 const HIT_FLASH_DURATION = 420;
+const PHASE_SPEED_STEP = 0.14;
+const MAX_PHASE_SPEED_BONUS = 1.35;
+const PACKET_SPEED_STEP = 0.05;
+const TIME_SPEED_STEP = 0.008;
+const MAX_RUN_SPEED_BONUS = 2.25;
 const SLOW_MODE_TIME_SCALE = 0.45;
 const SLOW_MODE_DEFAULT_SCORE_RATE = 500;
 const SLOW_MODE_RATE_SAMPLE_DURATION = 1;
@@ -485,7 +490,7 @@ export function startPhasebound(options = {}) {
     },
 
     updateHazards(time, dt) {
-      const phaseSpeed = 1 + Math.min(2.4, (this.phaseNumber - 1) * 0.22);
+      const phaseSpeed = 1 + Math.min(MAX_PHASE_SPEED_BONUS, (this.phaseNumber - 1) * PHASE_SPEED_STEP);
       let transitionSpeed = 1;
       if (this.phaseTransition) {
         if (this.phaseTransition.elapsed < PHASE_TURN_SLOWDOWN_DURATION) {
@@ -494,11 +499,12 @@ export function startPhasebound(options = {}) {
           transitionSpeed = Math.min(1, (this.phaseTransition.elapsed - PHASE_TURN_SLOWDOWN_DURATION) / (PHASE_TURN_DURATION - PHASE_TURN_SLOWDOWN_DURATION));
         }
       }
+      const runSpeed = 1 + Math.min(MAX_RUN_SPEED_BONUS, this.packetsCollected * PACKET_SPEED_STEP + this.elapsed * TIME_SPEED_STEP);
       for (const hazard of this.hazards) {
         const focus = ORBIT_FOCI[hazard.focusIndex];
         hazard.centerX = Phaser.Math.Linear(hazard.centerX, focus.x, Math.min(1, dt * 2.2));
         hazard.centerY = Phaser.Math.Linear(hazard.centerY, focus.y, Math.min(1, dt * 2.2));
-        const speed = hazard.speed * phaseSpeed * transitionSpeed * (1 + Math.min(4.2, this.packetsCollected * 0.11 + this.elapsed * 0.018));
+        const speed = hazard.speed * phaseSpeed * transitionSpeed * runSpeed;
         hazard.angle += speed * hazard.direction * dt;
         const wobble = Math.sin(time * 0.0012 + hazard.wobble) * 22 * focus.scale;
         hazard.x = hazard.centerX + Math.cos(hazard.angle) * (hazard.radius * focus.scale + wobble);

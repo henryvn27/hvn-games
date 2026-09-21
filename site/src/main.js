@@ -14,7 +14,13 @@ const SHELF_ROUTE = "shelf";
 const TOWER_DEFENSE_ROUTE = "neon-bastion";
 const COMET_ROUTE = "comet";
 const SPACE_WARS_ROUTE = "space-wars";
-const LEADERBOARD_GAME = "phasebound";
+const DEFAULT_LEADERBOARD_GAME = "phasebound";
+const LEADERBOARD_GAMES = [
+  { id: "phasebound", label: "Orbit" },
+  { id: "comet", label: "Comet" },
+  { id: "spacewars", label: "Space Wars" },
+  { id: "neon-bastion", label: "Neon Bastion" },
+];
 
 if (params.get("game")) {
   renderGame().finally(mountAdsConsent);
@@ -56,10 +62,11 @@ function renderGallery() {
 
       <section class="leaderboard-section page-width" id="leaderboard" aria-labelledby="leaderboard-title">
         <div class="leaderboard-heading">
-          <h2 id="leaderboard-title">high scores</h2>
-          <p id="leaderboard-connection">Scores saved in this browser.</p>
+          <h2 id="leaderboard-title">high scores · Orbit</h2>
+          <p id="leaderboard-connection">Scores saved in this browser. Each game has its own board.</p>
         </div>
         <div class="leaderboard-panel">
+          <label class="leaderboard-game-picker" for="leaderboard-game">game<select id="leaderboard-game" aria-label="Choose a game leaderboard">${LEADERBOARD_GAMES.map((game) => `<option value="${game.id}">${game.label}</option>`).join("")}</select></label>
           <form id="leaderboard-name-form" class="name-form">
             <label for="leaderboard-name">name or initials</label>
             <div><input id="leaderboard-name" name="name" maxlength="16" autocomplete="nickname" placeholder="ABC or your name"><button class="button button-secondary" type="submit">Save</button></div>
@@ -230,12 +237,14 @@ function setupPlayInsights() {
   });
 }
 
-function renderLeaderboard(node, entries = getLeaderboard(LEADERBOARD_GAME)) {
+function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME) {
+  const game = LEADERBOARD_GAMES.find((item) => item.id === gameId);
+  const entries = getLeaderboard(gameId);
   node.replaceChildren();
   if (!entries.length) {
     const empty = document.createElement("p");
     empty.className = "leaderboard-empty";
-    empty.textContent = "No scores yet. Play Orbit and put one here.";
+    empty.textContent = `No ${game?.label || "game"} scores yet.`;
     node.append(empty);
     return;
   }
@@ -260,9 +269,18 @@ function setupLeaderboard() {
   const form = document.querySelector("#leaderboard-name-form");
   const input = document.querySelector("#leaderboard-name");
   const node = document.querySelector("#leaderboard-list");
-  if (!form || !input || !node) return;
+  const picker = document.querySelector("#leaderboard-game");
+  const title = document.querySelector("#leaderboard-title");
+  if (!form || !input || !node || !picker) return;
   input.value = getPlayerName();
-  renderLeaderboard(node);
+  const update = () => {
+    const game = LEADERBOARD_GAMES.find((item) => item.id === picker.value) || LEADERBOARD_GAMES[0];
+    title.textContent = `high scores · ${game.label}`;
+    renderLeaderboard(node, game.id);
+  };
+  picker.value = DEFAULT_LEADERBOARD_GAME;
+  update();
+  picker.addEventListener("change", update);
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     input.value = setPlayerName(input.value);

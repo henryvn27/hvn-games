@@ -21,6 +21,8 @@ const PHASE_TURN_SLOWDOWN_DURATION = 0.95;
 const PHASE_TURN_DURATION = 2.4;
 const HIT_FREEZE_DURATION = 0.5;
 const HIT_FLASH_DURATION = 420;
+const WRONG_COLOR_FREEZE_DURATION = 0.18;
+const WRONG_COLOR_FLASH_DURATION = 160;
 const HAZARD_PLAYER_CLEARANCE = 64;
 const HAZARD_HAZARD_CLEARANCE = 58;
 const HAZARD_SPAWN_GRACE = 0.9;
@@ -549,7 +551,8 @@ export function startPhasebound(options = {}) {
         } else {
           this.streak = 0;
           this.energy -= 18;
-          this.cameras.main.flash(110, 255, 255, 255, false);
+          this.hitFreeze = Math.max(this.hitFreeze, WRONG_COLOR_FREEZE_DURATION);
+          this.cameras.main.flash(WRONG_COLOR_FLASH_DURATION, 255, 255, 255, false);
           this.burst(packet.x, packet.y, COLORS.danger, 10);
         }
         this.removePacket(packet);

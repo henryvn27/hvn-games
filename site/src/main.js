@@ -1,5 +1,5 @@
 import "./styles.css";
-import { mountAdPreview, mountAdsConsent } from "./ads.js";
+import { mountAdPreview, mountAdsConsent, mountGoogleAdSlots } from "./ads.js";
 import { createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlayerName } from "./play-intelligence.js";
 import orbitPolicyArtifact from "../../games/phasebound/orbit-policy.json";
 import { renderGameShelf, SHELF_GAMES } from "./shelf.js";
@@ -25,11 +25,13 @@ const LEADERBOARD_GAMES = [
 if (params.get("game")) {
   renderGame().finally(() => {
     mountAdsConsent();
+    mountGoogleAdSlots();
     mountAdPreview();
   });
 } else {
   renderGallery();
   mountAdsConsent();
+  mountGoogleAdSlots();
   mountAdPreview();
 }
 
@@ -51,18 +53,20 @@ function renderGallery() {
       </nav>
     </header>
     <main>
-      <section class="phasebound-home page-width" aria-labelledby="hero-title">
+      <section class="phasebound-home page-width" aria-labelledby="hero-title" data-ad-anchor="after-hero">
         <div class="phasebound-home-copy">
           <h1 id="hero-title">Orbit</h1>
           <p class="phasebound-rule">Match your color. Dodge the red planets.</p>
           <div class="hero-actions"><a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play Orbit</a><a class="button button-secondary" href="${base}?game=${COMET_ROUTE}">play Comet</a></div>
         </div>
       </section>
+      <div class="google-ad-slot page-width" data-google-ad-slot="5915584309" aria-label="Advertisement"></div>
 
       <section class="gallery-shelf page-width" id="all-games" aria-labelledby="all-games-title">
         <div class="gallery-shelf-heading"><div><p class="shelf-kicker">the collection</p><h2 id="all-games-title">All games.</h2></div><p>Pick a card. Every game opens right here.</p></div>
         <div class="shelf-grid" aria-label="All HVN games">${additionalGames.map((game) => galleryGameCard(game)).join("")}</div>
       </section>
+      <div class="google-ad-slot page-width" data-google-ad-slot="5915584309" aria-label="Advertisement"></div>
 
       <section class="leaderboard-section page-width" id="leaderboard" aria-labelledby="leaderboard-title">
         <div class="leaderboard-heading">
@@ -519,7 +523,7 @@ async function renderGame() {
         <h1>Orbit</h1>
         <p class="game-blurb">Match your color. Dodge the red planets.</p>
       </div>
-      <section class="game-frame" aria-label="Orbit game">
+      <section class="game-frame" aria-label="Orbit game" data-ad-anchor="after-game">
         <div class="hud" aria-live="polite">
           <div class="hud-group hud-score"><strong id="hud-score">0000</strong><span id="hud-phase" class="hud-phase">phase 1 · steady</span><span id="hud-lives" class="hud-lives" hidden></span></div>
           <div class="phase-control"><button id="phase-switch" class="phase-button" type="button" data-phase="cyan" aria-label="Switch color. Current color: cyan"><span aria-hidden="true"></span></button><span id="hud-streak" class="hud-streak">streak 0</span></div>
@@ -557,6 +561,7 @@ async function renderGame() {
           </div>
         </div>
       </section>
+      <div class="google-ad-slot" data-google-ad-slot="5915584309" aria-label="Advertisement"></div>
       <section class="route-leaderboard" id="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><h2 id="route-leaderboard-title">high scores</h2><p>Scores saved in this browser.</p></div><div id="phasebound-leaderboard"></div></section>
       <a class="button button-secondary rl-link" href="${base}?game=${ORBIT_RL_ROUTE}">reinforcement learning writeup</a>
     </main>

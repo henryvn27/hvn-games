@@ -1,5 +1,7 @@
 const CONSENT_KEY = "hvn-games:ads-consent:v1";
 const GOOGLE_AD_FALLBACK_DELAY = 8000;
+const GOOGLE_AD_CLIENT = "ca-pub-1123012671033143";
+const GOOGLE_AD_SLOT = "5915584309";
 
 function hasFilledGoogleAd() {
   const filledSlot = document.querySelector('ins.adsbygoogle[data-ad-status="filled"], [data-ad-status="filled"]');
@@ -46,7 +48,15 @@ export function mountAdPreview() {
       <span class="ad-preview-caption"><span class="ad-preview-label">house ad</span><strong>Scoutly</strong><span>From lookup to decision.</span></span>
     </a>
   `;
-  document.body.append(preview);
+  const anchor = document.querySelector("[data-ad-anchor]");
+  const main = document.querySelector("main");
+  if (anchor) {
+    anchor.insertAdjacentElement("afterend", preview);
+  } else if (main) {
+    main.append(preview);
+  } else {
+    document.body.append(preview);
+  }
 
   const settle = () => {
     if (hasFilledGoogleAd()) {
@@ -63,6 +73,39 @@ export function mountAdPreview() {
     window.clearTimeout(timeout);
   };
   settle();
+}
+
+export function mountGoogleAdSlots() {
+  if (readConsent() !== "allow") return;
+  const anchors = [...document.querySelectorAll("[data-google-ad-slot]")];
+  if (!anchors.length) {
+    const main = document.querySelector("main");
+    if (main) {
+      const anchor = document.createElement("div");
+      anchor.className = "google-ad-slot";
+      anchor.dataset.googleAdSlot = GOOGLE_AD_SLOT;
+      main.append(anchor);
+      anchors.push(anchor);
+    }
+  }
+
+  window.adsbygoogle = window.adsbygoogle || [];
+  for (const anchor of anchors) {
+    if (anchor.querySelector("ins.adsbygoogle")) continue;
+    const ins = document.createElement("ins");
+    ins.className = "adsbygoogle";
+    ins.style.display = "block";
+    ins.dataset.adClient = GOOGLE_AD_CLIENT;
+    ins.dataset.adSlot = anchor.dataset.googleAdSlot || GOOGLE_AD_SLOT;
+    ins.dataset.adFormat = "auto";
+    ins.dataset.fullWidthResponsive = "true";
+    anchor.append(ins);
+    try {
+      window.adsbygoogle.push({});
+    } catch {
+      // The async AdSense script will process the queued request when available.
+    }
+  }
 }
 
 function readConsent() {

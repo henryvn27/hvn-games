@@ -945,6 +945,12 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 }
 
 /* Ads stay outside the playfield and do not use fake ad cards or reserved artwork. */
+.google-ad-slot {
+  min-height: 90px;
+  margin-block: 28px;
+  overflow: hidden;
+}
+.google-ad-slot:has(ins[data-ad-status="unfilled"]) { min-height: 0; height: 0; margin-block: 0; }
 .ads-consent {
   position: fixed;
   z-index: 20;

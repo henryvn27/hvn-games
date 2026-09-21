@@ -24,13 +24,13 @@ const LEADERBOARD_GAMES = [
 
 if (params.get("game")) {
   renderGame().finally(() => {
-    mountAdPreview();
     mountAdsConsent();
+    mountAdPreview();
   });
 } else {
   renderGallery();
-  mountAdPreview();
   mountAdsConsent();
+  mountAdPreview();
 }
 
 function renderGallery() {

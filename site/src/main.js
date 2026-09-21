@@ -13,12 +13,12 @@ const ORBIT_RL_ROUTE = "orbit-rl";
 const SHELF_ROUTE = "shelf";
 const TOWER_DEFENSE_ROUTE = "neon-bastion";
 const COMET_ROUTE = "comet";
+// Archived: keep the implementation and direct route available without listing it in the gallery.
 const SPACE_WARS_ROUTE = "space-wars";
 const DEFAULT_LEADERBOARD_GAME = "phasebound";
 const LEADERBOARD_GAMES = [
   { id: "phasebound", label: "Orbit" },
   { id: "comet", label: "Comet" },
-  { id: "spacewars", label: "Space Wars" },
   { id: "neon-bastion", label: "Neon Bastion" },
 ];
 
@@ -37,9 +37,8 @@ function renderGallery() {
   document.body.className = "gallery-page";
   recordGalleryView();
   const additionalGames = [
-    { number: "02", name: "Space Wars", kind: "arcade", description: "Pilot a small ship, clear the sky, and hold your shields.", href: `${base}?game=${SPACE_WARS_ROUTE}`, action: "play" },
-    { number: "03", name: "Comet", kind: "arcade", description: "Eat beacons, dodge rocks, and keep the tail together.", href: `${base}?game=${COMET_ROUTE}`, action: "play" },
-    { number: "04", name: "Neon Bastion", kind: "strategy", description: "Place towers, hold the line, and send the next wave.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
+    { number: "02", name: "Comet", kind: "arcade", description: "Eat beacons, dodge rocks, and keep the tail together.", href: `${base}?game=${COMET_ROUTE}`, action: "play" },
+    { number: "03", name: "Neon Bastion", kind: "strategy", description: "Place towers, hold the line, and send the next wave.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
     ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 4).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
   ];
   app.innerHTML = `

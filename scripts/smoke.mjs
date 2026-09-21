@@ -8,6 +8,7 @@ const required = [
   "site/src/ads.js",
   "site/public/privacy.html",
   "site/public/ads.txt",
+  "site/public/assets/scoutly-house-ad.png",
   "site/src/styles.css",
   "site/src/play-intelligence.js",
   "site/src/shelf.js",
@@ -48,10 +49,10 @@ for (const marker of ["prefers-color-scheme", "prefers-reduced-motion"]) {
 }
 
 const ads = readFileSync(join(root, "site/src/ads.js"), "utf8");
-for (const marker of ["mountGoogleAdSlots", "MAX_AD_SLOTS_PER_PAGE", "adsbygoogle", "ca-pub-1123012671033143", "3947449400", "adSlot"]) {
+for (const marker of ["mountGoogleAdSlots", "mountScoutlyFallback", "MAX_AD_SLOTS_PER_PAGE", "adsbygoogle", "ca-pub-1123012671033143", "3947449400", "adSlot", "scoutlyFallback"]) {
   if (!ads.includes(marker)) throw new Error(`AdSense slot is missing marker: ${marker}`);
 }
-if (ads.includes("scoutly") || ads.includes("adFallback")) throw new Error("AdSense still includes the Scoutly fallback");
+if (!ads.includes("scoutly-house-ad.png")) throw new Error("Scoutly fallback creative is missing");
 if (ads.includes("location.reload") || ads.includes("window.reload")) throw new Error("Ads must not be refreshed by forced page reloads");
 if (html.includes("pauseAdRequests")) throw new Error("Ads are still blocked behind the old sitewide consent gate");
 if (!html.includes("adsbygoogle.js?client=ca-pub-1123012671033143")) throw new Error("AdSense script is missing");

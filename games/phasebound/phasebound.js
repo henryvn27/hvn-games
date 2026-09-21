@@ -22,6 +22,7 @@ const PHASE_TURN_DURATION = 2.4;
 const HIT_FREEZE_DURATION = 0.5;
 const HIT_FLASH_DURATION = 420;
 const HAZARD_PLAYER_CLEARANCE = 64;
+const HAZARD_HAZARD_CLEARANCE = 58;
 const HAZARD_SPAWN_GRACE = 0.9;
 const HAZARD_POSITION_ATTEMPTS = 32;
 const PHASE_SPEED_STEP = 0.14;
@@ -213,23 +214,32 @@ export function startPhasebound(options = {}) {
       const current = this.getHazardPosition(hazard, time);
       let bestAngle = hazard.angle;
       let bestPosition = current;
-      let bestDistance = Phaser.Math.Distance.Between(this.player.x, this.player.y, current.x, current.y);
+      let bestScore = this.hazardPositionScore(hazard, current);
 
       for (let attempt = 0; attempt < HAZARD_POSITION_ATTEMPTS; attempt += 1) {
         const angle = hazard.angle + (Math.PI * 2 * attempt) / HAZARD_POSITION_ATTEMPTS;
         const candidate = this.getHazardPosition(hazard, time, angle);
-        const distance = Phaser.Math.Distance.Between(this.player.x, this.player.y, candidate.x, candidate.y);
-        if (distance > bestDistance) {
-          bestDistance = distance;
+        const score = this.hazardPositionScore(hazard, candidate);
+        if (score > bestScore) {
+          bestScore = score;
           bestAngle = angle;
           bestPosition = candidate;
         }
-        if (distance >= HAZARD_PLAYER_CLEARANCE) break;
+        if (score >= 1) break;
       }
 
       hazard.angle = bestAngle;
       hazard.x = bestPosition.x;
       hazard.y = bestPosition.y;
+    },
+
+    hazardPositionScore(hazard, position) {
+      const playerDistance = Phaser.Math.Distance.Between(this.player.x, this.player.y, position.x, position.y);
+      const otherHazards = this.hazards.filter((other) => other !== hazard && Number.isFinite(other.x) && Number.isFinite(other.y));
+      const hazardDistance = otherHazards.length === 0
+        ? HAZARD_HAZARD_CLEARANCE
+        : Math.min(...otherHazards.map((other) => Phaser.Math.Distance.Between(position.x, position.y, other.x, other.y)));
+      return Math.min(playerDistance / HAZARD_PLAYER_CLEARANCE, hazardDistance / HAZARD_HAZARD_CLEARANCE);
     },
 
     resetHazardsForRun() {

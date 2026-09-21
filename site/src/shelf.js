@@ -1,4 +1,4 @@
-const SHELF_GAMES = [
+export const SHELF_GAMES = [
   { id: "golf", number: "01", name: "Mini Golf", kind: "arcade", description: "Six small greens. Banks, bunkers, and a clean line to the cup." },
   { id: "snake", number: "02", name: "Garden Snake", kind: "arcade", description: "Eat apples, pick a rule set, and try not to box yourself in." },
   { id: "dodger", number: "03", name: "Space Dodger", kind: "arcade", description: "Keep the fighter moving while Mars gets busier around you." },
@@ -13,7 +13,7 @@ const SHELF_GAMES = [
   { id: "trade", number: "12", name: "City Trader", kind: "board", description: "Buy streets, build them up, and outlast the other players." },
 ];
 
-function shelfCard(game, base) {
+export function shelfCard(game, base) {
   return `<article class="shelf-card shelf-card-${game.kind}">
     <div class="shelf-card-top"><span>${game.number}</span><span>${game.kind}</span></div>
     <div><h2>${game.name}</h2><p>${game.description}</p></div>
@@ -33,7 +33,7 @@ export function renderGameShelf({ app, base }) {
         <nav class="site-nav" aria-label="Shelf navigation"><a href="${base}?game=shelf">all games</a><a href="${base}?game=${params.get("from") || "orbit"}">back to Orbit</a></nav>
       </header>
       <main class="page-width shelf-play-main">
-        <div class="shelf-play-heading"><div><p class="shelf-kicker">game ${selected.number} / side room</p><h1>${selected.name}</h1></div><a class="text-link" href="${base}?game=shelf">← choose another</a></div>
+        <div class="shelf-play-heading"><div><p class="shelf-kicker">game ${selected.number}</p><h1>${selected.name}</h1></div><a class="text-link" href="${base}?game=shelf">← choose another</a></div>
         <div class="shelf-embed-frame"><iframe title="${selected.name}" src="${base}shelf/embed.html?game=${selected.id}"></iframe></div>
         <p class="shelf-credit">Game engine from Game Shelf, adapted into HVN games under its MIT license.</p>
       </main>
@@ -50,10 +50,10 @@ function renderShelfHome({ app, base, params }) {
     <nav class="site-nav" aria-label="Primary navigation"><a href="${base}?game=${params.get("from") || "orbit"}">back to Orbit</a></nav>
   </header><main class="page-width shelf-main">
     <section class="shelf-intro" aria-labelledby="shelf-title">
-      <div><p class="shelf-kicker">a side room for HVN games</p><h1 id="shelf-title">More things<br><em>to play.</em></h1></div>
+      <div><p class="shelf-kicker">more HVN games</p><h1 id="shelf-title">More things<br><em>to play.</em></h1></div>
       <div class="shelf-intro-note"><p>Orbit is still the main thing here. This is a dozen extra games from Game Shelf, brought into the same little corner so you do not have to leave.</p><span>12 games · no install</span></div>
     </section>
     <section class="shelf-grid" aria-label="Game Shelf games">${SHELF_GAMES.map((game) => shelfCard(game, base)).join("")}</section>
-    <footer class="shelf-footer"><span>HVN games / side room</span><a href="https://github.com/ignition27/game-shelf" target="_blank" rel="noreferrer">Game Shelf source + license</a></footer>
+    <footer class="shelf-footer"><span>HVN games / game shelf</span><a href="https://github.com/ignition27/game-shelf" target="_blank" rel="noreferrer">Game Shelf source + license</a></footer>
   </main>`;
 }

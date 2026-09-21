@@ -2,30 +2,46 @@
 
 ## Host flow
 
-The host flow is the public `HVN games` page. A visitor opens the page and the Play action loads Orbit in the same Pages deployment. It is the only game route currently shipped.
+The host flow is the public `HVN games` page. A visitor opens the gallery and a Play action loads Orbit or Comet in the same Pages deployment. Comet is the native second arcade route added from the MIT-licensed grow-and-survive game idea in `adrianov/snake`.
 
 ## Trigger and input
 
-- Trigger: open the gallery or use the Orbit game link `?game=orbit`.
-- Input: keyboard, pointer, or touch controls inside the game.
-- Authorized data: none. The game is local-only and uses no accounts, tracking, uploads, or network calls at runtime.
+- Trigger: open the gallery, use the Orbit link `?game=orbit`, or use the Comet link `?game=comet`.
+- Input: Orbit uses keyboard, pointer, or touch controls. Comet uses keyboard arrows/WASD, Space/P pause, and visible touch direction buttons.
+- Authorized data: gameplay stays local with no account, upload, or gameplay analytics path. Google AdSense is a separate third-party request after the visitor chooses to allow ads.
 
 ## Output and next action
 
-- Output: a playable run, a visible result state, and a fast restart path.
+- Output: a playable run, a visible result state, a browser-local best score, and a fast restart path.
 - Next action: play again, return to the page, or share the public Pages URL.
-- Adoption point: `site/src/main.js` owns gallery routing; `games/phasebound/` owns the game runtime.
+- Adoption point: `site/src/main.js` owns gallery routing; `games/phasebound/` and `games/comet/` own the game runtimes.
 
 ## Play intelligence contract
 
 - Storage: browser `localStorage` under `hvn-games:play-intelligence:v1`.
 - Events: gallery view, run start, completed run, win or loss, time played, packets collected, experiment variant, and optional feedback (`keep`, `hard`, or `skip`).
-- Privacy boundary: local-only and resettable. No analytics vendor, account, cookie, network request, or identifier is used.
+- Privacy boundary: the play-intelligence report is local-only and resettable. It does not send gameplay events to an analytics vendor or server; the separate AdSense integration is documented below.
 - Decision use: the gallery shows the local report. High replay signals identify favorites; low starts, short sessions, repeated losses, and negative feedback create improvement candidates.
 - Experiment rule: one clearly named variable per game at a time, stable assignment per browser, and variant results kept separate. Treat the results as directional for one player until a consented multi-player data path exists.
 - Adoption point: `site/src/play-intelligence.js` is the shared client layer.
 
-The current public shelf has one game: Orbit, with color matching and escalating hazards. New games should add a new verb or decision, not another skin for the same loop.
+The gallery now has two distinct routes: Orbit, with color matching and escalating hazards, and Comet, with grid steering and a growing tail. New games should add a new verb or decision, not another skin for the same loop.
+
+## Comet source boundary
+
+- Source selected: https://github.com/adrianov/snake
+- License: MIT, copyright Peter Adrianov (2025)
+- Adaptation: native Phaser implementation, new board, copy, visuals, controls, and game shell. No upstream source, assets, or interface are copied into the runtime.
+- Browser boundary: local-only best score under `hvn-games:comet-best:v1`; no game account, gameplay tracking, or external runtime assets.
+- Proof run: local `?game=comet` route, gallery link, start countdown, keyboard steering, touch direction buttons, pause/resume, collision result, and restart.
+
+## Advertising boundary
+
+- Publisher: Google AdSense `ca-pub-1123012671033143`, loaded once from `site/index.html` for page-level Auto ads.
+- Consent: requests begin paused; `site/src/ads.js` resumes non-personalized requests only after the visitor chooses “allow ads” and provides an “ad settings” reset.
+- Placement: page-level Auto ads keep the game canvas unobstructed; no ad is manually overlaid on the playfield and no ad slot ID was invented because the supplied snippet is the Auto ads snippet.
+- Policy gap: Google’s certified CMP and regional privacy messages still need to be configured in the AdSense account before serving personalized ads to EEA, UK, or Swiss visitors. This code does not claim that account-side setup is complete.
+- Privacy page: `site/public/privacy.html` documents local game storage and the AdSense data flow.
 
 ## Orbit proof contract
 

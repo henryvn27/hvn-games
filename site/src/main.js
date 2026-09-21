@@ -1,7 +1,8 @@
 import "./styles.css";
+import { mountAdsConsent } from "./ads.js";
 import { createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlayerName } from "./play-intelligence.js";
 import orbitPolicyArtifact from "../../games/phasebound/orbit-policy.json";
-import { renderGameShelf } from "./shelf.js";
+import { renderGameShelf, SHELF_GAMES, shelfCard } from "./shelf.js";
 
 const app = document.querySelector("#app");
 const base = import.meta.env.BASE_URL;
@@ -11,12 +12,14 @@ const LEGACY_ORBIT_ROUTE = "phasebound";
 const ORBIT_RL_ROUTE = "orbit-rl";
 const SHELF_ROUTE = "shelf";
 const TOWER_DEFENSE_ROUTE = "neon-bastion";
+const COMET_ROUTE = "comet";
 const LEADERBOARD_GAME = "phasebound";
 
 if (params.get("game")) {
-  renderGame();
+  renderGame().finally(mountAdsConsent);
 } else {
   renderGallery();
+  mountAdsConsent();
 }
 
 function renderGallery() {
@@ -27,8 +30,9 @@ function renderGallery() {
       <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="#leaderboard">scores</a>
-        <a href="${base}?game=${SHELF_ROUTE}">more games</a>
+        <a href="#all-games">games</a>
         <a href="${base}?game=${TOWER_DEFENSE_ROUTE}">defense</a>
+        <a href="${base}?game=${COMET_ROUTE}">comet</a>
         <a href="${base}?game=${ORBIT_ROUTE}">play</a>
       </nav>
     </header>
@@ -37,8 +41,22 @@ function renderGallery() {
         <div class="phasebound-home-copy">
           <h1 id="hero-title">Orbit</h1>
           <p class="phasebound-rule">Match your color. Dodge the red planets.</p>
-          <div class="hero-actions"><a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play Orbit</a><a class="button button-secondary" href="${base}?game=${SHELF_ROUTE}">more games</a></div>
+          <div class="hero-actions"><a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play Orbit</a><a class="button button-secondary" href="${base}?game=${COMET_ROUTE}">play Comet</a></div>
         </div>
+      </section>
+
+      <section class="gallery-game-list page-width" aria-labelledby="other-game-title">
+        <div><h2 id="other-game-title">A few more<br>things to play.</h2></div>
+        <div class="gallery-game-rows">
+          <a class="gallery-game-row" href="${base}?game=${COMET_ROUTE}"><span><strong>Comet</strong><small>Eat beacons. Dodge rocks. Keep the line clean.</small></span><b>play</b></a>
+          <a class="gallery-game-row" href="${base}?game=${TOWER_DEFENSE_ROUTE}"><span><strong>Neon Bastion</strong><small>Place towers. Hold the line. Send the next wave.</small></span><b>play</b></a>
+          <a class="gallery-game-row" href="${base}?game=${SHELF_ROUTE}"><span><strong>Game Shelf</strong><small>Twelve smaller games, from memory to checkers.</small></span><b>browse</b></a>
+        </div>
+      </section>
+
+      <section class="gallery-shelf page-width" id="all-games" aria-labelledby="all-games-title">
+        <div class="gallery-shelf-heading"><div><p class="shelf-kicker">the rest of the shelf</p><h2 id="all-games-title">Pick a game.<br>Play it right here.</h2></div><p>Small games, fully playable in the same site. No extra room to find first.</p></div>
+        <div class="shelf-grid" aria-label="All HVN games">${SHELF_GAMES.map((game) => shelfCard(game, base)).join("")}</div>
       </section>
 
       <section class="leaderboard-section page-width" id="leaderboard" aria-labelledby="leaderboard-title">
@@ -274,10 +292,116 @@ async function renderRLWriteup() {
   restartButton.addEventListener("click", () => api.start());
 }
 
+async function renderComet() {
+  document.body.className = "game-page game-comet";
+  app.innerHTML = `
+    <header class="game-header page-width">
+      <a class="wordmark" href="${base}">HVN games</a>
+      <nav class="site-nav" aria-label="Primary navigation"><a href="${base}?game=${ORBIT_ROUTE}">Orbit</a><a href="${base}">home</a></nav>
+    </header>
+    <main class="game-main page-width">
+      <div class="game-heading">
+        <h1>Comet</h1>
+        <p class="game-blurb">Grow the tail. Avoid the rocks. Keep the route clean.</p>
+      </div>
+      <section class="game-frame comet-frame" aria-label="Comet game">
+        <div class="comet-hud" aria-live="polite">
+          <div><span>score</span><strong id="comet-score">000</strong></div>
+          <div><span>best</span><strong id="comet-best">000</strong></div>
+          <div><span>tail</span><strong id="comet-length">04</strong></div>
+          <div><span>level</span><strong id="comet-level">01</strong></div>
+          <button id="comet-pause" class="pause-button" type="button" aria-label="Pause">Ⅱ</button>
+        </div>
+        <div id="game-root"></div>
+        <div id="comet-touch" class="comet-touch" aria-label="Touch controls">
+          <button type="button" data-direction="up" aria-label="Move up">↑</button>
+          <button type="button" data-direction="left" aria-label="Move left">←</button>
+          <button type="button" data-direction="down" aria-label="Move down">↓</button>
+          <button type="button" data-direction="right" aria-label="Move right">→</button>
+        </div>
+        <div id="game-overlay" class="game-overlay">
+          <h2 id="overlay-title">Ready?</h2>
+          <p id="overlay-copy">Eat the green beacons. Avoid the red rocks and your own tail.</p>
+          <button id="overlay-action" class="button button-primary" type="button">Start</button>
+          <p id="overlay-detail" class="overlay-detail">arrows or WASD to steer · Space pauses</p>
+        </div>
+      </section>
+      <section class="comet-note" aria-label="How to play Comet">
+        <p><strong>One rule.</strong> Every beacon makes the tail longer. The board gets tighter as your score climbs.</p>
+        <p>Inspired by <a href="https://github.com/adrianov/snake" rel="noreferrer">adrianov/snake</a>, rebuilt for HVN Games under its MIT License.</p>
+      </section>
+    </main>
+  `;
+
+  const { startComet } = await import("../../games/comet/comet.js");
+  const overlay = document.querySelector("#game-overlay");
+  const frame = document.querySelector(".comet-frame");
+  const overlayTitle = document.querySelector("#overlay-title");
+  const overlayCopy = document.querySelector("#overlay-copy");
+  const overlayDetail = document.querySelector("#overlay-detail");
+  const overlayAction = document.querySelector("#overlay-action");
+  const pauseButton = document.querySelector("#comet-pause");
+  const experiment = getExperimentAssignment("comet", "opening-load", ["steady"]);
+  const tracker = createGameTracker("comet", "opening-load", experiment);
+  const bestKey = "hvn-games:comet-best:v1";
+  let api;
+  let previousMode = "menu";
+  let action = null;
+  let savedBest = Number(window.localStorage.getItem(bestKey) || 0);
+
+  const showOverlay = ({ title, copy, detail, label, next }) => {
+    overlayTitle.textContent = title;
+    overlayCopy.textContent = copy;
+    overlayDetail.textContent = detail;
+    overlayAction.textContent = label;
+    overlayAction.hidden = false;
+    action = next;
+    overlay.classList.remove("is-hidden", "is-countdown");
+  };
+  const startWithCountdown = () => beginCountdown({
+    overlay,
+    title: overlayTitle,
+    copy: overlayCopy,
+    detail: overlayDetail,
+    actionButton: overlayAction,
+    message: "Steer the comet.",
+    next: () => api.start(),
+  });
+
+  action = startWithCountdown;
+
+  api = startComet({
+    parent: "game-root",
+    onState: (state) => {
+      const score = Math.max(0, Math.floor(state.score));
+      savedBest = Math.max(savedBest, score, Number(state.best) || 0);
+      if (savedBest > Number(window.localStorage.getItem(bestKey) || 0)) window.localStorage.setItem(bestKey, String(savedBest));
+      document.querySelector("#comet-score").textContent = String(score).padStart(3, "0");
+      document.querySelector("#comet-best").textContent = String(savedBest).padStart(3, "0");
+      document.querySelector("#comet-length").textContent = String(state.length).padStart(2, "0");
+      document.querySelector("#comet-level").textContent = String(state.level).padStart(2, "0");
+      pauseButton.textContent = state.mode === "pause" ? "▶" : "Ⅱ";
+      pauseButton.setAttribute("aria-label", state.mode === "pause" ? "Resume" : "Pause");
+      frame.classList.toggle("is-active", state.mode === "active");
+      if (state.mode === "active" && previousMode !== "active") tracker.start();
+      if (state.mode === "result" && previousMode !== "result") tracker.finish(state);
+      if (state.mode === "active") overlay.classList.add("is-hidden");
+      if (state.mode === "pause") showOverlay({ title: "Paused.", copy: "The comet is holding its line.", detail: "Press Space or choose resume.", label: "Resume", next: () => api.togglePause() });
+      if (state.mode === "result" && previousMode !== "result") showOverlay({ title: "Tail gone.", copy: `Score ${score}.`, detail: `Best ${savedBest}. Try a cleaner route.`, label: "Run it again", next: startWithCountdown });
+      previousMode = state.mode;
+    },
+  });
+
+  overlayAction.addEventListener("click", () => { if (!overlayAction.hidden) action(); });
+  pauseButton.addEventListener("click", () => api.togglePause());
+  for (const button of document.querySelectorAll("[data-direction]")) button.addEventListener("click", () => api.setDirection(button.dataset.direction));
+}
+
 async function renderGame() {
   if (params.get("game") === SHELF_ROUTE) return renderGameShelf({ app, base });
   if (params.get("game") === TOWER_DEFENSE_ROUTE) return renderTowerDefense();
   if (params.get("game") === ORBIT_RL_ROUTE) return renderRLWriteup();
+  if (params.get("game") === COMET_ROUTE) return renderComet();
   if (![ORBIT_ROUTE, LEGACY_ORBIT_ROUTE].includes(params.get("game"))) return renderGallery();
   document.body.className = "game-page game-phasebound";
   app.innerHTML = `

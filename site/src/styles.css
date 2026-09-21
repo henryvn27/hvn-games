@@ -335,7 +335,6 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .shelf-intro-note span { color: var(--ink); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 .shelf-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding-top: 28px; }
 .shelf-card { display: flex; min-height: 260px; flex-direction: column; justify-content: space-between; gap: 28px; padding: 20px; border: 1px solid var(--line); background: var(--surface); }
-.shelf-card:nth-child(3n + 2) { transform: translateY(18px); }
 .shelf-card-top { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
 .shelf-card h2 { font-size: clamp(1.55rem, 2.5vw, 2.3rem); margin: 0 0 12px; }
 .shelf-card p { color: var(--muted); font-size: 0.9rem; margin: 0; }
@@ -346,6 +345,11 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .shelf-card-board { border-top: 4px solid var(--amber); }
 .shelf-footer { display: flex; justify-content: space-between; gap: 18px; margin-top: 76px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.72rem; }
 .shelf-footer a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.gallery-shelf { padding-block: 54px 78px; border-top: 1px solid var(--line); }
+.gallery-shelf-heading { display: flex; align-items: end; justify-content: space-between; gap: 40px; }
+.gallery-shelf-heading h2 { margin: 0; }
+.gallery-shelf-heading > p { max-width: 280px; margin: 0 0 4px; color: var(--muted); font-size: 0.86rem; }
+.gallery-shelf .shelf-grid { padding-top: 30px; }
 .shelf-play-main { padding-block: 54px 80px; }
 .shelf-play-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
 .shelf-play-heading h1 { margin: 0; }
@@ -355,13 +359,11 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 @media (max-width: 760px) {
   .shelf-intro { grid-template-columns: 1fr; gap: 24px; }
   .shelf-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .shelf-card:nth-child(3n + 2) { transform: none; }
-  .shelf-card:nth-child(4n + 1) { transform: translateY(12px); }
+  .gallery-shelf-heading { align-items: flex-start; flex-direction: column; gap: 18px; }
 }
 @media (max-width: 520px) {
   .shelf-main, .shelf-play-main { padding-block: 42px 58px; }
   .shelf-grid { grid-template-columns: 1fr; }
-  .shelf-card:nth-child(4n + 1) { transform: none; }
   .shelf-play-heading { align-items: flex-start; flex-direction: column; }
   .shelf-embed-frame, .shelf-embed-frame iframe { min-height: 760px; height: 760px; }
   .shelf-footer { align-items: flex-start; flex-direction: column; }
@@ -892,4 +894,90 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .rl-facts { display: block; }
   .rl-paper { margin-top: 64px; }
   .rl-paper-grid { grid-template-columns: 1fr; row-gap: 40px; }
+}
+
+/* Comet is the second route: a small, flat arcade map with a tail as its level. */
+.gallery-game-list { display: grid; grid-template-columns: minmax(220px, 0.75fr) minmax(320px, 1.25fr); gap: 72px; padding-block: 54px 70px; border-top: 1px solid var(--line); }
+.gallery-game-list h2 { margin: 0; font-size: clamp(2.4rem, 4vw, 4.5rem); }
+.gallery-game-rows { display: grid; align-content: start; }
+.gallery-game-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 112px; padding: 20px 0; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
+.gallery-game-row span { display: grid; gap: 5px; }
+.gallery-game-row strong { font-size: 1.2rem; }
+.gallery-game-row small { color: var(--muted); font-size: 0.86rem; }
+.gallery-game-row b { color: var(--accent-strong); font-size: 0.82rem; }
+.gallery-game-row:hover b { text-decoration: underline; text-underline-offset: 4px; }
+
+.game-page.game-comet { background: #f7f7f2; color: #171817; --line: rgba(23, 24, 23, 0.18); --muted: #666962; --accent: #c8f04a; --accent-strong: #557300; }
+.game-comet .game-header { border-color: var(--line); }
+.game-comet .game-frame { border-color: #171817; background: #0d1722; }
+.comet-hud { position: absolute; z-index: 3; inset: 16px 22px auto; display: flex; align-items: start; gap: 24px; color: #8fa3a8; pointer-events: none; }
+.comet-hud > div { display: grid; gap: 2px; }
+.comet-hud span { font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.comet-hud strong { color: #f2f5e8; font: 600 1.05rem/1 var(--ui-font); letter-spacing: 0.02em; }
+.comet-hud > div:first-child strong { font-size: 1.5rem; }
+.comet-hud .pause-button { margin-left: auto; pointer-events: auto; }
+.game-comet .game-overlay { background: rgba(13, 23, 34, 0.91); }
+.game-comet .game-overlay > p:not(.overlay-detail) { color: #c3d0cd; }
+.game-comet .game-overlay .overlay-detail { color: #8fa3a8; }
+.comet-touch { position: absolute; z-index: 4; right: 18px; bottom: 18px; display: none; grid-template-columns: repeat(3, 38px); grid-template-rows: repeat(2, 38px); gap: 5px; }
+.comet-touch button { border: 1px solid rgba(242, 245, 232, 0.3); border-radius: 3px; background: rgba(13, 23, 34, 0.9); color: #f2f5e8; cursor: pointer; font-size: 1.1rem; touch-action: manipulation; }
+.comet-touch button:nth-child(1) { grid-column: 2; }
+.comet-touch button:nth-child(2) { grid-column: 1; grid-row: 2; }
+.comet-touch button:nth-child(3) { grid-column: 2; grid-row: 2; }
+.comet-touch button:nth-child(4) { grid-column: 3; grid-row: 2; }
+.comet-touch button:active { background: #c8f04a; color: #171817; }
+.comet-note { display: flex; justify-content: space-between; gap: 32px; padding-top: 24px; color: #666962; font-size: 0.82rem; }
+.comet-note p { max-width: 360px; margin: 0; }
+.comet-note strong { color: #171817; }
+.comet-note a { color: #557300; text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 600px) {
+  .gallery-game-list { grid-template-columns: 1fr; gap: 24px; padding-block: 42px 54px; }
+  .gallery-game-list h2 { font-size: clamp(2.4rem, 12vw, 3.5rem); }
+  .comet-hud { inset: 12px 14px auto; gap: 13px; }
+  .comet-hud > div:first-child strong { font-size: 1.2rem; }
+  .comet-hud strong { font-size: 0.88rem; }
+  .comet-hud span { font-size: 0.54rem; }
+  .comet-touch { display: grid; }
+  .comet-note { display: grid; gap: 12px; }
+}
+
+/* Ads stay outside the playfield and do not use fake ad cards or reserved artwork. */
+.ads-consent {
+  position: fixed;
+  z-index: 20;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: min(560px, calc(100% - 36px));
+  padding: 16px 18px;
+  border: 1px solid var(--ink);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.ads-consent strong { display: block; margin-bottom: 3px; font-size: 0.92rem; }
+.ads-consent p { max-width: 320px; margin: 0; color: var(--muted); font-size: 0.76rem; line-height: 1.35; }
+.ads-consent-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.ads-consent-actions .button { min-height: 36px; padding: 7px 12px; font-size: 0.75rem; }
+.ads-settings-link {
+  position: fixed;
+  z-index: 19;
+  right: 12px;
+  bottom: 10px;
+  border: 0;
+  padding: 2px 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+.ads-settings-link:hover, .ads-settings-link:focus-visible { color: var(--ink); opacity: 1; }
+@media (max-width: 620px) {
+  .ads-consent { right: 12px; bottom: 12px; width: calc(100% - 24px); align-items: flex-start; flex-direction: column; gap: 12px; padding: 14px; box-shadow: 4px 4px 0 var(--ink); }
+  .ads-consent-actions { width: 100%; justify-content: space-between; }
 }

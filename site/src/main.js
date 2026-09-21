@@ -18,7 +18,7 @@ const SPACE_WARS_ROUTE = "space-wars";
 const DEFAULT_LEADERBOARD_GAME = "phasebound";
 const LEADERBOARD_GAMES = [
   { id: "phasebound", label: "Orbit" },
-  { id: "comet", label: "Comet" },
+  { id: "comet", label: "Comet Courier" },
   { id: "neon-bastion", label: "Neon Bastion" },
 ];
 
@@ -37,7 +37,7 @@ function renderGallery() {
   document.body.className = "gallery-page";
   recordGalleryView();
   const additionalGames = [
-    { number: "02", name: "Comet", kind: "arcade", description: "Eat beacons, dodge rocks, and keep the tail together.", href: `${base}?game=${COMET_ROUTE}`, action: "play" },
+    { number: "02", name: "Comet Courier", kind: "arcade", description: "Carry survey beacons through a crowded comet tail.", href: `${base}?game=${COMET_ROUTE}`, action: "play" },
     { number: "03", name: "Neon Bastion", kind: "strategy", description: "Build a lunar relay defense, then stop the crawlers before they reach it.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
     ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 4).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
   ];
@@ -54,7 +54,7 @@ function renderGallery() {
         <div class="phasebound-home-copy">
           <h1 id="hero-title">Orbit</h1>
           <p class="phasebound-rule">Match your color. Dodge the red planets.</p>
-          <div class="hero-actions"><a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play Orbit</a><a class="button button-secondary" href="${base}?game=${COMET_ROUTE}">play Comet</a></div>
+          <div class="hero-actions"><a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play Orbit</a><a class="button button-secondary" href="${base}?game=${COMET_ROUTE}">play Comet Courier</a></div>
         </div>
       </section>
       <div class="google-ad-slot page-width" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>
@@ -406,10 +406,10 @@ async function renderComet() {
     </header>
     <main class="game-main page-width">
       <div class="game-heading">
-        <h1>Comet</h1>
-        <p class="game-blurb">Grow the tail. Avoid the rocks. Keep the route clean.</p>
+        <h1>Comet Courier</h1>
+        <p class="game-blurb">Carry survey beacons through a crowded comet tail.</p>
       </div>
-      <section class="game-frame comet-frame" aria-label="Comet game">
+      <section class="game-frame comet-frame" aria-label="Comet Courier game">
         <div class="comet-hud" aria-live="polite">
           <div><span>score</span><strong id="comet-score">000</strong></div>
           <div><span>best</span><strong id="comet-best">000</strong></div>
@@ -425,14 +425,14 @@ async function renderComet() {
           <button type="button" data-direction="right" aria-label="Move right">→</button>
         </div>
         <div id="game-overlay" class="game-overlay">
-          <h2 id="overlay-title">Ready?</h2>
-          <p id="overlay-copy">Eat the green beacons. Avoid the red rocks and your own tail.</p>
-          <button id="overlay-action" class="button button-primary" type="button">Start</button>
+          <h2 id="overlay-title">Ready for the pass?</h2>
+          <p id="overlay-copy">Bring each green survey beacon home. Red debris and your own tail end the run.</p>
+          <button id="overlay-action" class="button button-primary" type="button">Start the pass</button>
           <p id="overlay-detail" class="overlay-detail">arrows or WASD to steer · Space pauses</p>
         </div>
       </section>
-      <section class="comet-note" aria-label="How to play Comet">
-        <p><strong>One rule.</strong> Every beacon makes the tail longer. The board gets tighter as your score climbs.</p>
+      <section class="comet-note" aria-label="How to play Comet Courier">
+        <p><strong>One rule.</strong> Every beacon adds another instrument to the tail. The route gets tighter as the survey continues.</p>
         <p>Inspired by <a href="https://github.com/adrianov/snake" rel="noreferrer">adrianov/snake</a>, rebuilt for HVN Games under its MIT License.</p>
       </section>
     </main>

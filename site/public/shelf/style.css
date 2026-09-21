@@ -59,6 +59,8 @@
 /* Keep the expanded shelf navigation usable on narrow screens. */
 button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #986017;outline-offset:3px}
 .reaction{width:100%;border:0;font:700 25px 'Space Grotesk',sans-serif;padding:20px}
+.field-kit-panel{background:#edf0df;border-color:#274c47;box-shadow:6px 6px 0 #274c47;color:#274c47}.field-kit-panel .memory button{background:#d7dfb8;border-color:#274c47;color:#274c47}.field-kit-panel .memory button.open{background:#fffdf2}.field-kit-panel .memory button.done{background:#9fc6a0;border-color:#274c47}
+.signal-panel{background:#f1eee7;border-color:#2b3037;box-shadow:6px 6px 0 #2b3037}.signal-board{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 auto 16px;max-width:360px;padding:12px;border:2px solid #2b3037;border-radius:8px;background:#3a3e43;color:#f5f1e8;text-align:left}.signal-board b,.signal-board small{display:block}.signal-board b{font-size:14px}.signal-board small{margin-top:3px;color:#cbd0cf;font:10px 'DM Mono',monospace;letter-spacing:.8px}.signal-lamp{width:30px;height:30px;border-radius:50%;background:#c35f5b;border:4px solid #191d21;box-shadow:inset 0 0 0 3px #873f42}.signal-clear .signal-lamp{background:#86d297;box-shadow:inset 0 0 0 3px #4d8c5b}.signal-panel .reaction{border:2px solid #2b3037;border-radius:8px;background:#e5e8ed;color:#2b3037}.signal-panel .controls button{border-color:#2b3037}
 .difficulty button:disabled{cursor:default;opacity:.55}
 [hidden]{display:none!important}
 .reaction-leaderboard{max-width:430px;margin:24px auto 0;text-align:left;border-top:2px solid var(--ink);padding-top:18px}

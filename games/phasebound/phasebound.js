@@ -438,7 +438,7 @@ export function startPhasebound(options = {}) {
         this.dashCooldown = Math.max(0, this.dashCooldown - realDt);
         this.energy = Math.min(100, this.energy + realDt * 2.4);
         this.orbitTime += realDt * 1000;
-        this.updateHazards(realDt);
+        this.updateHazards(this.orbitTime, realDt);
         this.updateMovement(realDt);
         this.drawPlayer();
         return;
@@ -454,7 +454,7 @@ export function startPhasebound(options = {}) {
       this.spawnGrace = Math.max(0, this.spawnGrace - realDt);
       const scoreBefore = this.score;
       this.orbitTime += dt * 1000;
-      this.updateHazards(dt);
+        this.updateHazards(this.orbitTime, dt);
 
       this.elapsed += dt;
       this.updatePhaseTransition(dt);
@@ -581,7 +581,7 @@ export function startPhasebound(options = {}) {
       }
     },
 
-    updateHazards(dt) {
+    updateHazards(time, dt) {
       const phaseSpeed = 1 + Math.min(MAX_PHASE_SPEED_BONUS, (this.phaseNumber - 1) * PHASE_SPEED_STEP);
       let transitionSpeed = 1;
       if (this.phaseTransition) {
@@ -598,9 +598,11 @@ export function startPhasebound(options = {}) {
         hazard.centerY = Phaser.Math.Linear(hazard.centerY, focus.y, Math.min(1, dt * 2.2));
         const speed = hazard.speed * phaseSpeed * transitionSpeed * runSpeed;
         hazard.angle += speed * hazard.direction * dt;
-        // Do not re-place live hazards here. Safety checks are for spawn and
-        // reset only; changing the angle every frame makes asteroids teleport
-        // away from the player instead of moving along their orbit.
+        // Update the live position from the continuous angle. Safety checks
+        // belong to spawn/reset only; they must never rewrite this angle.
+        const position = this.getHazardPosition(hazard, time);
+        hazard.x = position.x;
+        hazard.y = position.y;
         hazard.art.clear();
         const size = hazard.size;
         hazard.art.fillStyle(COLORS.danger, 0.96);

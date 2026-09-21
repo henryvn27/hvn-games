@@ -1,5 +1,22 @@
 const CONSENT_KEY = "hvn-games:ads-consent:v1";
 
+export function mountAdPreview() {
+  if (document.querySelector("[data-ad-preview]")) return;
+  const preview = document.createElement("aside");
+  preview.className = "ad-preview";
+  preview.dataset.adPreview = "true";
+  preview.setAttribute("aria-label", "Ad placement preview");
+  preview.innerHTML = `
+    <div>
+      <span class="ad-preview-label">ad placement preview</span>
+      <strong>A small, quiet space for a sponsor</strong>
+      <p>Scouting mockup only. This is not a live Google ad.</p>
+    </div>
+    <span class="ad-preview-size">728 × 90</span>
+  `;
+  document.body.append(preview);
+}
+
 function readConsent() {
   try {
     return window.localStorage.getItem(CONSENT_KEY);

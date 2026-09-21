@@ -979,9 +979,34 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   opacity: 0.7;
 }
 .ads-settings-link:hover, .ads-settings-link:focus-visible { color: var(--ink); opacity: 1; }
+.ad-preview {
+  width: min(728px, calc(100% - 48px));
+  min-height: 90px;
+  margin: 24px auto 34px;
+  padding: 15px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border: 1px dashed var(--line);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  color: var(--muted);
+}
+.ad-preview > div { display: grid; gap: 3px; }
+.ad-preview-label, .ad-preview-size {
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ad-preview-label { color: var(--accent-strong); }
+.ad-preview strong { color: var(--ink); font-size: 0.92rem; font-weight: 700; }
+.ad-preview p { margin: 0; font-size: 0.74rem; }
+.ad-preview-size { white-space: nowrap; }
 @media (max-width: 620px) {
   .ads-consent { right: 12px; bottom: 12px; width: calc(100% - 24px); align-items: flex-start; flex-direction: column; gap: 12px; padding: 14px; box-shadow: 4px 4px 0 var(--ink); }
   .ads-consent-actions { width: 100%; justify-content: space-between; }
+  .ad-preview { width: calc(100% - 32px); min-height: 76px; margin-block: 18px 26px; padding: 13px 14px; }
+  .ad-preview-size { display: none; }
 }
 
 /* Space Wars is a direct HVN play surface: one field, one compact HUD, no nested site chrome. */

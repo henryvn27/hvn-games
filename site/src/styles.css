@@ -797,6 +797,8 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .tutorial-swatch:hover { border-color: #72f6e3; }
 .first-play-tutorial .button-primary { min-height: 42px; }
 .first-play-tutorial .button-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+.tutorial-skip { display: block; margin-top: 13px; padding: 0; color: #8e9bb4; font-size: 0.76rem; }
+.tutorial-skip:hover { color: #f5f7ff; }
 
 @media (max-width: 600px) {
   .first-play-tutorial { max-width: 360px; }

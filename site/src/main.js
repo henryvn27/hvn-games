@@ -308,6 +308,7 @@ async function renderGame() {
             </div>
             <button id="tutorial-swatch" class="tutorial-swatch" type="button" hidden aria-label="Switch color in the practice lesson"><span aria-hidden="true"></span><b>tap to switch</b></button>
             <button id="tutorial-start" class="button button-primary" type="button" disabled>move to continue</button>
+            <button id="tutorial-skip" class="text-button tutorial-skip" type="button">skip tutorial</button>
           </div>
           <h2 id="overlay-title">Ready?</h2>
           <p id="overlay-copy">Match your color. Dodge the red planets.</p>
@@ -348,6 +349,7 @@ async function renderGame() {
   const tutorialStatus = document.querySelector("#tutorial-status");
   const tutorialSwatch = document.querySelector("#tutorial-swatch");
   const tutorialStart = document.querySelector("#tutorial-start");
+  const tutorialSkip = document.querySelector("#tutorial-skip");
   const phaseSwitch = document.querySelector("#phase-switch");
   const pauseButton = document.querySelector("#pause-button");
   const scoreSave = document.querySelector("#score-save");
@@ -486,6 +488,17 @@ async function renderGame() {
     overlay.classList.remove("is-hidden", "is-countdown");
   }
 
+  function skipTutorial() {
+    markTutorialSeen();
+    showOverlay({
+      title: "Ready?",
+      copy: "Match your color. Dodge the red planets.",
+      detail: "move with WASD or arrows · square or Space changes color · slow costs points",
+      label: "Start",
+      next: startWithCountdown,
+    });
+  }
+
   let pendingScore = null;
   function showScoreSave(state) {
     pendingScore = { score: Math.max(0, Math.floor(state.score)), packets: state.packets, elapsed: state.elapsed };
@@ -577,6 +590,7 @@ async function renderGame() {
 
   overlayAction.addEventListener("click", () => { if (overlayAction.hidden) return; action(); });
   tutorialStart.addEventListener("click", advanceTutorial);
+  tutorialSkip.addEventListener("click", skipTutorial);
   tutorialSwatch.addEventListener("click", () => {
     if (!tutorialActive || tutorialLessonIndex !== 1 || tutorialLessonReady) return;
     api.togglePhase();

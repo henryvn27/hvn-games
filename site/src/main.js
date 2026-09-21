@@ -38,7 +38,7 @@ function renderGallery() {
   recordGalleryView();
   const additionalGames = [
     { number: "02", name: "Comet", kind: "arcade", description: "Eat beacons, dodge rocks, and keep the tail together.", href: `${base}?game=${COMET_ROUTE}`, action: "play" },
-    { number: "03", name: "Neon Bastion", kind: "strategy", description: "Place towers, hold the line, and send the next wave.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
+    { number: "03", name: "Neon Bastion", kind: "strategy", description: "Build a lunar relay defense, then stop the crawlers before they reach it.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
     ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 4).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
   ];
   app.innerHTML = `

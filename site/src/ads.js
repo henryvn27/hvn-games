@@ -1,5 +1,5 @@
 const GOOGLE_AD_CLIENT = "ca-pub-1123012671033143";
-const GOOGLE_AD_SLOT = "5915584309";
+const GOOGLE_AD_SLOT = "3947449400";
 
 export function mountGoogleAdSlots() {
   const anchors = [...document.querySelectorAll("[data-google-ad-slot]")];

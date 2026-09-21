@@ -48,7 +48,7 @@ for (const marker of ["prefers-color-scheme", "prefers-reduced-motion"]) {
 }
 
 const ads = readFileSync(join(root, "site/src/ads.js"), "utf8");
-for (const marker of ["mountGoogleAdSlots", "adsbygoogle", "ca-pub-1123012671033143", "adSlot"]) {
+for (const marker of ["mountGoogleAdSlots", "adsbygoogle", "ca-pub-1123012671033143", "3947449400", "adSlot"]) {
   if (!ads.includes(marker)) throw new Error(`AdSense slot is missing marker: ${marker}`);
 }
 if (ads.includes("scoutly") || ads.includes("adFallback")) throw new Error("AdSense still includes the Scoutly fallback");

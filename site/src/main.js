@@ -56,13 +56,13 @@ function renderGallery() {
           <div class="hero-actions"><a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play Orbit</a><a class="button button-secondary" href="${base}?game=${COMET_ROUTE}">play Comet</a></div>
         </div>
       </section>
-      <div class="google-ad-slot page-width" data-google-ad-slot="5915584309" aria-label="Advertisement"></div>
+      <div class="google-ad-slot page-width" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>
 
       <section class="gallery-shelf page-width" id="all-games" aria-labelledby="all-games-title">
         <div class="gallery-shelf-heading"><div><p class="shelf-kicker">the collection</p><h2 id="all-games-title">All games.</h2></div><p>Pick a card. Every game opens right here.</p></div>
         <div class="shelf-grid" aria-label="All HVN games">${additionalGames.map((game) => galleryGameCard(game)).join("")}</div>
       </section>
-      <div class="google-ad-slot page-width" data-google-ad-slot="5915584309" aria-label="Advertisement"></div>
+      <div class="google-ad-slot page-width" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>
 
       <section class="leaderboard-section page-width" id="leaderboard" aria-labelledby="leaderboard-title">
         <div class="leaderboard-heading">
@@ -557,7 +557,7 @@ async function renderGame() {
           </div>
         </div>
       </section>
-      <div class="google-ad-slot" data-google-ad-slot="5915584309" aria-label="Advertisement"></div>
+      <div class="google-ad-slot" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>
       <section class="route-leaderboard" id="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><h2 id="route-leaderboard-title">high scores</h2><p>Scores saved in this browser.</p></div><div id="phasebound-leaderboard"></div></section>
       <a class="button button-secondary rl-link" href="${base}?game=${ORBIT_RL_ROUTE}">reinforcement learning writeup</a>
     </main>

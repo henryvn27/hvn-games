@@ -2,7 +2,7 @@
 
 A small browser game made to be played, not just shown.
 
-The public page currently opens with [Orbit](https://henryvn27.github.io/hvn-games/?game=phasebound). [Comet](https://henryvn27.github.io/hvn-games/?game=comet) is the native grow-and-survive route. [Neon Bastion](http://127.0.0.1:5173/hvn-games/?game=neon-bastion) is the separate Three.js tower-defense route; it has its own board, visual language, and input loop.
+The public page currently opens with [Orbit](https://henryvn27.github.io/hvn-games/?game=phasebound). [Neon Bastion](http://127.0.0.1:5173/hvn-games/?game=neon-bastion) is the separate Three.js tower-defense route; it has its own board, visual language, and input loop. Comet is archived and hidden from the gallery.
 
 ## Install and run
 
@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Open the local URL Vite prints, then play Orbit, Comet, or visit `?game=neon-bastion` for the tower-defense route. The public gallery is at <https://henryvn27.github.io/hvn-games/>.
+Open the local URL Vite prints, then play Orbit or visit `?game=neon-bastion` for the tower-defense route. The public gallery is at <https://henryvn27.github.io/hvn-games/>.
 
 ## Play intelligence
 

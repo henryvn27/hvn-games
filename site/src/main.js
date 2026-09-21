@@ -1,5 +1,5 @@
 import "./styles.css";
-import { mountGoogleAdSlots } from "./ads.js";
+import { mountGoogleAdSlots, mountScoutlyFallback } from "./ads.js";
 import { createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlayerName } from "./play-intelligence.js";
 import orbitPolicyArtifact from "../../games/phasebound/orbit-policy.json";
 import { renderGameShelf, SHELF_GAMES } from "./shelf.js";
@@ -25,10 +25,12 @@ const LEADERBOARD_GAMES = [
 if (params.get("game")) {
   renderGame().finally(() => {
     mountGoogleAdSlots();
+    mountScoutlyFallback();
   });
 } else {
   renderGallery();
   mountGoogleAdSlots();
+  mountScoutlyFallback();
 }
 
 function renderGallery() {

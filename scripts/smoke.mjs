@@ -70,6 +70,7 @@ const shelf = readFileSync(join(root, "site/src/shelf.js"), "utf8");
 for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "shelf-native-host", "mountNativeShelfGame", "Other HVN games"]) {
   if (!shelf.includes(marker)) throw new Error(`Shelf is missing game or route marker: ${marker}`);
 }
+if (shelf.includes('name: "Garden Snake"')) throw new Error("Shelf still uses the old Snake name");
 if (shelf.includes("<iframe")) throw new Error("Game Shelf still uses a nested iframe");
 
 const workflow = readFileSync(join(root, ".github/workflows/pages.yml"), "utf8");

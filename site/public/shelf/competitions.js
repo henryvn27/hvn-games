@@ -13,7 +13,7 @@
   const hash=s=>{let n=2166136261;for(const c of String(s))n=Math.imul(n^c.charCodeAt(0),16777619);return n>>>0;};
   function random(seed){let n=seed>>>0;return ()=>{n+=0x6D2B79F5;let t=n;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
   const GAMES={
-    snake:{name:'Garden Snake',icon:'🐍',seconds:90,rules:'Wrap · Normal speed · 1 apple',rule:'wrap-125-1',score:'5 points per apple. 20 apples = 100 points.'},
+    snake:{name:'Snake',icon:'🐍',seconds:90,rules:'Wrap · Normal speed · 1 apple',rule:'wrap-125-1',score:'5 points per apple. 20 apples = 100 points.'},
     dodger:{name:'Space Dodger',icon:'🚀',seconds:90,rules:'Standard Mars survival',rule:'mars',score:'1 point per 25 score. 2,500 score = 100 points.'},
     flappy:{name:'Sky Flyer',icon:'✈️',seconds:90,rules:'Standard flight from level 1',rule:'sky',score:'5 points per gate. 20 gates = 100 points.'},
     memory:{name:'Memory Match',icon:'🃏',seconds:90,rules:'8 pairs · same layout for every player',rule:'eight-pairs',score:'5 points per pair. Finish for 20 bonus points, plus up to 40 for fewer moves (−2 per move beyond 8).'},
@@ -29,7 +29,7 @@
     [
       {id:'ten-gates',game:'flappy',title:'Through the clouds',description:'Clear 10 gates in one Sky Flyer flight.',kind:'score',target:10},
       {id:'mars-thousand',game:'dodger',title:'Hold the line',description:'Reach 1,000 score in one Space Dodger mission.',kind:'score',target:1000},
-      {id:'garden-fifteen',game:'snake',title:'Growing ambition',description:'Collect 15 apples in one round. Classic or Wrap, Normal speed, 1 apple.',kind:'snake',target:15}
+      {id:'garden-fifteen',game:'snake',title:'Growing ambition',description:'Collect 15 apples in one Snake round. Classic or Wrap, Normal speed, 1 apple.',kind:'snake',target:15}
     ],
     [
       {id:'vault-four',game:'word',title:'Crack the daily code',description:'Solve a 5-letter Word Vault in 4 guesses or fewer.',kind:'word',target:1},

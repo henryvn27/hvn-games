@@ -1,5 +1,5 @@
 const app=document.querySelector('#app');let clean=()=>{},carIndex=0,carTimer=null;
-const games=[['golf','⛳','Mini Golf','Six holes. Find your perfect line.'],['snake','🐍','Garden Snake','Four ways to eat, grow, and go.'],['dodger','🚀','Space Dodger','Defend Mars. Survive the fleet.'],['memory','🃏','Memory Match','Find every pair.'],['reaction','⚡','Reaction Test','How quick are you?'],['word','🔤','Word Vault','Six attempts. Crack the code.'],['clicker','🪙','Clicker Adventure','Build a camp. Explore three worlds.'],['flappy','🐦','Sky Flyer','A pixel-plane sunset run.'],['platform','🕹️','Mini Platformer','Twelve levels. Three worlds. Every star.'],['tic','❌','Tic-Tac-Toe','Take on the computer.'],['checkers','♟','Checkers','Three bot difficulties.'],['trade','🏘️','City Trader','Buy streets, beat the bots.']];
+const games=[['golf','⛳','Mini Golf','Six holes. Find your perfect line.'],['snake','🐍','Snake','Four ways to eat, grow, and go.'],['dodger','🚀','Space Dodger','Defend Mars. Survive the fleet.'],['memory','🃏','Memory Match','Find every pair.'],['reaction','⚡','Reaction Test','How quick are you?'],['word','🔤','Word Vault','Six attempts. Crack the code.'],['clicker','🪙','Clicker Adventure','Build a camp. Explore three worlds.'],['flappy','🐦','Sky Flyer','A pixel-plane sunset run.'],['platform','🕹️','Mini Platformer','Twelve levels. Three worlds. Every star.'],['tic','❌','Tic-Tac-Toe','Take on the computer.'],['checkers','♟','Checkers','Three bot difficulties.'],['trade','🏘️','City Trader','Buy streets, beat the bots.']];
 function cards(filter='all'){return games.filter(g=>filter==='all'||(filter==='board'?['checkers','trade'].includes(g[0]):!['checkers','trade'].includes(g[0]))).map(g=>`<article class="card"><div class="art">${g[1]}</div><h3>${g[2]}</h3><p>${g[3]}</p><button onclick="play('${g[0]}')">Play now →</button></article>`).join('')}
 function carousel(){return `<section class="carousel" aria-roledescription="carousel" aria-label="Browse all games"><div class="section-title"><div><span class="eyebrow">Spin the shelf</span><h2>Browse them all</h2></div><div class="car-controls"><button class="car-btn" id="carPrev" aria-label="Previous game">←</button><button class="car-btn" id="carNext" aria-label="Next game">→</button></div></div><div class="car-viewport"><div class="car-track" id="carTrack">${games.map(g=>`<article class="card car-slide"><div class="art">${g[1]}</div><h3>${g[2]}</h3><p>${g[3]}</p><button onclick="play('${g[0]}')">Play now →</button></article>`).join('')}</div></div><div class="car-dots" id="carDots">${games.map((_,i)=>`<button data-i="${i}" class="${i===0?'active':''}" aria-label="Go to slide ${i+1}"></button>`).join('')}</div></section>`}
 function initCarousel(){let track=document.querySelector('#carTrack'),dots=[...document.querySelectorAll('#carDots button')],box=document.querySelector('.carousel'),gap=parseFloat(getComputedStyle(track).columnGap)||15;carIndex=0;let step=()=>track.children[0].getBoundingClientRect().width+gap;let go=i=>{carIndex=(i+games.length)%games.length;track.style.transform=`translateX(-${carIndex*step()}px)`;dots.forEach((d,j)=>d.classList.toggle('active',j===carIndex))};let next=()=>go(carIndex+1);let start=()=>carTimer=setInterval(next,3500);let restart=()=>{clearInterval(carTimer);start()};document.querySelector('#carNext').onclick=()=>{next();restart()};document.querySelector('#carPrev').onclick=()=>{go(carIndex-1);restart()};dots.forEach(d=>d.onclick=()=>{go(+d.dataset.i);restart()});box.onmouseenter=()=>clearInterval(carTimer);box.onmouseleave=start;box.ontouchstart=()=>clearInterval(carTimer);box.ontouchend=start;let onResize=()=>go(carIndex);addEventListener('resize',onResize);start();clean=()=>{clearInterval(carTimer);removeEventListener('resize',onResize)}}
@@ -13,21 +13,30 @@ function arcadeBest(key, score=0){
   catch { return score; }
 }
 function snake(){
-  shell('Garden Snake','W A S D to steer · collect apples, find your rhythm.',`
+  shell('Snake','Eat apples. Grow longer. Don’t hit the wall.',`
     <div class="panel arcade-panel snake-panel">
-      <div class="arcade-banner"><span>THE GARDEN CLUB</span><span>01 / SNAKE</span></div>
-      <div class="arcade-settings">
-        <label>Game mode<select id="snake-mode"><option value="classic">Classic</option><option value="wrap">Wrap</option><option value="maze">Maze</option><option value="feast">Feast</option></select></label>
-        <label>Speed<select id="snake-speed"><option value="180">Chill</option><option value="125" selected>Normal</option><option value="85">Fast</option></select></label>
-        <label>Apples<select id="snake-food"><option>1</option><option>3</option><option>5</option></select></label>
+      <div class="snake-topline"><div><span class="snake-eyebrow">classic arcade</span><h2>Snake</h2></div><span class="snake-live-mark" id="snake-state">Ready</span></div>
+      <p class="snake-rule"><span class="snake-rule-dot">●</span> Eat the red apples. The longer you get, the harder it is to turn.</p>
+      <div class="snake-layout">
+        <aside class="snake-rail" aria-label="Snake score and settings">
+          <div class="snake-stat"><span>score</span><strong id="score">00</strong></div>
+          <div class="snake-stat"><span>best</span><strong id="best">00</strong></div>
+          <div class="snake-settings">
+            <label>Board<select id="snake-mode"><option value="classic">Classic</option><option value="wrap">Wrap</option><option value="maze">Maze</option><option value="feast">Feast</option></select></label>
+            <label>Speed<select id="snake-speed"><option value="180">Chill</option><option value="125" selected>Normal</option><option value="85">Fast</option></select></label>
+            <label>Apples<select id="snake-food"><option>1</option><option>3</option><option>5</option></select></label>
+          </div>
+          <p class="snake-mode-note" id="mode-note"></p>
+        </aside>
+        <div class="snake-play">
+          <div class="arcade-stage"><canvas class="canvas" width="480" height="480" aria-label="Snake game board"></canvas>
+            <div class="arcade-overlay" id="game-overlay"><span class="kicker">ONE RULE</span><h2 id="overlay-title">Ready to grow?</h2><p id="overlay-note">Eat apples. Don’t hit the wall or yourself.</p><button class="action" id="start-game">Start →</button></div>
+          </div>
+          <p class="snake-feedback" id="snake-feedback" aria-live="polite">Use arrows or WASD to steer.</p>
+        </div>
       </div>
-      <p class="mode-note" id="mode-note"></p>
-      <div class="arcade-stats"><span>APPLES <b id="score">00</b></span><span>BEST <b id="best">00</b></span><span id="snake-state">READY</span></div>
-      <div class="arcade-stage"><canvas class="canvas" width="480" height="480" aria-label="Snake game board"></canvas>
-        <div class="arcade-overlay" id="game-overlay"><span class="kicker">FRESH AIR. FRESH HIGH SCORE.</span><h2 id="overlay-title">A little room<br>to grow.</h2><p id="overlay-note">Pick your rules, then head into the garden.</p><button class="action" id="start-game">Start growing →</button></div>
-      </div>
-      <div class="controls"><button data-direction="w" aria-label="Move up">W ↑</button><button data-direction="a" aria-label="Move left">A ←</button><button data-direction="s" aria-label="Move down">S ↓</button><button data-direction="d" aria-label="Move right">D →</button><button id="pause-game" disabled>Pause</button><button id="restart-game">Restart</button></div>
-      <p class="arcade-footnote">WASD or arrow keys · P to pause · settings start a fresh round</p>
+      <div class="controls snake-controls"><button data-direction="w" aria-label="Move up">W ↑</button><button data-direction="a" aria-label="Move left">A ←</button><button data-direction="s" aria-label="Move down">S ↓</button><button data-direction="d" aria-label="Move right">D →</button><button id="pause-game" disabled>Pause</button><button id="restart-game">Restart</button></div>
+      <p class="snake-footnote">Arrows / WASD to steer · P to pause · changing a setting starts a new round</p>
     </div>`);
   const $=s=>document.querySelector(s), c=$('canvas'),x=c.getContext('2d');
   const runSession=GameRuns.session('snake');

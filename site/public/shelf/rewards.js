@@ -17,7 +17,7 @@
     ['first-play', 'Make a moment', 'Open your first game.', '🎟', 'played', 1],
     ['six-games', 'Shelf explorer', 'Try six different games.', '🧭', 'played', 6],
     ['all-games', 'Full shelf', 'Try all 12 games.', '🌟', 'played', 12],
-    ['snake-ten', 'Apple collector', 'Collect 10 apples in one Garden Snake round.', '🍎', 'snakeScore', 10],
+    ['snake-ten', 'Apple collector', 'Collect 10 apples in one Snake round.', '🍎', 'snakeScore', 10],
     ['first-boss', 'Mars defender', 'Defeat a boss in Space Dodger.', '🚀', 'bossWins', 1],
     ['memory-master', 'Perfectly paired', 'Finish Memory Match in 16 moves or fewer.', '🃏', 'memoryMoves', 16, 'atMost', 'moves'],
     ['quick-reaction', 'Lightning reflexes', 'React after the signal in 250 ms or less.', '⚡', 'reactionMs', 250, 'atMost', 'ms'],

@@ -1,5 +1,5 @@
 import "./styles.css";
-import { mountAdPreview, mountAdsConsent, mountGoogleAdSlots } from "./ads.js";
+import { mountAdPreview, mountGoogleAdSlots } from "./ads.js";
 import { createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlayerName } from "./play-intelligence.js";
 import orbitPolicyArtifact from "../../games/phasebound/orbit-policy.json";
 import { renderGameShelf, SHELF_GAMES } from "./shelf.js";
@@ -24,13 +24,11 @@ const LEADERBOARD_GAMES = [
 
 if (params.get("game")) {
   renderGame().finally(() => {
-    mountAdsConsent();
     mountGoogleAdSlots();
     mountAdPreview();
   });
 } else {
   renderGallery();
-  mountAdsConsent();
   mountGoogleAdSlots();
   mountAdPreview();
 }

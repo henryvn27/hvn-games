@@ -1,4 +1,3 @@
-const CONSENT_KEY = "hvn-games:ads-consent:v1";
 const GOOGLE_AD_FALLBACK_DELAY = 8000;
 const GOOGLE_AD_CLIENT = "ca-pub-1123012671033143";
 const GOOGLE_AD_SLOT = "5915584309";
@@ -36,7 +35,6 @@ function showFallback(preview) {
 }
 
 export function mountAdPreview() {
-  if (readConsent() !== "allow") return;
   if (document.querySelector("[data-ad-preview]")) return;
   const preview = document.createElement("aside");
   preview.className = "ad-preview";
@@ -46,8 +44,8 @@ export function mountAdPreview() {
   preview.setAttribute("aria-hidden", "true");
   preview.innerHTML = `
     <a class="ad-preview-link" href="https://scoutly.one" target="_blank" rel="noreferrer">
-      <img src="${import.meta.env.BASE_URL}assets/scoutly-house-ad.png" alt="Scoutly: from lookup to decision">
-      <span class="ad-preview-caption"><span class="ad-preview-label">house ad</span><strong>Scoutly</strong><span>From lookup to decision.</span></span>
+      <img src="${import.meta.env.BASE_URL}assets/scoutly-house-ad.png" alt="Scoutly: the only app you need for competitive robotics">
+      <span class="ad-preview-caption"><strong>Scoutly</strong><span>The only app you need for competitive robotics.</span></span>
     </a>
   `;
   const anchor = document.querySelector("[data-ad-anchor]");
@@ -74,11 +72,11 @@ export function mountAdPreview() {
     observer.disconnect();
     window.clearTimeout(timeout);
   };
+  showFallback(preview);
   settle();
 }
 
 export function mountGoogleAdSlots() {
-  if (readConsent() !== "allow") return;
   const anchors = [...document.querySelectorAll("[data-google-ad-slot]")];
   if (!anchors.length) {
     const main = document.querySelector("main");
@@ -108,78 +106,4 @@ export function mountGoogleAdSlots() {
       // The async AdSense script will process the queued request when available.
     }
   }
-}
-
-function readConsent() {
-  try {
-    return window.localStorage.getItem(CONSENT_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function writeConsent(value) {
-  try {
-    window.localStorage.setItem(CONSENT_KEY, value);
-  } catch {
-    // Ads stay paused if this browser blocks local storage.
-  }
-}
-
-function startAds() {
-  window.adsbygoogle = window.adsbygoogle || [];
-  window.adsbygoogle.requestNonPersonalizedAds = 1;
-  window.adsbygoogle.pauseAdRequests = 0;
-}
-
-function addSettingsLink() {
-  if (document.querySelector("[data-ads-settings]")) return;
-  const link = document.createElement("button");
-  link.type = "button";
-  link.className = "ads-settings-link";
-  link.dataset.adsSettings = "true";
-  link.textContent = "ad settings";
-  link.addEventListener("click", () => {
-    try { window.localStorage.removeItem(CONSENT_KEY); } catch { /* keep the banner usable */ }
-    window.location.reload();
-  });
-  document.body.append(link);
-}
-
-export function mountAdsConsent() {
-  const consent = readConsent();
-  if (consent === "allow") {
-    startAds();
-    addSettingsLink();
-    return;
-  }
-  if (consent === "decline") {
-    addSettingsLink();
-    return;
-  }
-  if (document.querySelector(".ads-consent")) return;
-
-  const banner = document.createElement("aside");
-  banner.className = "ads-consent";
-  banner.setAttribute("aria-label", "Advertising choices");
-  banner.innerHTML = `
-    <div>
-      <strong>Keep the games free</strong>
-      <p>HVN games uses occasional Google ads. They are paused until you choose. <a href="./privacy.html">privacy</a></p>
-    </div>
-    <div class="ads-consent-actions">
-      <button type="button" class="button button-primary" data-ads-allow>allow ads</button>
-      <button type="button" class="text-button" data-ads-decline>not now</button>
-    </div>
-  `;
-  banner.querySelector("[data-ads-allow]").addEventListener("click", () => {
-    writeConsent("allow");
-    window.location.reload();
-  });
-  banner.querySelector("[data-ads-decline]").addEventListener("click", () => {
-    writeConsent("decline");
-    banner.remove();
-    addSettingsLink();
-  });
-  document.body.append(banner);
 }

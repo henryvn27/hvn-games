@@ -791,6 +791,8 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .tutorial-demo { min-height: 26px; margin: 19px 0 18px; color: #72f6e3; font-size: 0.83rem; }
 .tutorial-status { display: inline-flex; align-items: center; gap: 8px; }
 .tutorial-status::before { width: 7px; height: 7px; border-radius: 50%; background: currentColor; content: ""; }
+.tutorial-action { display: inline-flex; align-items: center; min-height: 40px; margin: 0 0 18px; padding: 8px 13px; border: 1px solid rgba(224, 232, 255, 0.24); background: rgba(7, 17, 36, 0.42); color: #d6dced; cursor: pointer; font: inherit; }
+.tutorial-action:hover { border-color: #72f6e3; }
 .tutorial-swatch { display: inline-flex; align-items: center; gap: 9px; min-height: 40px; margin: 0 0 18px; padding: 8px 12px 8px 8px; border: 1px solid rgba(224, 232, 255, 0.24); background: rgba(7, 17, 36, 0.42); color: #d6dced; cursor: pointer; font: inherit; }
 .tutorial-swatch span { width: 23px; height: 23px; background: #72f6e3; }
 .tutorial-swatch[data-phase="amber"] span { background: #ffc857; }

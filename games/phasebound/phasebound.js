@@ -153,10 +153,14 @@ export function startPhasebound(options = {}) {
       });
       this.input.on("pointerdown", (pointer) => {
         if (this.mode !== "active" && this.mode !== "tutorial") return;
+        options.onInput?.("move");
         this.pointerTarget = new Phaser.Math.Vector2(pointer.worldX, pointer.worldY);
       });
       this.input.on("pointermove", (pointer) => {
-        if ((this.mode === "active" || this.mode === "tutorial") && pointer.isDown) this.pointerTarget = new Phaser.Math.Vector2(pointer.worldX, pointer.worldY);
+        if ((this.mode === "active" || this.mode === "tutorial") && pointer.isDown) {
+          options.onInput?.("move");
+          this.pointerTarget = new Phaser.Math.Vector2(pointer.worldX, pointer.worldY);
+        }
       });
       this.input.on("pointerup", () => { this.pointerTarget = null; });
     },
@@ -290,6 +294,7 @@ export function startPhasebound(options = {}) {
     togglePhase() {
       if (this.mode !== "active" && this.mode !== "tutorial") return;
       this.phase = this.phase === "cyan" ? "amber" : "cyan";
+      options.onInput?.("phase");
       this.burst(this.player.x, this.player.y, COLORS[this.phase], 8);
       this.drawPlayer();
       this.publish();
@@ -300,6 +305,7 @@ export function startPhasebound(options = {}) {
       this.dashTime = 0.24;
       this.dashCooldown = 1.3;
       this.energy -= 20;
+      options.onInput?.("dash");
       this.burst(this.player.x, this.player.y, COLORS[this.phase], 13);
       this.publish();
     },

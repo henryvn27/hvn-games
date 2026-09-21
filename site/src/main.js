@@ -301,12 +301,14 @@ async function renderGame() {
           <div id="first-play-tutorial" class="first-play-tutorial" hidden>
             <p class="tutorial-kicker">try it once</p>
             <p id="tutorial-step" class="tutorial-step">lesson 1 of 4</p>
-            <h2 id="tutorial-title">Move the triangle.</h2>
-            <p id="tutorial-copy" class="tutorial-intro">Press WASD or an arrow key. Try moving once.</p>
+            <h2 id="tutorial-title">Move your triangle.</h2>
+            <p id="tutorial-copy" class="tutorial-intro">Use WASD or an arrow key, or tap the move button below on a phone.</p>
             <div id="tutorial-demo" class="tutorial-demo" aria-live="polite">
               <span id="tutorial-status">waiting for movement</span>
             </div>
+            <button id="tutorial-move" class="tutorial-action" type="button" hidden>tap to move</button>
             <button id="tutorial-swatch" class="tutorial-swatch" type="button" hidden aria-label="Switch color in the practice lesson"><span aria-hidden="true"></span><b>tap to switch</b></button>
+            <button id="tutorial-dash" class="tutorial-action" type="button" hidden>tap to dash</button>
             <button id="tutorial-start" class="button button-primary" type="button" disabled>move to continue</button>
             <button id="tutorial-skip" class="text-button tutorial-skip" type="button">skip tutorial</button>
           </div>
@@ -347,7 +349,9 @@ async function renderGame() {
   const tutorialTitle = document.querySelector("#tutorial-title");
   const tutorialCopy = document.querySelector("#tutorial-copy");
   const tutorialStatus = document.querySelector("#tutorial-status");
+  const tutorialMove = document.querySelector("#tutorial-move");
   const tutorialSwatch = document.querySelector("#tutorial-swatch");
+  const tutorialDash = document.querySelector("#tutorial-dash");
   const tutorialStart = document.querySelector("#tutorial-start");
   const tutorialSkip = document.querySelector("#tutorial-skip");
   const phaseSwitch = document.querySelector("#phase-switch");
@@ -386,7 +390,7 @@ async function renderGame() {
   const tutorialLessons = [
     {
       title: "Move your triangle.",
-      copy: "Press WASD or an arrow key to move. In the game, you steer this triangle around the field.",
+      copy: "Use WASD or an arrow key to move. On a phone, tap the move button below. In the game, you steer this triangle around the field.",
       waiting: "move the triangle once",
       ready: "That is you. Use it to reach matching dots.",
       blocked: "move to continue",
@@ -402,7 +406,7 @@ async function renderGame() {
     },
     {
       title: "Dash when you need room.",
-      copy: "Press Shift. The triangle surges forward for a moment. Use it to escape a red planet.",
+      copy: "Press Shift, or tap the dash button below on a phone. The triangle surges forward for a moment, which helps you escape a red planet.",
       waiting: "press Shift once",
       ready: "That burst is your escape move.",
       blocked: "dash to continue",
@@ -429,8 +433,10 @@ async function renderGame() {
     tutorialStatus.textContent = tutorialLessonReady ? lesson.ready : lesson.waiting;
     tutorialStart.textContent = tutorialLessonReady ? lesson.next : lesson.blocked;
     tutorialStart.disabled = !tutorialLessonReady;
+    tutorialMove.hidden = tutorialLessonIndex !== 0;
     tutorialSwatch.hidden = tutorialLessonIndex !== 1;
     tutorialSwatch.dataset.phase = tutorialLessonIndex === 1 ? "cyan" : "";
+    tutorialDash.hidden = tutorialLessonIndex !== 2;
   }
 
   function finishTutorialLesson(message) {
@@ -568,6 +574,12 @@ async function renderGame() {
   api = startPhasebound({
     parent: "game-root",
     tutorial: !hasSeenTutorial(),
+    onInput: (input) => {
+      if (!tutorialActive || tutorialLessonReady) return;
+      if (tutorialLessonIndex === 0 && input === "move") finishTutorialLesson(tutorialLessons[0].ready);
+      if (tutorialLessonIndex === 1 && input === "phase") finishTutorialLesson(tutorialLessons[1].ready);
+      if (tutorialLessonIndex === 2 && input === "dash") finishTutorialLesson(tutorialLessons[2].ready);
+    },
     onState: (state) => {
       if (state.mode === "active" && previousMode !== "active") tracker.start();
       if (state.mode === "result" && previousMode !== "result") tracker.finish(state);
@@ -590,11 +602,22 @@ async function renderGame() {
 
   overlayAction.addEventListener("click", () => { if (overlayAction.hidden) return; action(); });
   tutorialStart.addEventListener("click", advanceTutorial);
+  tutorialMove.addEventListener("click", () => {
+    if (!tutorialActive || tutorialLessonIndex !== 0 || tutorialLessonReady) return;
+    api.setTouchDirection("right", true);
+    window.setTimeout(() => api.setTouchDirection("right", false), 260);
+    finishTutorialLesson(tutorialLessons[0].ready);
+  });
   tutorialSkip.addEventListener("click", skipTutorial);
   tutorialSwatch.addEventListener("click", () => {
     if (!tutorialActive || tutorialLessonIndex !== 1 || tutorialLessonReady) return;
     api.togglePhase();
     finishTutorialLesson(tutorialLessons[1].ready);
+  });
+  tutorialDash.addEventListener("click", () => {
+    if (!tutorialActive || tutorialLessonIndex !== 2 || tutorialLessonReady) return;
+    api.dash();
+    finishTutorialLesson(tutorialLessons[2].ready);
   });
   window.addEventListener("keydown", (event) => {
     if (!tutorialActive || event.repeat) return;

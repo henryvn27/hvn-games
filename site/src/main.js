@@ -299,7 +299,7 @@ async function renderGame() {
         <div id="game-root"></div>
         <div id="game-overlay" class="game-overlay">
           <div id="first-play-tutorial" class="first-play-tutorial" hidden>
-            <p class="tutorial-kicker">quick practice</p>
+            <p class="tutorial-kicker">try it once</p>
             <p id="tutorial-step" class="tutorial-step">lesson 1 of 4</p>
             <h2 id="tutorial-title">Move the triangle.</h2>
             <p id="tutorial-copy" class="tutorial-intro">Press WASD or an arrow key. Try moving once.</p>
@@ -385,34 +385,34 @@ async function renderGame() {
 
   const tutorialLessons = [
     {
-      title: "Move the triangle.",
-      copy: "Press WASD or an arrow key. Try moving once.",
-      waiting: "waiting for movement",
-      ready: "Good. You are steering the triangle.",
+      title: "Move your triangle.",
+      copy: "Press WASD or an arrow key to move. In the game, you steer this triangle around the field.",
+      waiting: "move the triangle once",
+      ready: "That is you. Use it to reach matching dots.",
       blocked: "move to continue",
-      next: "next: switch color",
+      next: "next: match a color",
     },
     {
-      title: "Switch your color.",
-      copy: "Press Space, or tap the square below. Match your color to collect a dot.",
-      waiting: "waiting for a color change",
-      ready: "Nice. Your color changed.",
-      blocked: "switch to continue",
-      next: "next: try a dash",
+      title: "Match the dot's color.",
+      copy: "Press Space, or tap the square. Your triangle changes color. Collect dots with the same color.",
+      waiting: "change your color",
+      ready: "Good. Now look for a dot that matches.",
+      blocked: "change color to continue",
+      next: "next: use a dash",
     },
     {
-      title: "Dash out of trouble.",
-      copy: "Press Shift for a quick burst. Use it when a red planet gets too close.",
-      waiting: "waiting for a dash",
-      ready: "That burst can get you clear.",
+      title: "Dash when you need room.",
+      copy: "Press Shift. The triangle surges forward for a moment. Use it to escape a red planet.",
+      waiting: "press Shift once",
+      ready: "That burst is your escape move.",
       blocked: "dash to continue",
-      next: "next: see the goal",
+      next: "next: play a run",
     },
     {
-      title: "Match dots. Dodge planets.",
-      copy: "Collect dots that match your color. Red planets cost a life. Pink stars give one back.",
-      waiting: "you are ready",
-      ready: "",
+      title: "Collect matching dots.",
+      copy: "Grab cyan or yellow dots that match your triangle. Red planets hurt. Pink stars give you another life.",
+      waiting: "you have the basics",
+      ready: "Matching dots raise your score. Red planets end the run.",
       blocked: "start the run",
       next: "start the run",
     },

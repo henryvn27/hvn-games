@@ -1,0 +1,55 @@
+(function () {
+  'use strict';
+
+  const STORAGE_KEY = 'hvn-games-shelf-leaderboards-v1';
+  const PROFILE_KEY = 'hvn-games-shelf-player-v1';
+
+  function read() {
+    try {
+      const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      return value && typeof value === 'object' ? value : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function write(value) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(value)); } catch { /* play still works */ }
+  }
+
+  function getName() {
+    try { return localStorage.getItem(PROFILE_KEY) || ''; } catch { return ''; }
+  }
+
+  function setName(value) {
+    const raw = String(value || '').trim().replace(/\s+/g, ' ').slice(0, 16);
+    const name = /^[a-zA-Z]{3}$/.test(raw) ? raw.toUpperCase() : raw;
+    try { localStorage.setItem(PROFILE_KEY, name); } catch { /* play still works */ }
+    return name;
+  }
+
+  function get(gameId = 'reaction') {
+    const data = read();
+    const entries = Array.isArray(data[gameId]) ? data[gameId] : [];
+    return entries
+      .filter(entry => entry && typeof entry.name === 'string' && Number.isFinite(entry.score))
+      .sort((a, b) => a.score - b.score || a.createdAt.localeCompare(b.createdAt))
+      .slice(0, 10);
+  }
+
+  function record(gameId, score) {
+    const name = getName();
+    if (!name || !Number.isFinite(score) || score <= 0) return get(gameId);
+    const data = read();
+    const entries = Array.isArray(data[gameId]) ? data[gameId] : [];
+    const now = new Date().toISOString();
+    const duplicate = entries.some(entry => entry.name === name && entry.score === Math.round(score)
+      && Math.abs(Date.parse(entry.createdAt) - Date.parse(now)) < 2000);
+    if (!duplicate) entries.push({name, score: Math.round(score), createdAt: now});
+    data[gameId] = entries.sort((a, b) => a.score - b.score || a.createdAt.localeCompare(b.createdAt)).slice(0, 25);
+    write(data);
+    return get(gameId);
+  }
+
+  window.ShelfLeaderboard = Object.freeze({get, record, getName, setName});
+})();

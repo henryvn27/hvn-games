@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { createOrbitPolicy } from "./orbit-policy.js";
 
 const COLORS = {
   cyan: 0x72f6e3,
@@ -20,6 +21,19 @@ const PHASE_TURN_SLOWDOWN_DURATION = 0.95;
 const PHASE_TURN_DURATION = 2.4;
 const HIT_FREEZE_DURATION = 0.5;
 const HIT_FLASH_DURATION = 420;
+const HAZARD_PLAYER_CLEARANCE = 64;
+const HAZARD_HAZARD_CLEARANCE = 58;
+const HAZARD_SPAWN_GRACE = 0.9;
+const HAZARD_POSITION_ATTEMPTS = 32;
+const PHASE_SPEED_STEP = 0.14;
+const MAX_PHASE_SPEED_BONUS = 1.35;
+const PACKET_SPEED_STEP = 0.05;
+const TIME_SPEED_STEP = 0.008;
+const MAX_RUN_SPEED_BONUS = 2.25;
+const SLOW_MODE_TIME_SCALE = 0.45;
+const SLOW_MODE_DEFAULT_SCORE_RATE = 500;
+const SLOW_MODE_RATE_SAMPLE_DURATION = 1;
+const PLAYER_EDGE_MARGIN = 18;
 const PHASE_LABELS = ["steady", "turnaround", "tight orbit", "fast orbit", "rough orbit"];
 const ORBIT_RINGS = [[300, 132, 0.16, 2], [470, 220, 0.12, 1], [660, 320, 0.1, 1], [880, 430, 0.08, 1], [1_100, 540, 0.06, 1]];
 const ORBIT_FOCI = [
@@ -40,6 +54,8 @@ export function startPhasebound(options = {}) {
     create() {
       this.mode = options.tutorial ? "tutorial" : "menu";
       this.preview = Boolean(options.preview);
+      this.autoplay = Boolean(options.autoplay);
+      this.policy = options.policy ?? createOrbitPolicy();
       this.pacing = options.pacing === "busy" ? "busy" : "steady";
       this.phase = "cyan";
       this.phaseNumber = 1;
@@ -57,12 +73,19 @@ export function startPhasebound(options = {}) {
       this.heat = 1;
       this.energy = 100;
       this.elapsed = 0;
+      this.slowMode = false;
+      this.normalScoreRate = SLOW_MODE_DEFAULT_SCORE_RATE;
+      this.normalScoreSampleElapsed = 0;
+      this.normalScoreSamplePoints = 0;
       this.spawnClock = 0;
       this.publishClock = 0;
       this.hitCooldown = 0;
       this.hitFreeze = 0;
+      this.spawnGrace = 0;
       this.dashTime = 0;
       this.dashCooldown = 0;
+      this.autoplayClock = 0;
+      this.autoplayDirection = new Phaser.Math.Vector2();
       this.touch = { up: false, down: false, left: false, right: false };
       this.packets = [];
       this.hazards = [];
@@ -72,7 +95,7 @@ export function startPhasebound(options = {}) {
       this.createInput();
       this.createHazards();
       this.publish();
-      if (this.preview) this.startRun();
+      if (this.preview || this.autoplay) this.startRun();
       else if (options.tutorial) this.startTutorial();
     },
 
@@ -135,15 +158,20 @@ export function startPhasebound(options = {}) {
       this.input.keyboard.on("keydown-SPACE", () => this.togglePhase());
       this.input.keyboard.on("keydown-SHIFT", () => this.dash());
       this.input.keyboard.on("keydown-P", () => this.togglePause());
+      this.input.keyboard.on("keydown-Q", () => this.toggleSlowMode());
       this.input.keyboard.on("keydown-R", () => {
         if (this.mode === "result" || this.mode === "menu") this.startRun();
       });
       this.input.on("pointerdown", (pointer) => {
         if (this.mode !== "active" && this.mode !== "tutorial") return;
+        options.onInput?.("move");
         this.pointerTarget = new Phaser.Math.Vector2(pointer.worldX, pointer.worldY);
       });
       this.input.on("pointermove", (pointer) => {
-        if ((this.mode === "active" || this.mode === "tutorial") && pointer.isDown) this.pointerTarget = new Phaser.Math.Vector2(pointer.worldX, pointer.worldY);
+        if ((this.mode === "active" || this.mode === "tutorial") && pointer.isDown) {
+          options.onInput?.("move");
+          this.pointerTarget = new Phaser.Math.Vector2(pointer.worldX, pointer.worldY);
+        }
       });
       this.input.on("pointerup", () => { this.pointerTarget = null; });
     },
@@ -155,7 +183,7 @@ export function startPhasebound(options = {}) {
     addHazard(index) {
       const focusIndex = index % this.getActiveOrbitCount();
       const focus = ORBIT_FOCI[focusIndex];
-      this.hazards.push({
+      const hazard = {
         angle: (Math.PI * 2 * index) / 5 + 0.35,
         radius: 130 + (index % 3) * 76,
         speed: 0.22 + index * 0.035,
@@ -166,7 +194,66 @@ export function startPhasebound(options = {}) {
         size: index % 2 === 0 ? 15 : 11,
         wobble: index * 0.8,
         art: this.add.graphics().setDepth(2),
-      });
+      };
+      this.hazards.push(hazard);
+      this.positionHazardSafely(hazard, 0);
+      if (this.mode === "active" || this.mode === "tutorial") this.spawnGrace = Math.max(this.spawnGrace, HAZARD_SPAWN_GRACE);
+    },
+
+    getHazardPosition(hazard, time, angle = hazard.angle) {
+      const focus = ORBIT_FOCI[hazard.focusIndex];
+      const wobble = Math.sin(time * 0.0012 + hazard.wobble) * 22 * focus.scale;
+      const orbitRadius = hazard.radius * focus.scale + wobble;
+      return {
+        x: hazard.centerX + Math.cos(angle) * orbitRadius,
+        y: hazard.centerY + Math.sin(angle) * orbitRadius * 0.58,
+      };
+    },
+
+    positionHazardSafely(hazard, time) {
+      const current = this.getHazardPosition(hazard, time);
+      let bestAngle = hazard.angle;
+      let bestPosition = current;
+      let bestScore = this.hazardPositionScore(hazard, current);
+
+      for (let attempt = 0; attempt < HAZARD_POSITION_ATTEMPTS; attempt += 1) {
+        const angle = hazard.angle + (Math.PI * 2 * attempt) / HAZARD_POSITION_ATTEMPTS;
+        const candidate = this.getHazardPosition(hazard, time, angle);
+        const score = this.hazardPositionScore(hazard, candidate);
+        if (score > bestScore) {
+          bestScore = score;
+          bestAngle = angle;
+          bestPosition = candidate;
+        }
+        if (score >= 1) break;
+      }
+
+      hazard.angle = bestAngle;
+      hazard.x = bestPosition.x;
+      hazard.y = bestPosition.y;
+    },
+
+    hazardPositionScore(hazard, position) {
+      const playerDistance = Phaser.Math.Distance.Between(this.player.x, this.player.y, position.x, position.y);
+      const otherHazards = this.hazards.filter((other) => other !== hazard && Number.isFinite(other.x) && Number.isFinite(other.y));
+      const hazardDistance = otherHazards.length === 0
+        ? HAZARD_HAZARD_CLEARANCE
+        : Math.min(...otherHazards.map((other) => Phaser.Math.Distance.Between(position.x, position.y, other.x, other.y)));
+      return Math.min(playerDistance / HAZARD_PLAYER_CLEARANCE, hazardDistance / HAZARD_HAZARD_CLEARANCE);
+    },
+
+    resetHazardsForRun() {
+      const activeOrbitCount = this.getActiveOrbitCount();
+      for (const [index, hazard] of this.hazards.entries()) {
+        const focusIndex = index % activeOrbitCount;
+        const focus = ORBIT_FOCI[focusIndex];
+        hazard.focusIndex = focusIndex;
+        hazard.centerX = focus.x;
+        hazard.centerY = focus.y;
+        hazard.angle = (Math.PI * 2 * index) / 5 + 0.35;
+        hazard.direction = 1;
+        this.positionHazardSafely(hazard, 0);
+      }
     },
 
     updateDifficulty() {
@@ -188,6 +275,7 @@ export function startPhasebound(options = {}) {
       this.phaseLabel = PHASE_LABELS[Math.min(this.phaseNumber - 1, PHASE_LABELS.length - 1)] || `phase ${this.phaseNumber}`;
       this.phaseWarning = false;
       this.phaseTransition = { elapsed: 0, switched: false };
+      this.spawnGrace = Math.max(this.spawnGrace, HAZARD_SPAWN_GRACE);
       const activeOrbitCount = this.getActiveOrbitCount();
       for (const [index, hazard] of this.hazards.entries()) hazard.focusIndex = index % activeOrbitCount;
       this.drawOrbitMap();
@@ -215,16 +303,23 @@ export function startPhasebound(options = {}) {
       this.heat = 1;
       this.energy = 100;
       this.elapsed = 0;
+      this.slowMode = false;
+      this.normalScoreRate = SLOW_MODE_DEFAULT_SCORE_RATE;
+      this.normalScoreSampleElapsed = 0;
+      this.normalScoreSamplePoints = 0;
       this.spawnClock = 0;
       this.hitCooldown = 0;
       this.hitFreeze = 0;
+      this.spawnGrace = HAZARD_SPAWN_GRACE;
       this.dashTime = 0;
       this.dashCooldown = 0;
+      this.autoplayClock = 0;
+      this.autoplayDirection.set(0, 0);
       this.player.setPosition(480, 320);
       this.cameras.main.setZoom(1);
       this.playerVelocity.set(0, 0);
       this.pointerTarget = null;
-      for (const hazard of this.hazards) hazard.direction = 1;
+      this.resetHazardsForRun();
       const openingPackets = this.pacing === "busy" ? 6 : 5;
       for (let index = 0; index < openingPackets; index += 1) this.spawnPacket();
       this.publish();
@@ -250,16 +345,21 @@ export function startPhasebound(options = {}) {
       this.heat = 1;
       this.energy = 100;
       this.elapsed = 0;
+      this.slowMode = false;
+      this.normalScoreRate = SLOW_MODE_DEFAULT_SCORE_RATE;
+      this.normalScoreSampleElapsed = 0;
+      this.normalScoreSamplePoints = 0;
       this.spawnClock = 0;
       this.hitCooldown = 0;
       this.hitFreeze = 0;
+      this.spawnGrace = HAZARD_SPAWN_GRACE;
       this.dashTime = 0;
       this.dashCooldown = 0;
       this.player.setPosition(480, 320);
       this.cameras.main.setZoom(1);
       this.playerVelocity.set(0, 0);
       this.pointerTarget = null;
-      for (const hazard of this.hazards) hazard.direction = 1;
+      this.resetHazardsForRun();
       this.drawPlayer();
       this.publish();
     },
@@ -267,6 +367,7 @@ export function startPhasebound(options = {}) {
     togglePhase() {
       if (this.mode !== "active" && this.mode !== "tutorial") return;
       this.phase = this.phase === "cyan" ? "amber" : "cyan";
+      options.onInput?.("phase");
       this.burst(this.player.x, this.player.y, COLORS[this.phase], 8);
       this.drawPlayer();
       this.publish();
@@ -277,6 +378,7 @@ export function startPhasebound(options = {}) {
       this.dashTime = 0.24;
       this.dashCooldown = 1.3;
       this.energy -= 20;
+      options.onInput?.("dash");
       this.burst(this.player.x, this.player.y, COLORS[this.phase], 13);
       this.publish();
     },
@@ -291,6 +393,12 @@ export function startPhasebound(options = {}) {
       }
     },
 
+    toggleSlowMode() {
+      if (this.mode !== "active") return;
+      this.slowMode = !this.slowMode;
+      this.publish();
+    },
+
     resumeRun() {
       if (this.mode !== "pause") return;
       this.mode = "active";
@@ -303,23 +411,26 @@ export function startPhasebound(options = {}) {
     },
 
     update(time, delta) {
-      const dt = Math.min(delta / 1000, 0.04);
+      const realDt = Math.min(delta / 1000, 0.04);
       if (this.mode === "tutorial") {
-        this.dashTime = Math.max(0, this.dashTime - dt);
-        this.dashCooldown = Math.max(0, this.dashCooldown - dt);
-        this.energy = Math.min(100, this.energy + dt * 2.4);
-        this.updateHazards(time, dt);
-        this.updateMovement(dt);
+        this.dashTime = Math.max(0, this.dashTime - realDt);
+        this.dashCooldown = Math.max(0, this.dashCooldown - realDt);
+        this.energy = Math.min(100, this.energy + realDt * 2.4);
+        this.updateHazards(time, realDt);
+        this.updateMovement(realDt);
         this.drawPlayer();
         return;
       }
       if (this.mode !== "active") return;
       for (const star of this.stars) star.object.setAlpha(0.16 + (Math.sin(time * 0.001 + star.phase) + 1) * 0.11);
-      this.updateBursts(dt);
+      this.updateBursts(realDt);
       if (this.hitFreeze > 0) {
-        this.hitFreeze = Math.max(0, this.hitFreeze - dt);
+        this.hitFreeze = Math.max(0, this.hitFreeze - realDt);
         return;
       }
+      const dt = realDt * (this.slowMode ? SLOW_MODE_TIME_SCALE : 1);
+      this.spawnGrace = Math.max(0, this.spawnGrace - realDt);
+      const scoreBefore = this.score;
       this.updateHazards(time, dt);
 
       this.elapsed += dt;
@@ -329,13 +440,15 @@ export function startPhasebound(options = {}) {
       this.dashTime = Math.max(0, this.dashTime - dt);
       this.dashCooldown = Math.max(0, this.dashCooldown - dt);
       this.energy = Math.min(100, this.energy + dt * 2.4);
+      this.applyAutoplay(dt);
       this.updateMovement(dt);
       this.updatePackets(time);
       this.updateLifePickup(time);
       this.updateDifficulty();
       this.updateHazardCollision();
+      this.updateSlowMode(realDt, scoreBefore);
       this.drawPlayer();
-      this.publishClock += dt;
+      this.publishClock += realDt;
       if (this.publishClock > 0.1) {
         this.publishClock = 0;
         this.publish();
@@ -343,13 +456,35 @@ export function startPhasebound(options = {}) {
       if (this.energy <= 0) this.endRun("lost");
     },
 
+    updateSlowMode(realDt, scoreBefore) {
+      if (this.slowMode) {
+        this.score = Math.max(0, this.score - this.normalScoreRate * realDt);
+        return;
+      }
+
+      const scoreGain = Math.max(0, this.score - scoreBefore);
+      this.normalScoreSampleElapsed += realDt;
+      this.normalScoreSamplePoints += scoreGain;
+      if (this.normalScoreSampleElapsed < SLOW_MODE_RATE_SAMPLE_DURATION) return;
+
+      const measuredRate = this.normalScoreSamplePoints / this.normalScoreSampleElapsed;
+      this.normalScoreRate = Phaser.Math.Linear(this.normalScoreRate, measuredRate, 0.55);
+      this.normalScoreSampleElapsed = 0;
+      this.normalScoreSamplePoints = 0;
+    },
+
     updateMovement(dt) {
       let x = 0;
       let y = 0;
-      if (this.cursors.left.isDown || this.keys.A.isDown || this.touch.left) x -= 1;
-      if (this.cursors.right.isDown || this.keys.D.isDown || this.touch.right) x += 1;
-      if (this.cursors.up.isDown || this.keys.W.isDown || this.touch.up) y -= 1;
-      if (this.cursors.down.isDown || this.keys.S.isDown || this.touch.down) y += 1;
+      if (this.autoplay && this.autoplayDirection.lengthSq() > 0.001) {
+        x = this.autoplayDirection.x;
+        y = this.autoplayDirection.y;
+      } else {
+        if (this.cursors.left.isDown || this.keys.A.isDown || this.touch.left) x -= 1;
+        if (this.cursors.right.isDown || this.keys.D.isDown || this.touch.right) x += 1;
+        if (this.cursors.up.isDown || this.keys.W.isDown || this.touch.up) y -= 1;
+        if (this.cursors.down.isDown || this.keys.S.isDown || this.touch.down) y += 1;
+      }
       if (x || y) {
         const length = Math.hypot(x, y) || 1;
         const runSpeed = 235 + Math.min(90, this.packetsCollected * 2.2);
@@ -365,9 +500,36 @@ export function startPhasebound(options = {}) {
       } else {
         this.playerVelocity.scale(0.82);
       }
-      this.player.x = Phaser.Math.Clamp(this.player.x + this.playerVelocity.x * dt, 34, 926);
-      this.player.y = Phaser.Math.Clamp(this.player.y + this.playerVelocity.y * dt, 34, 606);
+      this.player.x = Phaser.Math.Clamp(this.player.x + this.playerVelocity.x * dt, PLAYER_EDGE_MARGIN, 960 - PLAYER_EDGE_MARGIN);
+      this.player.y = Phaser.Math.Clamp(this.player.y + this.playerVelocity.y * dt, PLAYER_EDGE_MARGIN, 640 - PLAYER_EDGE_MARGIN);
       if (this.playerVelocity.length() > 10) this.player.rotation = Math.atan2(this.playerVelocity.y, this.playerVelocity.x) + Math.PI / 2;
+    },
+
+    applyAutoplay(dt) {
+      if (!this.autoplay || !this.policy) return;
+      this.autoplayClock -= dt;
+      if (this.autoplayClock > 0) return;
+      const action = this.policy.act(this.getPolicyObservation());
+      this.autoplayClock = 0.05;
+      this.autoplayDirection.x = Phaser.Math.Clamp(Number(action.dx) || 0, -1, 1);
+      this.autoplayDirection.y = Phaser.Math.Clamp(Number(action.dy) || 0, -1, 1);
+      if (action.toggle) this.togglePhase();
+      if (action.dash) this.dash();
+    },
+
+    getPolicyObservation() {
+      return {
+        player: { x: this.player.x, y: this.player.y },
+        phase: this.phase,
+        phaseNumber: this.phaseNumber,
+        score: this.score,
+        energy: this.energy,
+        lives: this.lives,
+        elapsed: this.elapsed,
+        packets: this.packets.map((packet) => ({ x: packet.x, y: packet.y, phase: packet.phase })),
+        hazards: this.hazards.map((hazard) => ({ x: hazard.x, y: hazard.y, size: hazard.size })),
+        lifePickup: this.lifePickup ? { x: this.lifePickup.x, y: this.lifePickup.y } : null,
+      };
     },
 
     updatePackets(time) {
@@ -387,6 +549,7 @@ export function startPhasebound(options = {}) {
         } else {
           this.streak = 0;
           this.energy -= 18;
+          this.cameras.main.flash(110, 255, 255, 255, false);
           this.burst(packet.x, packet.y, COLORS.danger, 10);
         }
         this.removePacket(packet);
@@ -395,7 +558,7 @@ export function startPhasebound(options = {}) {
     },
 
     updateHazards(time, dt) {
-      const phaseSpeed = 1 + Math.min(2.4, (this.phaseNumber - 1) * 0.22);
+      const phaseSpeed = 1 + Math.min(MAX_PHASE_SPEED_BONUS, (this.phaseNumber - 1) * PHASE_SPEED_STEP);
       let transitionSpeed = 1;
       if (this.phaseTransition) {
         if (this.phaseTransition.elapsed < PHASE_TURN_SLOWDOWN_DURATION) {
@@ -404,15 +567,14 @@ export function startPhasebound(options = {}) {
           transitionSpeed = Math.min(1, (this.phaseTransition.elapsed - PHASE_TURN_SLOWDOWN_DURATION) / (PHASE_TURN_DURATION - PHASE_TURN_SLOWDOWN_DURATION));
         }
       }
+      const runSpeed = 1 + Math.min(MAX_RUN_SPEED_BONUS, this.packetsCollected * PACKET_SPEED_STEP + this.elapsed * TIME_SPEED_STEP);
       for (const hazard of this.hazards) {
         const focus = ORBIT_FOCI[hazard.focusIndex];
         hazard.centerX = Phaser.Math.Linear(hazard.centerX, focus.x, Math.min(1, dt * 2.2));
         hazard.centerY = Phaser.Math.Linear(hazard.centerY, focus.y, Math.min(1, dt * 2.2));
-        const speed = hazard.speed * phaseSpeed * transitionSpeed * (1 + Math.min(4.2, this.packetsCollected * 0.11 + this.elapsed * 0.018));
+        const speed = hazard.speed * phaseSpeed * transitionSpeed * runSpeed;
         hazard.angle += speed * hazard.direction * dt;
-        const wobble = Math.sin(time * 0.0012 + hazard.wobble) * 22 * focus.scale;
-        hazard.x = hazard.centerX + Math.cos(hazard.angle) * (hazard.radius * focus.scale + wobble);
-        hazard.y = hazard.centerY + Math.sin(hazard.angle) * (hazard.radius * focus.scale + wobble) * 0.58;
+        this.positionHazardSafely(hazard, time);
         hazard.art.clear();
         const size = hazard.size;
         hazard.art.fillStyle(COLORS.danger, 0.96);
@@ -444,7 +606,7 @@ export function startPhasebound(options = {}) {
     },
 
     updateHazardCollision() {
-      if (this.dashTime > 0 || this.hitCooldown > 0) return;
+      if (this.spawnGrace > 0 || this.dashTime > 0 || this.hitCooldown > 0) return;
       for (const hazard of this.hazards) {
         if (Phaser.Math.Distance.Between(this.player.x, this.player.y, hazard.x, hazard.y) < hazard.size + 17) {
           this.streak = 0;
@@ -632,6 +794,7 @@ export function startPhasebound(options = {}) {
       if (this.mode !== "active") return;
       this.mode = "result";
       this.result = result;
+      this.slowMode = false;
       this.phaseWarning = false;
       this.phaseTransition = null;
       this.playerVelocity.set(0, 0);
@@ -640,7 +803,7 @@ export function startPhasebound(options = {}) {
     },
 
     publish() {
-      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, phaseNumber: this.phaseNumber, phaseLabel: this.phaseLabel, phaseWarning: this.phaseWarning, phaseTurning: Boolean(this.phaseTransition), score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed });
+      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, phaseNumber: this.phaseNumber, phaseLabel: this.phaseLabel, phaseWarning: this.phaseWarning, phaseTurning: Boolean(this.phaseTransition), score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed, slowMode: this.slowMode, slowModeRate: this.normalScoreRate, autoplay: this.autoplay, policy: this.policy?.name || null });
     },
   });
 
@@ -656,41 +819,6 @@ export function startPhasebound(options = {}) {
     scene: HotDotScene,
   });
 
-  // Phaser's logical game size stays at 960x640, but the canvas backing store
-  // should match a Retina display so circles and the player triangle stay crisp.
-  // Cap the multiplier to avoid turning low-value effects into a needlessly
-  // expensive render target on very dense displays.
-  const canvasDensity = Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
-  const applyCanvasDensity = () => {
-    if (!game.canvas || !game.renderer) return;
-
-    const { width, height } = game.scale.gameSize;
-    game.canvas.width = Math.round(width * canvasDensity);
-    game.canvas.height = Math.round(height * canvasDensity);
-    // Keep Phaser's renderer dimensions logical. Camera and input math use
-    // these values; only the canvas backing store should be density-scaled.
-    game.renderer.width = width;
-    game.renderer.height = height;
-  };
-
-  game.events.once("ready", () => {
-    applyCanvasDensity();
-    const context = game.renderer.gameContext;
-    const originalSetTransform = context.setTransform.bind(context);
-    let scaleTransforms = false;
-    context.setTransform = (...args) => {
-      if (scaleTransforms && args.length === 6) {
-        const [a, b, c, d, e, f] = args;
-        originalSetTransform(a * canvasDensity, b * canvasDensity, c * canvasDensity, d * canvasDensity, e * canvasDensity, f * canvasDensity);
-        return;
-      }
-      originalSetTransform(...args);
-    };
-    game.renderer.on("prerender", () => { scaleTransforms = true; });
-    game.renderer.on("postrender", () => { scaleTransforms = false; });
-    game.scale.on("resize", applyCanvasDensity);
-  });
-
   const getScene = () => game.scene.getScene("HotDot");
   return {
     start: () => getScene()?.startRun(),
@@ -698,6 +826,7 @@ export function startPhasebound(options = {}) {
     resume: () => getScene()?.resumeRun(),
     togglePhase: () => getScene()?.togglePhase(),
     togglePause: () => getScene()?.togglePause(),
+    toggleSlowMode: () => getScene()?.toggleSlowMode(),
     dash: () => getScene()?.dash(),
     setTouchDirection: (direction, pressed) => getScene()?.setTouchDirection(direction, pressed),
     destroy: () => game.destroy(true),

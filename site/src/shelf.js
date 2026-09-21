@@ -32,9 +32,13 @@ export async function renderGameShelf({ app, base }) {
     app.innerHTML = `
       <header class="game-header page-width shelf-header">
         <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
-        <nav class="site-nav" aria-label="Game navigation"><span class="shelf-game-label">${selected.name}</span><a href="${base}?game=shelf">all games</a><a href="${base}?game=${params.get("from") || "orbit"}">back to Orbit</a></nav>
+        <nav class="site-nav" aria-label="Game navigation"><span class="shelf-game-label">${selected.name}</span><a href="${base}?game=shelf">all games</a><a href="${base}">home</a></nav>
       </header>
-      <main class="page-width shelf-native-main">
+      <main class="game-main page-width shelf-native-main">
+        <div class="game-heading shelf-game-heading">
+          <div><p class="game-index">${selected.number} / ${selected.kind}</p><h1>${selected.name}</h1></div>
+          <p class="game-blurb">${selected.description}</p>
+        </div>
         <div id="shelf-native-host" aria-label="${selected.name} game"><div id="app"></div></div>
       </main>
     `;
@@ -42,39 +46,45 @@ export async function renderGameShelf({ app, base }) {
     return;
   }
 
-  renderShelfHome({ app, base, params });
+  renderShelfHome({ app, base });
 }
 
 const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
 const SHELF_SCRIPTS = ["word-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
 const NATIVE_SHELF_OVERRIDES = `
-  body.shelf-native-mode { background: #111211; color: #f3f5eb; }
+  body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode > #hvn-shell-app { width: 100%; }
-  body.shelf-native-mode .game-header { position: relative; height: auto; min-height: 72px; padding-block: 18px; background: #111211; border-bottom: 1px solid rgba(243, 245, 235, .2); }
+  body.shelf-native-mode .game-header { position: relative; min-height: 78px; background: var(--native-bg); border-bottom: 1px solid var(--native-line); }
   body.shelf-native-mode .game-header .wordmark,
-  body.shelf-native-mode .game-header .site-nav a { color: #f3f5eb; }
-  body.shelf-native-mode .shelf-game-label { color: #f3f5eb; font-size: .82rem; }
+  body.shelf-native-mode .game-header .site-nav a { color: var(--native-ink); }
+  body.shelf-native-mode .shelf-game-label { color: var(--native-muted); font-size: .78rem; }
   body.shelf-native-mode .game-header .site-nav { display: flex; }
-  body.shelf-native-mode .shelf-native-main { max-width: 1180px; padding-block: 0 80px; }
+  body.shelf-native-mode .shelf-native-main { max-width: 1180px; padding-block: 44px 78px; }
+  body.shelf-native-mode .shelf-game-heading { align-items: end; margin-bottom: 26px; }
+  body.shelf-native-mode .shelf-game-heading .game-index { color: #dfff73; }
+  body.shelf-native-mode .shelf-game-heading h1 { color: var(--native-ink); }
+  body.shelf-native-mode .shelf-game-heading .game-blurb { color: var(--native-muted); }
   body.shelf-native-mode #shelf-native-host { min-height: 0; overflow: visible; border: 0; background: transparent; box-shadow: none; }
-  body.shelf-native-mode #shelf-native-host > #app { width: 100%; max-width: none; margin: 0; padding: 0 0 34px; color: #12151f; }
+  body.shelf-native-mode #shelf-native-host > #app { width: 100%; max-width: none; margin: 0; padding: 0; color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode #shelf-native-host .game-head { display: none; }
-  body.shelf-native-mode #shelf-native-host .game-wrap { max-width: 900px; }
-  body.shelf-native-mode #shelf-native-host .panel { box-shadow: 5px 5px 0 rgba(18, 21, 31, .18); }
+  body.shelf-native-mode #shelf-native-host .game-wrap { max-width: 960px; text-align: initial; }
+  body.shelf-native-mode #shelf-native-host .game-wrap > p { display: none; }
+  body.shelf-native-mode #shelf-native-host .game-wrap > .panel { margin: 0; border-radius: 0; box-shadow: none; }
   body.shelf-native-mode #shelf-native-host footer,
   body.shelf-native-mode #shelf-native-host header,
   body.shelf-native-mode #shelf-native-host nav { display: none; }
   body.shelf-native-mode #shelf-native-host main { min-height: 0; padding: 0; }
   @media (max-width: 520px) {
-    body.shelf-native-mode .shelf-native-main { padding-block: 0 58px; }
-    body.shelf-native-mode #shelf-native-host > #app { padding-inline: 12px; }
+    body.shelf-native-mode .shelf-native-main { padding-block: 30px 58px; }
+    body.shelf-native-mode .shelf-game-heading { align-items: start; flex-direction: column; gap: 10px; }
+    body.shelf-native-mode #shelf-native-host > #app { padding-inline: 0; }
   }
   @media (prefers-color-scheme: light) {
-    body.shelf-native-mode { background: #f7f7f2; color: #171817; }
-    body.shelf-native-mode .game-header { background: #f7f7f2; border-bottom-color: rgba(23, 24, 23, .18); }
+    body.shelf-native-mode { --native-bg: #f7f7f2; --native-ink: #171817; --native-muted: #666962; --native-line: rgba(23, 24, 23, .18); background: var(--native-bg); color: var(--native-ink); }
+    body.shelf-native-mode .game-header { background: var(--native-bg); border-bottom-color: var(--native-line); }
     body.shelf-native-mode .game-header .wordmark,
-    body.shelf-native-mode .game-header .site-nav a { color: #171817; }
-    body.shelf-native-mode .shelf-game-label { color: #171817; }
+    body.shelf-native-mode .game-header .site-nav a { color: var(--native-ink); }
+    body.shelf-native-mode .shelf-game-label { color: var(--native-muted); }
   }
 `;
 
@@ -107,16 +117,16 @@ async function mountNativeShelfGame({ base, gameId }) {
   window.play(gameId);
 }
 
-function renderShelfHome({ app, base, params }) {
+function renderShelfHome({ app, base }) {
   app.innerHTML = `<header class="site-header page-width shelf-header">
     <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
-    <nav class="site-nav" aria-label="Primary navigation"><a href="${base}?game=${params.get("from") || "orbit"}">back to Orbit</a></nav>
+    <nav class="site-nav" aria-label="Primary navigation"><a href="${base}">home</a></nav>
   </header><main class="page-width shelf-main">
     <section class="shelf-intro" aria-labelledby="shelf-title">
-      <div><p class="shelf-kicker">more HVN games</p><h1 id="shelf-title">More things<br><em>to play.</em></h1></div>
-      <div class="shelf-intro-note"><p>Orbit is still the main thing here. This is a dozen extra games from Game Shelf, brought into the same little corner so you do not have to leave.</p><span>12 games · no install</span></div>
+      <div><p class="shelf-kicker">the other games</p><h1 id="shelf-title">Pick a game.</h1></div>
+      <div class="shelf-intro-note"><p>Short games for a spare minute. Pick one and start playing.</p><span>12 games · no install</span></div>
     </section>
-    <section class="shelf-grid" aria-label="Game Shelf games">${SHELF_GAMES.map((game) => shelfCard(game, base)).join("")}</section>
-    <footer class="shelf-footer"><span>HVN games / game shelf</span><a href="https://github.com/ignition27/game-shelf" target="_blank" rel="noreferrer">Game Shelf source + license</a></footer>
+    <section class="shelf-grid" aria-label="Other HVN games">${SHELF_GAMES.map((game) => shelfCard(game, base)).join("")}</section>
+    <footer class="site-footer shelf-footer"><span>HVN games</span><span>12 games</span></footer>
   </main>`;
 }

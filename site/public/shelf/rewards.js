@@ -1,4 +1,4 @@
-/* Game Shelf rewards. Games report completed actions through Shelf.record().
+/* Shared rewards hooks. Games report completed actions through Shelf.record().
  * Supported events (numbers must be finite, never numeric strings):
  * game_play {id}; snake_score {score}; shooter_boss {}; memory_win {moves};
  * reaction_result {ms} AFTER the go signal only; word_win {guesses};

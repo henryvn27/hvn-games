@@ -8,7 +8,6 @@ const required = [
   "site/src/ads.js",
   "site/public/privacy.html",
   "site/public/ads.txt",
-  "site/public/assets/scoutly-house-ad.png",
   "site/src/styles.css",
   "site/src/play-intelligence.js",
   "site/src/shelf.js",
@@ -37,7 +36,7 @@ if (!html.includes("src/main.js")) throw new Error("Gallery entry point is not w
 if (!html.includes('name="google-adsense-account" content="ca-pub-1123012671033143"')) throw new Error("AdSense ownership meta tag is missing");
 
 const main = readFileSync(join(root, "site/src/main.js"), "utf8");
-for (const marker of ["phasebound", "ORBIT_ROUTE", "ORBIT_RL_ROUTE", "SHELF_ROUTE", "TOWER_DEFENSE_ROUTE", "COMET_ROUTE", "SPACE_WARS_ROUTE", "LEADERBOARD_GAMES", "leaderboard-game", "renderRLWriteup", "renderGameShelf", "renderComet", "renderSpaceWars", "startSpaceWars", "reinforcement learning writeup", "?game=${ORBIT_ROUTE}", "?game=${COMET_ROUTE}", "?game=${TOWER_DEFENSE_ROUTE}", "?game=${SPACE_WARS_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "saved automatically", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Match your color", "All games.", "galleryGameCard", "Space Wars", "Neon Bastion", "all-games", "SHELF_GAMES", "data-ad-anchor", "data-google-ad-slot", "mountGoogleAdSlots"]) {
+for (const marker of ["phasebound", "ORBIT_ROUTE", "ORBIT_RL_ROUTE", "SHELF_ROUTE", "TOWER_DEFENSE_ROUTE", "COMET_ROUTE", "SPACE_WARS_ROUTE", "LEADERBOARD_GAMES", "leaderboard-game", "renderRLWriteup", "renderGameShelf", "renderComet", "renderSpaceWars", "startSpaceWars", "reinforcement learning writeup", "?game=${ORBIT_ROUTE}", "?game=${COMET_ROUTE}", "?game=${TOWER_DEFENSE_ROUTE}", "?game=${SPACE_WARS_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "saved automatically", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Match your color", "All games.", "galleryGameCard", "Space Wars", "Neon Bastion", "all-games", "SHELF_GAMES", "data-google-ad-slot", "mountGoogleAdSlots"]) {
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
 }
 const gallerySource = main.slice(0, main.indexOf("async function renderRLWriteup"));
@@ -49,9 +48,10 @@ for (const marker of ["prefers-color-scheme", "prefers-reduced-motion"]) {
 }
 
 const ads = readFileSync(join(root, "site/src/ads.js"), "utf8");
-for (const marker of ["mountAdPreview", "data-ad-preview", "GOOGLE_AD_FALLBACK_DELAY", "MutationObserver", "data-ad-status", "scoutly.one", "scoutly-house-ad.png", "competitive robotics", "adFallback"]) {
-  if (!ads.includes(marker)) throw new Error(`Ad preview is missing marker: ${marker}`);
+for (const marker of ["mountGoogleAdSlots", "adsbygoogle", "ca-pub-1123012671033143", "adSlot"]) {
+  if (!ads.includes(marker)) throw new Error(`AdSense slot is missing marker: ${marker}`);
 }
+if (ads.includes("scoutly") || ads.includes("adFallback")) throw new Error("AdSense still includes the Scoutly fallback");
 if (html.includes("pauseAdRequests")) throw new Error("Ads are still blocked behind the old sitewide consent gate");
 if (!html.includes("adsbygoogle.js?client=ca-pub-1123012671033143")) throw new Error("AdSense script is missing");
 

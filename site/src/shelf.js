@@ -1,6 +1,6 @@
 export const SHELF_GAMES = [
   { id: "golf", number: "01", name: "Mini Golf", kind: "arcade", description: "Six small greens. Banks, bunkers, and a clean line to the cup." },
-  { id: "snake", number: "02", name: "Garden Snake", kind: "arcade", description: "Eat apples, pick a rule set, and try not to box yourself in." },
+  { id: "snake", number: "02", name: "Snake", kind: "arcade", description: "Eat apples, grow longer, and don’t hit the wall." },
   { id: "dodger", number: "03", name: "Space Dodger", kind: "arcade", description: "Keep the fighter moving while Mars gets busier around you." },
   { id: "memory", number: "04", name: "Memory Match", kind: "arcade", description: "Turn over pairs. Fewer moves is the whole trick." },
   { id: "reaction", number: "05", name: "Reaction Test", kind: "arcade", description: "Wait for the signal, then hit it before your brain catches up." },
@@ -86,6 +86,62 @@ const NATIVE_SHELF_OVERRIDES = `
     body.shelf-native-mode .game-header .site-nav a { color: var(--native-ink); }
     body.shelf-native-mode .shelf-game-label { color: var(--native-muted); }
   }
+  body.shelf-native-mode .snake-panel {
+    --snake-ink: #163d32;
+    --snake-muted: #637568;
+    --snake-paper: #f2edda;
+    --snake-board: #234c3d;
+    --snake-apple: #d95f4d;
+    display: grid;
+    gap: 22px;
+    padding: clamp(16px, 3vw, 30px);
+    border: 1px solid var(--snake-ink);
+    border-radius: 4px;
+    background: var(--snake-paper);
+    color: var(--snake-ink);
+    box-shadow: 9px 9px 0 rgba(22, 61, 50, .22);
+  }
+  body.shelf-native-mode .snake-topline { display: flex; align-items: end; justify-content: space-between; gap: 16px; padding-bottom: 17px; border-bottom: 1px solid rgba(22, 61, 50, .28); }
+  body.shelf-native-mode .snake-topline h2 { margin: 4px 0 0; font-size: clamp(2rem, 5vw, 3.5rem); line-height: .95; letter-spacing: -.07em; }
+  body.shelf-native-mode .snake-eyebrow { color: var(--snake-muted); font-size: .68rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+  body.shelf-native-mode .snake-live-mark { padding: 5px 8px; border: 1px solid var(--snake-ink); color: var(--snake-ink); font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  body.shelf-native-mode .snake-rule { display: flex; align-items: center; gap: 8px; margin: -5px 0 0; color: var(--snake-muted); font-size: .86rem; }
+  body.shelf-native-mode .snake-rule-dot { color: var(--snake-apple); font-size: 1.1rem; line-height: 1; }
+  body.shelf-native-mode .snake-layout { display: grid; grid-template-columns: 165px minmax(0, 1fr); gap: clamp(18px, 3vw, 34px); align-items: start; }
+  body.shelf-native-mode .snake-rail { display: grid; gap: 14px; align-content: start; }
+  body.shelf-native-mode .snake-stat { display: grid; gap: 4px; padding-bottom: 12px; border-bottom: 1px solid rgba(22, 61, 50, .2); }
+  body.shelf-native-mode .snake-stat span, body.shelf-native-mode .snake-settings label { color: var(--snake-muted); font-size: .63rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  body.shelf-native-mode .snake-stat strong { font-size: 2rem; line-height: 1; letter-spacing: -.06em; font-variant-numeric: tabular-nums; }
+  body.shelf-native-mode .snake-settings { display: grid; gap: 10px; margin-top: 2px; }
+  body.shelf-native-mode .snake-settings label { display: grid; gap: 5px; }
+  body.shelf-native-mode .snake-settings select { min-width: 0; padding: 8px 9px; border: 1px solid rgba(22, 61, 50, .42); border-radius: 2px; background: #fbf7e8; color: var(--snake-ink); font: 500 .84rem "Avenir Next", "Helvetica Neue", sans-serif; }
+  body.shelf-native-mode .snake-mode-note { margin: 2px 0 0; color: var(--snake-muted); font-size: .76rem; line-height: 1.45; }
+  body.shelf-native-mode .snake-play { min-width: 0; }
+  body.shelf-native-mode .snake-play .arcade-stage { max-width: 480px; margin: 0 auto; padding: 9px; border: 1px solid var(--snake-ink); border-radius: 3px; background: var(--snake-board); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+  body.shelf-native-mode .snake-play .arcade-stage .canvas { display: block; border: 1px solid rgba(246, 241, 216, .22); }
+  body.shelf-native-mode .snake-feedback { min-height: 20px; margin: 11px 0 0; color: var(--snake-muted); font-size: .78rem; text-align: center; }
+  body.shelf-native-mode .snake-controls { justify-content: center; margin-top: -2px; }
+  body.shelf-native-mode .snake-controls button { border-color: var(--snake-ink); border-radius: 2px; background: transparent; color: var(--snake-ink); font-size: .76rem; }
+  body.shelf-native-mode .snake-controls button:hover { background: var(--snake-ink); color: var(--snake-paper); }
+  body.shelf-native-mode .snake-panel .arcade-overlay { background: rgba(35, 76, 61, .9); color: #f4f0dc; }
+  body.shelf-native-mode .snake-panel .arcade-overlay .kicker { color: #d8e58b; }
+  body.shelf-native-mode .snake-panel .arcade-overlay h2 { max-width: 280px; margin: 12px 0 10px; font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -.07em; }
+  body.shelf-native-mode .snake-panel .arcade-overlay p { max-width: 260px; font-size: .88rem; }
+  body.shelf-native-mode .snake-panel .arcade-overlay .action { border-color: #e4e99b; border-radius: 2px; background: #e4e99b; color: var(--snake-ink); }
+  body.shelf-native-mode .snake-footnote { margin: -7px 0 0; color: var(--snake-muted); font-size: .72rem; text-align: center; }
+  @media (max-width: 680px) {
+    body.shelf-native-mode .snake-layout { grid-template-columns: 1fr; }
+    body.shelf-native-mode .snake-rail { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    body.shelf-native-mode .snake-settings, body.shelf-native-mode .snake-mode-note { grid-column: 1 / -1; }
+  }
+  @media (max-width: 420px) {
+    body.shelf-native-mode .snake-panel { gap: 16px; padding: 13px; }
+    body.shelf-native-mode .snake-topline h2 { font-size: 2.35rem; }
+    body.shelf-native-mode .snake-rule { font-size: .78rem; }
+    body.shelf-native-mode .snake-stat strong { font-size: 1.55rem; }
+    body.shelf-native-mode .snake-controls { display: grid; grid-template-columns: repeat(4, 1fr); }
+    body.shelf-native-mode .snake-controls #pause-game, body.shelf-native-mode .snake-controls #restart-game { grid-column: span 2; }
+  }
 `;
 
 async function mountNativeShelfGame({ base, gameId }) {
@@ -115,6 +171,24 @@ async function mountNativeShelfGame({ base, gameId }) {
 
   if (typeof window.play !== "function") throw new Error("Shelf game engine did not expose play()");
   window.play(gameId);
+  if (gameId === "snake") {
+    const syncSnakeCopy = () => {
+      const title = document.querySelector("#overlay-title");
+      const note = document.querySelector("#overlay-note");
+      const action = document.querySelector("#start-game");
+      if (title?.textContent === "A little room to grow.") title.textContent = "Ready to grow?";
+      if (note?.textContent === "Pick your rules, then head into the garden.") note.textContent = "Eat apples. Don’t hit the wall or yourself.";
+      if (action?.textContent === "Start growing →") action.textContent = "Start →";
+      if (title?.textContent === "Garden complete!") title.textContent = "Board cleared!";
+      if (note?.textContent?.includes("You filled the garden!")) note.textContent = note.textContent.replace("You filled the garden!", "You filled the board!");
+      if (title?.textContent === "Take a breather.") title.textContent = "Paused.";
+      if (note?.textContent === "Your garden will be right here.") note.textContent = "Your score is safe. Pick up where you left off.";
+      if (action?.textContent === "Keep growing →") action.textContent = "Resume →";
+    };
+    const snakeCopyObserver = new MutationObserver(syncSnakeCopy);
+    snakeCopyObserver.observe(document.querySelector("#shelf-native-host") || document.body, { subtree: true, childList: true, characterData: true });
+    syncSnakeCopy();
+  }
 }
 
 function renderShelfHome({ app, base }) {

@@ -63,6 +63,8 @@ for (const marker of ["startPhasebound", "startTutorial", "options.tutorial", "o
   if (!game.includes(marker)) throw new Error(`Game is missing marker: ${marker}`);
 }
 if (game.includes("timeLeft = 60") || game.includes("target = 18")) throw new Error("Phasebound still has a fixed timer or packet target");
+if (game.includes("this.positionHazardSafely(hazard, time)")) throw new Error("Orbit must not reposition live asteroids every frame");
+if (!game.includes("Safe placement belongs to the spawn event")) throw new Error("Orbit spawn-safety regression guard is missing");
 
 const comet = readFileSync(join(root, "games/comet/comet.js"), "utf8");
 for (const marker of ["startComet", "Comet", "setDirection", "spawnFood", "maybeAddRock", "togglePause", "this.mode = \"result\"", "BOARD", "stepDelay", "this.snake"]) {

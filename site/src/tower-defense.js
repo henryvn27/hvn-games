@@ -5,26 +5,27 @@ const CELL = 1.55;
 const BOARD = { columns: 9, rows: 7 };
 const COLORS = {
   ink: 0x08111f,
-  panel: 0x101c2d,
-  grid: 0x22334c,
-  path: 0x172943,
-  cyan: 0x53e6df,
-  amber: 0xffc35a,
-  coral: 0xff6e78,
-  violet: 0xb48cff,
+  panel: 0x121c27,
+  grid: 0x2a3948,
+  path: 0x2b3640,
+  route: 0xb7a47b,
+  cyan: 0x71d8d1,
+  amber: 0xe2ad59,
+  coral: 0xd75f55,
+  sage: 0x9fb89a,
   white: 0xf5f8ff,
 };
 
 const TOWERS = {
-  arc: { name: "Arc", hint: "fast", cost: 70, range: 3.25, damage: 15, rate: 1.7, color: COLORS.cyan },
-  rail: { name: "Rail", hint: "heavy", cost: 105, range: 5.5, damage: 46, rate: 0.62, color: COLORS.amber },
-  pulse: { name: "Pulse", hint: "slow", cost: 90, range: 3.9, damage: 12, rate: 0.9, color: COLORS.violet },
+  arc: { name: "Relay gun", hint: "quick", cost: 70, range: 3.25, damage: 15, rate: 1.7, color: COLORS.cyan },
+  rail: { name: "Coil cannon", hint: "long range", cost: 105, range: 5.5, damage: 46, rate: 0.62, color: COLORS.amber },
+  pulse: { name: "Dust snare", hint: "slows", cost: 90, range: 3.9, damage: 12, rate: 0.9, color: COLORS.sage },
 };
 
 const ENEMIES = {
-  scout: { name: "scout", speed: 1.65, hp: 38, damage: 1, reward: 9, color: COLORS.coral, size: 0.27 },
-  brute: { name: "brute", speed: 0.67, hp: 125, damage: 2, reward: 18, color: COLORS.amber, size: 0.42 },
-  runner: { name: "runner", speed: 2.15, hp: 29, damage: 1, reward: 14, color: COLORS.violet, size: 0.22 },
+  scout: { name: "crawler", speed: 1.65, hp: 38, damage: 1, reward: 9, color: COLORS.coral, size: 0.27 },
+  brute: { name: "hauler", speed: 0.67, hp: 125, damage: 2, reward: 18, color: COLORS.amber, size: 0.42 },
+  runner: { name: "skitter", speed: 2.15, hp: 29, damage: 1, reward: 14, color: 0xef8e6f, size: 0.22 },
 };
 
 function colorMaterial(color, emissive = color, intensity = 0.35, roughness = 0.35) {
@@ -79,43 +80,44 @@ class NeonBastion {
       <div class="nb-shell">
         <header class="nb-header">
           <a class="nb-wordmark" href="${this.base}">HVN games</a>
-          <div class="nb-title"><span class="nb-title-mark"></span><strong>Neon Bastion</strong><span>tower defense</span></div>
+          <div class="nb-title"><span class="nb-title-mark"></span><strong>Neon Bastion</strong><span>lunar relay defense</span></div>
           <button class="nb-pause" id="nb-pause" type="button">pause</button>
         </header>
         <div class="nb-layout">
-          <section class="nb-stage" aria-label="Neon Bastion game board">
+          <section class="nb-stage" aria-label="Lunar relay defense map">
             <div id="nb-canvas" class="nb-canvas"></div>
-            <div class="nb-stage-note" id="nb-stage-note">Choose a tower, then tap an amber pad.</div>
+            <div class="nb-map-label"><span>outpost 07</span><span>relay route</span></div>
+            <div class="nb-stage-note" id="nb-stage-note">Build on a marked pad. Start the next wave when ready.</div>
             <div class="nb-overlay" id="nb-overlay">
               <div class="nb-overlay-card">
-                <p class="nb-overline" id="nb-overlay-overline">a small defense game</p>
-                <h1 id="nb-overlay-title">Hold the line.</h1>
-                <p id="nb-overlay-copy">Place towers on the amber pads. Keep the core alive through every wave.</p>
-                <button class="nb-primary" id="nb-overlay-action" type="button">start a run</button>
-                <p class="nb-keyline">click or tap to build · space launches · p pauses</p>
+                <p class="nb-overline" id="nb-overlay-overline">outpost 07 · moon side</p>
+                <h1 id="nb-overlay-title">Keep the relay online.</h1>
+                <p id="nb-overlay-copy">Build guns beside the route. Stop the crawlers before they reach the relay.</p>
+                <button class="nb-primary" id="nb-overlay-action" type="button">start a shift</button>
+                <p class="nb-keyline">click a pad to build · 1–3 choose a tower · space sends a wave · p pauses</p>
               </div>
             </div>
           </section>
           <aside class="nb-controls" aria-label="Game controls">
             <div class="nb-stats">
-              <div><span>core</span><strong id="nb-core">10 / 10</strong></div>
-              <div><span>energy</span><strong id="nb-energy">300</strong></div>
+              <div><span>relay</span><strong id="nb-core">10 / 10</strong></div>
+              <div><span>credits</span><strong id="nb-energy">300</strong></div>
               <div><span>wave</span><strong id="nb-wave">—</strong></div>
               <div><span>score</span><strong id="nb-score">0000</strong></div>
             </div>
             <div class="nb-meter"><span id="nb-core-meter"></span></div>
-            <div class="nb-section-heading"><h2>build</h2><span id="nb-build-note">choose one</span></div>
+            <div class="nb-section-heading"><h2>Build a defense</h2><span id="nb-build-note">choose one</span></div>
             <div class="nb-tower-list">
-              <button class="nb-tower-option is-selected" data-tower="arc" type="button"><span class="nb-tower-icon nb-icon-arc"></span><span><b>Arc</b><small>fast · 70</small></span><i>1</i></button>
-              <button class="nb-tower-option" data-tower="rail" type="button"><span class="nb-tower-icon nb-icon-rail"></span><span><b>Rail</b><small>heavy · 105</small></span><i>2</i></button>
-              <button class="nb-tower-option" data-tower="pulse" type="button"><span class="nb-tower-icon nb-icon-pulse"></span><span><b>Pulse</b><small>slow · 90</small></span><i>3</i></button>
+              <button class="nb-tower-option is-selected" data-tower="arc" type="button"><span class="nb-tower-icon nb-icon-arc"></span><span><b>Relay gun</b><small>quick · 70 credits</small></span><i>1</i></button>
+              <button class="nb-tower-option" data-tower="rail" type="button"><span class="nb-tower-icon nb-icon-rail"></span><span><b>Coil cannon</b><small>long range · 105 credits</small></span><i>2</i></button>
+              <button class="nb-tower-option" data-tower="pulse" type="button"><span class="nb-tower-icon nb-icon-pulse"></span><span><b>Dust snare</b><small>slows · 90 credits</small></span><i>3</i></button>
             </div>
-            <button class="nb-secondary nb-upgrade" id="nb-upgrade" type="button" disabled>upgrade selected <span>—</span></button>
+            <button class="nb-secondary nb-upgrade" id="nb-upgrade" type="button" disabled>upgrade tower <span>—</span></button>
             <div class="nb-divider"></div>
-            <button class="nb-primary nb-wave-button" id="nb-wave-button" type="button">launch wave 1</button>
+            <button class="nb-primary nb-wave-button" id="nb-wave-button" type="button">send wave 1</button>
             <button class="nb-secondary nb-speed" id="nb-speed" type="button">speed: 1×</button>
-            <p class="nb-status" id="nb-status">Place a tower before the first wave.</p>
-            <div class="nb-legend"><span><i class="nb-dot nb-dot-path"></i>route</span><span><i class="nb-dot nb-dot-pad"></i>build pad</span><span><i class="nb-dot nb-dot-enemy"></i>enemy</span></div>
+            <p class="nb-status" id="nb-status">Choose a defense before sending the first wave.</p>
+            <div class="nb-legend"><span><i class="nb-dot nb-dot-path"></i>route</span><span><i class="nb-dot nb-dot-pad"></i>build site</span><span><i class="nb-dot nb-dot-enemy"></i>crawler</span></div>
           </aside>
         </div>
       </div>
@@ -212,6 +214,13 @@ class NeonBastion {
       this.pathTotal += length;
     }
     const routeSet = new Set(routeCells.map(cellKey));
+    const buildCells = {};
+    routeCells.forEach(({ x, z }) => {
+      [[x - 1, z], [x + 1, z], [x, z - 1], [x, z + 1]].forEach(([neighborX, neighborZ]) => {
+        const key = `${neighborX}:${neighborZ}`;
+        if (neighborX >= -4 && neighborX <= 4 && neighborZ >= -3 && neighborZ <= 3 && !routeSet.has(key)) buildCells[key] = true;
+      });
+    });
     this.padByKey = new Map();
     const gridMaterial = new THREE.LineBasicMaterial({ color: COLORS.grid, transparent: true, opacity: 0.62 });
     const gridPoints = [];
@@ -229,16 +238,17 @@ class NeonBastion {
         const cell = { x, z };
         const world = this.worldCell(cell);
         if (routeSet.has(cellKey(cell))) {
-          const tile = new THREE.Mesh(new THREE.BoxGeometry(CELL * 0.9, 0.08, CELL * 0.9), colorMaterial(COLORS.path, 0x1d426a, 0.38, 0.8));
+          const tile = new THREE.Mesh(new THREE.BoxGeometry(CELL * 0.9, 0.08, CELL * 0.9), colorMaterial(COLORS.path, 0x47535b, 0.16, 0.84));
           tile.position.copy(world).setY(0.02);
           this.board.add(tile);
-          const lane = new THREE.Mesh(new THREE.BoxGeometry(CELL * 0.07, 0.035, CELL * 0.76), new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.36 }));
+          const lane = new THREE.Mesh(new THREE.BoxGeometry(CELL * 0.07, 0.035, CELL * 0.76), new THREE.MeshBasicMaterial({ color: COLORS.route, transparent: true, opacity: 0.42 }));
           lane.position.copy(world).setY(0.1);
           this.board.add(lane);
           continue;
         }
         if (x === 4 && z === 2) continue;
-        const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.5, 0.09, 6), new THREE.MeshStandardMaterial({ color: 0x46392a, emissive: 0xffa72b, emissiveIntensity: 0.12, metalness: 0.4, roughness: 0.55 }));
+        if (!buildCells[cellKey(cell)]) continue;
+        const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.5, 0.09, 6), new THREE.MeshStandardMaterial({ color: 0x6d604d, emissive: COLORS.amber, emissiveIntensity: 0.08, metalness: 0.32, roughness: 0.72 }));
         pad.position.copy(world).setY(0.1);
         pad.userData.cell = cell;
         pad.userData.baseMaterial = pad.material;
@@ -252,15 +262,18 @@ class NeonBastion {
   buildCore(position) {
     this.core = new THREE.Group();
     this.core.position.copy(position).setY(0.35);
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.74, 0.9, 0.26, 8), colorMaterial(0x17263e, 0x1e4c72, 0.32));
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.73, 0.045, 8, 32), new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.8 }));
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.74, 0.9, 0.26, 8), colorMaterial(0x26313c, 0x344856, 0.2, 0.7));
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.73, 0.045, 8, 32), new THREE.MeshBasicMaterial({ color: COLORS.route, transparent: true, opacity: 0.8 }));
     ring.rotation.x = Math.PI / 2;
-    const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.52, 1), colorMaterial(0x67f6eb, COLORS.cyan, 0.8, 0.16));
-    crystal.position.y = 0.67;
-    const beacon = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 2.5, 8), new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.14 }));
-    beacon.position.y = 1.7;
-    this.core.add(base, ring, crystal, beacon);
-    this.coreOrb = crystal;
+    const crystal = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.22, 0.9, 6), colorMaterial(0x6bc9c3, COLORS.cyan, 0.38, 0.32));
+    crystal.position.y = 0.68;
+    const dish = new THREE.Mesh(new THREE.ConeGeometry(0.48, 0.22, 16, 1, true), colorMaterial(0x7d8790, 0x3b4e59, 0.12, 0.66));
+    dish.position.y = 1.18;
+    dish.rotation.x = Math.PI;
+    const beacon = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.25, 8), new THREE.MeshBasicMaterial({ color: COLORS.cyan, transparent: true, opacity: 0.22 }));
+    beacon.position.y = 1.75;
+    this.core.add(base, ring, crystal, dish, beacon);
+    this.coreOrb = dish;
     this.board.add(this.core);
   }
 
@@ -308,7 +321,7 @@ class NeonBastion {
     this.selectedType = type;
     this.node.querySelectorAll("[data-tower]").forEach((button) => button.classList.toggle("is-selected", button.dataset.tower === type));
     this.node.querySelector("#nb-build-note").textContent = `${TOWERS[type].name} selected`;
-    this.stageNote.textContent = `Tap an amber pad to place ${TOWERS[type].name}.`;
+    this.stageNote.textContent = `Click a marked pad to place ${TOWERS[type].name}.`;
   }
 
   buildAt(pad) {
@@ -325,7 +338,7 @@ class NeonBastion {
     this.towers.push(tower);
     this.energy -= spec.cost;
     this.selectedTower = tower;
-    this.flashStatus(`${spec.name} online. Cover the route.`);
+    this.flashStatus(`${spec.name} placed. Cover the relay route.`);
     this.playTone("build");
     this.updateHud();
   }
@@ -334,12 +347,14 @@ class NeonBastion {
     const group = new THREE.Group();
     const base = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.4, 0.22, 8), colorMaterial(0x24344b, 0x1f6a79, 0.24));
     const body = tower.type === "rail"
-      ? new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.72, 0.2), colorMaterial(0xffd078, COLORS.amber, 0.42, 0.22))
+      ? new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.44, 0.34), colorMaterial(0xd1a052, COLORS.amber, 0.2, 0.32))
       : tower.type === "pulse"
-        ? new THREE.Mesh(new THREE.TorusKnotGeometry(0.2, 0.055, 48, 8), colorMaterial(COLORS.violet, COLORS.violet, 0.46, 0.2))
-        : new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.72, 6), colorMaterial(COLORS.cyan, COLORS.cyan, 0.42, 0.2));
-    body.position.y = 0.46;
-    group.add(base, body);
+        ? new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.07, 8, 20), colorMaterial(COLORS.sage, COLORS.sage, 0.2, 0.3))
+        : new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.44, 8), colorMaterial(COLORS.cyan, COLORS.cyan, 0.2, 0.3));
+    body.position.y = 0.34;
+    const barrel = new THREE.Mesh(new THREE.BoxGeometry(tower.type === "rail" ? 0.13 : 0.09, 0.12, tower.type === "rail" ? 0.64 : 0.44), colorMaterial(0xc8d0d0, 0x55636b, 0.1, 0.5));
+    barrel.position.set(0, 0.42, 0.2);
+    group.add(base, body, barrel);
     const ring = new THREE.Mesh(new THREE.RingGeometry(tower.range - 0.018, tower.range, 64), new THREE.MeshBasicMaterial({ color: tower.color, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false }));
     ring.rotation.x = -Math.PI / 2;
     ring.position.y = 0.12;
@@ -355,7 +370,7 @@ class NeonBastion {
     this.selectedTower = tower;
     if (tower.rangeRing) tower.rangeRing.material.opacity = 0.24;
     this.updateHud();
-    this.flashStatus(`${tower.name} level ${tower.level}. Upgrade or keep building.`);
+    this.flashStatus(`${tower.name} level ${tower.level}. Upgrade it or place another.`);
   }
 
   upgradeSelected() {
@@ -380,7 +395,7 @@ class NeonBastion {
     this.mode = "active";
     this.overlay.classList.add("is-hidden");
     this.overlay.setAttribute("aria-hidden", "true");
-    this.flashStatus("Place a tower, then launch wave 1.");
+    this.flashStatus("Build a defense, then send wave 1.");
     this.playTone("start");
     this.updateHud();
   }
@@ -399,10 +414,10 @@ class NeonBastion {
     this.mode = "menu";
     this.overlay.classList.remove("is-hidden");
     this.overlay.setAttribute("aria-hidden", "false");
-    this.overlayOverline.textContent = "a small defense game";
-    this.overlayTitle.textContent = "Hold the line.";
-    this.overlayCopy.textContent = "Place towers on the amber pads. Keep the core alive through every wave.";
-    this.overlayAction.textContent = "start a run";
+    this.overlayOverline.textContent = "outpost 07 · moon side";
+    this.overlayTitle.textContent = "Keep the relay online.";
+    this.overlayCopy.textContent = "Build guns beside the route. Stop the crawlers before they reach the relay.";
+    this.overlayAction.textContent = "start a shift";
     this.overlayAction.dataset.action = "start";
     this.updateHud();
   }
@@ -420,11 +435,12 @@ class NeonBastion {
 
   launchWave() {
     if (this.mode !== "active" || this.waveRunning) return;
+    if (!this.towers.length) return this.flashStatus("Build at least one defense before sending a wave.");
     this.wave += 1;
     this.waveRunning = true;
     this.spawnTimer = 0.15;
     this.spawnQueue = this.createWave(this.wave);
-    this.flashStatus(`Wave ${this.wave} inbound.`);
+    this.flashStatus(`Wave ${this.wave} is on the route.`);
     this.playTone("wave");
     this.updateHud();
   }
@@ -569,7 +585,7 @@ class NeonBastion {
     if (this.waveRunning && !this.spawnQueue.length && !this.enemies.length) {
       this.waveRunning = false;
       this.energy += 50 + this.wave * 12;
-      this.flashStatus(`Wave ${this.wave} clear. Build or launch the next one.`);
+      this.flashStatus(`Wave ${this.wave} clear. Add a defense or send the next one.`);
       this.playTone("clear");
     }
     if (this.coreOrb && !this.reducedMotion) this.coreOrb.rotation.y += step * 1.4;
@@ -582,12 +598,12 @@ class NeonBastion {
     this.waveRunning = false;
     this.overlay.classList.remove("is-hidden");
     this.overlay.setAttribute("aria-hidden", "false");
-    this.overlayOverline.textContent = "the core went dark";
+    this.overlayOverline.textContent = "outpost 07 · relay offline";
     this.overlayTitle.textContent = `Score ${this.score}`;
-    this.overlayCopy.textContent = `You held through ${this.wave} wave${this.wave === 1 ? "" : "s"}. Try a different tower mix.`;
-    this.overlayAction.textContent = "try again";
+    this.overlayCopy.textContent = `You held through ${this.wave} wave${this.wave === 1 ? "" : "s"}. Rebuild the defense and try again.`;
+    this.overlayAction.textContent = "restart shift";
     this.overlayAction.dataset.action = "retry";
-    this.stageNote.textContent = "Run over. Your board is frozen.";
+    this.stageNote.textContent = "Relay offline. Restart when you are ready.";
     this.playTone("fail");
     this.updateHud();
   }
@@ -597,9 +613,9 @@ class NeonBastion {
       this.mode = "pause";
       this.overlay.classList.remove("is-hidden");
       this.overlay.setAttribute("aria-hidden", "false");
-      this.overlayOverline.textContent = "nothing moves while paused";
+      this.overlayOverline.textContent = "outpost 07 · holding pattern";
       this.overlayTitle.textContent = "Paused.";
-      this.overlayCopy.textContent = "Take a breath. Your board, wave, and projectiles are all held in place.";
+      this.overlayCopy.textContent = "The relay, crawlers, and projectiles are all held in place.";
       this.overlayAction.textContent = "resume";
       this.overlayAction.dataset.action = "resume";
     } else if (this.mode === "pause") {
@@ -624,14 +640,14 @@ class NeonBastion {
     this.node.querySelector("#nb-core-meter").style.width = `${this.coreHp * 10}%`;
     this.pauseButton.textContent = this.mode === "pause" ? "resume" : "pause";
     this.pauseButton.disabled = !["active", "pause"].includes(this.mode);
-    const canLaunch = this.mode === "active" && !this.waveRunning;
+    const canLaunch = this.mode === "active" && !this.waveRunning && this.towers.length > 0;
     this.waveButton.disabled = !canLaunch;
-    this.waveButton.textContent = this.wave ? `launch wave ${this.wave + 1}` : "launch wave 1";
+    this.waveButton.textContent = this.wave ? `send wave ${this.wave + 1}` : "send wave 1";
     this.upgradeButton.disabled = !this.selectedTower || this.mode !== "active";
     if (this.selectedTower) {
       const cost = 55 + this.selectedTower.level * 35;
       this.upgradeButton.innerHTML = `upgrade ${this.selectedTower.name.toLowerCase()} <span>${cost}</span>`;
-    } else this.upgradeButton.innerHTML = "upgrade selected <span>—</span>";
+    } else this.upgradeButton.innerHTML = "upgrade tower <span>—</span>";
   }
 
   resize() {

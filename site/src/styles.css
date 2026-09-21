@@ -343,6 +343,7 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .shelf-card-puzzle { border-top: 4px solid var(--accent); }
 .shelf-card-adventure { border-top: 4px solid #d891cf; }
 .shelf-card-board { border-top: 4px solid var(--amber); }
+.shelf-card-strategy { border-top: 4px solid #d47a58; }
 .shelf-footer { display: flex; justify-content: space-between; gap: 18px; margin-top: 76px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.72rem; }
 .shelf-footer a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .gallery-shelf { padding-block: 54px 78px; border-top: 1px solid var(--line); }

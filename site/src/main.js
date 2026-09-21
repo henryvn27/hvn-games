@@ -2,7 +2,7 @@ import "./styles.css";
 import { mountAdsConsent } from "./ads.js";
 import { createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlayerName } from "./play-intelligence.js";
 import orbitPolicyArtifact from "../../games/phasebound/orbit-policy.json";
-import { renderGameShelf, SHELF_GAMES, shelfCard } from "./shelf.js";
+import { renderGameShelf, SHELF_GAMES } from "./shelf.js";
 
 const app = document.querySelector("#app");
 const base = import.meta.env.BASE_URL;
@@ -25,15 +25,17 @@ if (params.get("game")) {
 function renderGallery() {
   document.body.className = "gallery-page";
   recordGalleryView();
+  const additionalGames = [
+    { number: "02", name: "Comet", kind: "arcade", description: "Eat beacons, dodge rocks, and keep the tail together.", href: `${base}?game=${COMET_ROUTE}`, action: "play" },
+    { number: "03", name: "Neon Bastion", kind: "strategy", description: "Place towers, hold the line, and send the next wave.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
+    ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 3).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
+  ];
   app.innerHTML = `
     <header class="site-header page-width">
       <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="#leaderboard">scores</a>
         <a href="#all-games">games</a>
-        <a href="${base}?game=${TOWER_DEFENSE_ROUTE}">defense</a>
-        <a href="${base}?game=${COMET_ROUTE}">comet</a>
-        <a href="${base}?game=${ORBIT_ROUTE}">play</a>
       </nav>
     </header>
     <main>
@@ -45,18 +47,9 @@ function renderGallery() {
         </div>
       </section>
 
-      <section class="gallery-game-list page-width" aria-labelledby="other-game-title">
-        <div><h2 id="other-game-title">A few more<br>things to play.</h2></div>
-        <div class="gallery-game-rows">
-          <a class="gallery-game-row" href="${base}?game=${COMET_ROUTE}"><span><strong>Comet</strong><small>Eat beacons. Dodge rocks. Keep the line clean.</small></span><b>play</b></a>
-          <a class="gallery-game-row" href="${base}?game=${TOWER_DEFENSE_ROUTE}"><span><strong>Neon Bastion</strong><small>Place towers. Hold the line. Send the next wave.</small></span><b>play</b></a>
-          <a class="gallery-game-row" href="${base}?game=${SHELF_ROUTE}"><span><strong>Game Shelf</strong><small>Twelve smaller games, from memory to checkers.</small></span><b>browse</b></a>
-        </div>
-      </section>
-
       <section class="gallery-shelf page-width" id="all-games" aria-labelledby="all-games-title">
-        <div class="gallery-shelf-heading"><div><p class="shelf-kicker">the rest of the shelf</p><h2 id="all-games-title">Pick a game.<br>Play it right here.</h2></div><p>Small games, fully playable in the same site. No extra room to find first.</p></div>
-        <div class="shelf-grid" aria-label="All HVN games">${SHELF_GAMES.map((game) => shelfCard(game, base)).join("")}</div>
+        <div class="gallery-shelf-heading"><div><p class="shelf-kicker">the collection</p><h2 id="all-games-title">All games.</h2></div><p>Pick a card. Every game opens right here.</p></div>
+        <div class="shelf-grid" aria-label="All HVN games">${additionalGames.map((game) => galleryGameCard(game)).join("")}</div>
       </section>
 
       <section class="leaderboard-section page-width" id="leaderboard" aria-labelledby="leaderboard-title">
@@ -77,6 +70,14 @@ function renderGallery() {
   `;
   setupCopyButtons();
   setupLeaderboard();
+}
+
+function galleryGameCard(game) {
+  return `<article class="shelf-card shelf-card-${game.kind}">
+    <div class="shelf-card-top"><span>${game.number}</span><span>${game.kind}</span></div>
+    <div><h2>${game.name}</h2><p>${game.description}</p></div>
+    <a class="button button-secondary" href="${game.href}">${game.action}</a>
+  </article>`;
 }
 
 function commandBlock(label, command, id) {

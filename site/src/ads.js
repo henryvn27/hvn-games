@@ -1,17 +1,17 @@
 const GOOGLE_AD_CLIENT = "ca-pub-1123012671033143";
 const GOOGLE_AD_SLOT = "3947449400";
+const MAX_AD_SLOTS_PER_PAGE = 2;
 
 export function mountGoogleAdSlots() {
   const anchors = [...document.querySelectorAll("[data-google-ad-slot]")];
-  if (!anchors.length) {
-    const main = document.querySelector("main");
-    if (main) {
-      const anchor = document.createElement("div");
-      anchor.className = "google-ad-slot";
-      anchor.dataset.googleAdSlot = GOOGLE_AD_SLOT;
-      main.append(anchor);
-      anchors.push(anchor);
-    }
+  const main = document.querySelector("main");
+  while (main && anchors.length < MAX_AD_SLOTS_PER_PAGE) {
+    const anchor = document.createElement("div");
+    anchor.className = "google-ad-slot";
+    anchor.dataset.googleAdSlot = GOOGLE_AD_SLOT;
+    anchor.setAttribute("aria-label", "Advertisement");
+    main.append(anchor);
+    anchors.push(anchor);
   }
 
   window.adsbygoogle = window.adsbygoogle || [];

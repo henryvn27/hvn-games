@@ -24,6 +24,7 @@ const HIT_FLASH_DURATION = 420;
 const SLOW_MODE_TIME_SCALE = 0.45;
 const SLOW_MODE_DEFAULT_SCORE_RATE = 500;
 const SLOW_MODE_RATE_SAMPLE_DURATION = 1;
+const PLAYER_EDGE_MARGIN = 18;
 const PHASE_LABELS = ["steady", "turnaround", "tight orbit", "fast orbit", "rough orbit"];
 const ORBIT_RINGS = [[300, 132, 0.16, 2], [470, 220, 0.12, 1], [660, 320, 0.1, 1], [880, 430, 0.08, 1], [1_100, 540, 0.06, 1]];
 const ORBIT_FOCI = [
@@ -426,8 +427,8 @@ export function startPhasebound(options = {}) {
       } else {
         this.playerVelocity.scale(0.82);
       }
-      this.player.x = Phaser.Math.Clamp(this.player.x + this.playerVelocity.x * dt, 34, 926);
-      this.player.y = Phaser.Math.Clamp(this.player.y + this.playerVelocity.y * dt, 34, 606);
+      this.player.x = Phaser.Math.Clamp(this.player.x + this.playerVelocity.x * dt, PLAYER_EDGE_MARGIN, 960 - PLAYER_EDGE_MARGIN);
+      this.player.y = Phaser.Math.Clamp(this.player.y + this.playerVelocity.y * dt, PLAYER_EDGE_MARGIN, 640 - PLAYER_EDGE_MARGIN);
       if (this.playerVelocity.length() > 10) this.player.rotation = Math.atan2(this.playerVelocity.y, this.playerVelocity.x) + Math.PI / 2;
     },
 
@@ -744,41 +745,6 @@ export function startPhasebound(options = {}) {
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     input: { activePointers: 3 },
     scene: HotDotScene,
-  });
-
-  // Phaser's logical game size stays at 960x640, but the canvas backing store
-  // should match a Retina display so circles and the player triangle stay crisp.
-  // Cap the multiplier to avoid turning low-value effects into a needlessly
-  // expensive render target on very dense displays.
-  const canvasDensity = Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
-  const applyCanvasDensity = () => {
-    if (!game.canvas || !game.renderer) return;
-
-    const { width, height } = game.scale.gameSize;
-    game.canvas.width = Math.round(width * canvasDensity);
-    game.canvas.height = Math.round(height * canvasDensity);
-    // Keep Phaser's renderer dimensions logical. Camera and input math use
-    // these values; only the canvas backing store should be density-scaled.
-    game.renderer.width = width;
-    game.renderer.height = height;
-  };
-
-  game.events.once("ready", () => {
-    applyCanvasDensity();
-    const context = game.renderer.gameContext;
-    const originalSetTransform = context.setTransform.bind(context);
-    let scaleTransforms = false;
-    context.setTransform = (...args) => {
-      if (scaleTransforms && args.length === 6) {
-        const [a, b, c, d, e, f] = args;
-        originalSetTransform(a * canvasDensity, b * canvasDensity, c * canvasDensity, d * canvasDensity, e * canvasDensity, f * canvasDensity);
-        return;
-      }
-      originalSetTransform(...args);
-    };
-    game.renderer.on("prerender", () => { scaleTransforms = true; });
-    game.renderer.on("postrender", () => { scaleTransforms = false; });
-    game.scale.on("resize", applyCanvasDensity);
   });
 
   const getScene = () => game.scene.getScene("HotDot");

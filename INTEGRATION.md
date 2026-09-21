@@ -2,11 +2,11 @@
 
 ## Host flow
 
-The host flow is the public `HVN games` page. A visitor opens the gallery and a Play action loads Orbit or Comet in the same Pages deployment. Comet is the native second arcade route added from the MIT-licensed grow-and-survive game idea in `adrianov/snake`.
+The host flow is the public `HVN games` page. A visitor opens the gallery and a Play action loads one of the visible games in the same Pages deployment. Comet is archived and hidden from the gallery; its native route remains in the repository for recoverability.
 
 ## Trigger and input
 
-- Trigger: open the gallery, use the Orbit link `?game=orbit`, or use the Comet link `?game=comet`.
+- Trigger: open the gallery and use a visible game link such as `?game=orbit`.
 - Input: Orbit uses keyboard, pointer, or touch controls. Comet uses keyboard arrows/WASD, Space/P pause, and visible touch direction buttons.
 - Authorized data: gameplay stays local with no account, upload, or gameplay analytics path. Google AdSense is a separate third-party request after the visitor chooses to allow ads.
 
@@ -25,7 +25,7 @@ The host flow is the public `HVN games` page. A visitor opens the gallery and a 
 - Experiment rule: one clearly named variable per game at a time, stable assignment per browser, and variant results kept separate. Treat the results as directional for one player until a consented multi-player data path exists.
 - Adoption point: `site/src/play-intelligence.js` is the shared client layer.
 
-The gallery now has two distinct routes: Orbit, with color matching and escalating hazards, and Comet, with grid steering and a growing tail. New games should add a new verb or decision, not another skin for the same loop.
+The gallery now features Orbit and the other visible game routes. Comet remains archived in source but is not presented as a playable gallery choice. New games should add a new verb or decision, not another skin for the same loop.
 
 ## Comet source boundary
 

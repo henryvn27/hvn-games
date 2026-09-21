@@ -18,7 +18,6 @@ const SPACE_WARS_ROUTE = "space-wars";
 const DEFAULT_LEADERBOARD_GAME = "phasebound";
 const LEADERBOARD_GAMES = [
   { id: "phasebound", label: "Orbit" },
-  { id: "comet", label: "Comet Courier" },
   { id: "neon-bastion", label: "Neon Bastion" },
 ];
 
@@ -37,9 +36,8 @@ function renderGallery() {
   document.body.className = "gallery-page";
   recordGalleryView();
   const additionalGames = [
-    { number: "02", name: "Comet Courier", kind: "arcade", description: "Carry survey beacons through a crowded comet tail.", href: `${base}?game=${COMET_ROUTE}`, action: "play" },
-    { number: "03", name: "Neon Bastion", kind: "strategy", description: "Build a lunar relay defense, then stop the crawlers before they reach it.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
-    ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 4).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
+    { number: "02", name: "Neon Bastion", kind: "strategy", description: "Build a lunar relay defense, then stop the crawlers before they reach it.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
+    ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 2).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
   ];
   app.innerHTML = `
     <header class="site-header page-width">
@@ -54,7 +52,7 @@ function renderGallery() {
         <div class="phasebound-home-copy">
           <h1 id="hero-title">Orbit</h1>
           <p class="phasebound-rule">Match your color. Dodge the red planets.</p>
-          <div class="hero-actions"><a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play Orbit</a><a class="button button-secondary" href="${base}?game=${COMET_ROUTE}">play Comet Courier</a></div>
+          <div class="hero-actions"><a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play Orbit</a></div>
         </div>
       </section>
       <div class="google-ad-slot page-width" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>

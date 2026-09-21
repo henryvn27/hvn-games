@@ -8,6 +8,7 @@ const required = [
   "site/src/ads.js",
   "site/public/privacy.html",
   "site/public/ads.txt",
+  "site/public/assets/scoutly-house-ad.png",
   "site/src/styles.css",
   "site/src/play-intelligence.js",
   "site/src/shelf.js",
@@ -48,7 +49,7 @@ for (const marker of ["prefers-color-scheme", "prefers-reduced-motion"]) {
 }
 
 const ads = readFileSync(join(root, "site/src/ads.js"), "utf8");
-for (const marker of ["mountAdPreview", "data-ad-preview", "ad placement preview", "not a live Google ad"]) {
+for (const marker of ["mountAdPreview", "data-ad-preview", "GOOGLE_AD_FALLBACK_DELAY", "MutationObserver", "data-ad-status", "scoutly.one", "scoutly-house-ad.png", "From lookup to decision.", "adFallback"]) {
   if (!ads.includes(marker)) throw new Error(`Ad preview is missing marker: ${marker}`);
 }
 for (const marker of ["pauseAdRequests", "requestNonPersonalizedAds", "ads-consent", "data-ads-settings", "localStorage.getItem", "window.location.reload"]) {

@@ -1,20 +1,68 @@
 const CONSENT_KEY = "hvn-games:ads-consent:v1";
+const GOOGLE_AD_FALLBACK_DELAY = 8000;
+
+function hasFilledGoogleAd() {
+  const filledSlot = document.querySelector('ins.adsbygoogle[data-ad-status="filled"], [data-ad-status="filled"]');
+  if (filledSlot) return true;
+
+  return [...document.querySelectorAll("iframe")].some((frame) => {
+    const source = frame.getAttribute("src") || "";
+    if (!/googleadservices\.com|doubleclick\.net|googlesyndication\.com/.test(source)) return false;
+    const rect = frame.getBoundingClientRect();
+    const style = window.getComputedStyle(frame);
+    return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+  });
+}
+
+function hasGoogleAdResponse() {
+  return Boolean(document.querySelector('ins.adsbygoogle[data-ad-status="filled"], ins.adsbygoogle[data-ad-status="unfilled"]'));
+}
+
+function hideFallback(preview) {
+  preview.hidden = true;
+  preview.setAttribute("aria-hidden", "true");
+  preview.dataset.adFallback = "hidden";
+}
+
+function showFallback(preview) {
+  if (hasFilledGoogleAd()) return;
+  preview.hidden = false;
+  preview.removeAttribute("aria-hidden");
+  preview.dataset.adFallback = "shown";
+}
 
 export function mountAdPreview() {
+  if (readConsent() !== "allow") return;
   if (document.querySelector("[data-ad-preview]")) return;
   const preview = document.createElement("aside");
   preview.className = "ad-preview";
   preview.dataset.adPreview = "true";
-  preview.setAttribute("aria-label", "Ad placement preview");
+  preview.setAttribute("aria-label", "Sponsor message");
+  preview.hidden = true;
+  preview.setAttribute("aria-hidden", "true");
   preview.innerHTML = `
-    <div>
-      <span class="ad-preview-label">ad placement preview</span>
-      <strong>A small, quiet space for a sponsor</strong>
-      <p>Scouting mockup only. This is not a live Google ad.</p>
-    </div>
-    <span class="ad-preview-size">728 × 90</span>
+    <a class="ad-preview-link" href="https://scoutly.one" target="_blank" rel="noreferrer">
+      <img src="${import.meta.env.BASE_URL}assets/scoutly-house-ad.png" alt="Scoutly: from lookup to decision">
+      <span class="ad-preview-caption"><span class="ad-preview-label">house ad</span><strong>Scoutly</strong><span>From lookup to decision.</span></span>
+    </a>
   `;
   document.body.append(preview);
+
+  const settle = () => {
+    if (hasFilledGoogleAd()) {
+      hideFallback(preview);
+      return;
+    }
+    if (hasGoogleAdResponse()) showFallback(preview);
+  };
+  const observer = new MutationObserver(settle);
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-ad-status", "src"] });
+  const timeout = window.setTimeout(() => showFallback(preview), GOOGLE_AD_FALLBACK_DELAY);
+  window.__hvnAdFallbackCleanup = () => {
+    observer.disconnect();
+    window.clearTimeout(timeout);
+  };
+  settle();
 }
 
 function readConsent() {

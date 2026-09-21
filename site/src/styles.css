@@ -983,30 +983,40 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   width: min(728px, calc(100% - 48px));
   min-height: 90px;
   margin: 24px auto 34px;
-  padding: 15px 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  border: 1px dashed var(--line);
-  background: color-mix(in srgb, var(--surface) 72%, transparent);
-  color: var(--muted);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #171717;
+  color: #f7f2e7;
 }
-.ad-preview > div { display: grid; gap: 3px; }
-.ad-preview-label, .ad-preview-size {
+.ad-preview[hidden] { display: none; }
+.ad-preview-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  min-height: 90px;
+  color: inherit;
+  text-decoration: none;
+}
+.ad-preview-link:focus-visible { outline: 2px solid #ff2b83; outline-offset: -3px; }
+.ad-preview-link img { display: block; width: 100%; height: 100%; min-height: 90px; object-fit: cover; object-position: center; }
+.ad-preview-caption { display: grid; align-content: center; gap: 5px; padding: 14px 18px; }
+.ad-preview-caption .ad-preview-label, .ad-preview-caption > span:last-child { color: #b6b0a6; }
+.ad-preview-caption strong { color: #f7f2e7; font-size: 1.05rem; font-weight: 700; }
+.ad-preview-caption > span:last-child { font-size: 0.74rem; line-height: 1.35; }
+.ad-preview-label {
+  color: #ff2b83;
   font-size: 0.62rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.ad-preview-label { color: var(--accent-strong); }
-.ad-preview strong { color: var(--ink); font-size: 0.92rem; font-weight: 700; }
-.ad-preview p { margin: 0; font-size: 0.74rem; }
-.ad-preview-size { white-space: nowrap; }
 @media (max-width: 620px) {
   .ads-consent { right: 12px; bottom: 12px; width: calc(100% - 24px); align-items: flex-start; flex-direction: column; gap: 12px; padding: 14px; box-shadow: 4px 4px 0 var(--ink); }
   .ads-consent-actions { width: 100%; justify-content: space-between; }
-  .ad-preview { width: calc(100% - 32px); min-height: 76px; margin-block: 18px 26px; padding: 13px 14px; }
-  .ad-preview-size { display: none; }
+  .ad-preview { width: calc(100% - 32px); min-height: 76px; margin-block: 18px 26px; }
+  .ad-preview-link { grid-template-columns: minmax(0, 1fr) 128px; min-height: 76px; }
+  .ad-preview-link img { min-height: 76px; }
+  .ad-preview-caption { padding: 10px 12px; }
+  .ad-preview-caption strong { font-size: 0.92rem; }
+  .ad-preview-caption > span:last-child { font-size: 0.68rem; }
 }
 
 /* Space Wars is a direct HVN play surface: one field, one compact HUD, no nested site chrome. */

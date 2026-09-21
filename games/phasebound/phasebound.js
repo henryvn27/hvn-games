@@ -21,6 +21,9 @@ const PHASE_TURN_SLOWDOWN_DURATION = 0.95;
 const PHASE_TURN_DURATION = 2.4;
 const HIT_FREEZE_DURATION = 0.5;
 const HIT_FLASH_DURATION = 420;
+const HAZARD_PLAYER_CLEARANCE = 64;
+const HAZARD_SPAWN_GRACE = 0.9;
+const HAZARD_POSITION_ATTEMPTS = 32;
 const PHASE_SPEED_STEP = 0.14;
 const MAX_PHASE_SPEED_BONUS = 1.35;
 const PACKET_SPEED_STEP = 0.05;
@@ -77,6 +80,7 @@ export function startPhasebound(options = {}) {
       this.publishClock = 0;
       this.hitCooldown = 0;
       this.hitFreeze = 0;
+      this.spawnGrace = 0;
       this.dashTime = 0;
       this.dashCooldown = 0;
       this.autoplayClock = 0;
@@ -178,7 +182,7 @@ export function startPhasebound(options = {}) {
     addHazard(index) {
       const focusIndex = index % this.getActiveOrbitCount();
       const focus = ORBIT_FOCI[focusIndex];
-      this.hazards.push({
+      const hazard = {
         angle: (Math.PI * 2 * index) / 5 + 0.35,
         radius: 130 + (index % 3) * 76,
         speed: 0.22 + index * 0.035,
@@ -189,7 +193,57 @@ export function startPhasebound(options = {}) {
         size: index % 2 === 0 ? 15 : 11,
         wobble: index * 0.8,
         art: this.add.graphics().setDepth(2),
-      });
+      };
+      this.hazards.push(hazard);
+      this.positionHazardSafely(hazard, 0);
+      if (this.mode === "active" || this.mode === "tutorial") this.spawnGrace = Math.max(this.spawnGrace, HAZARD_SPAWN_GRACE);
+    },
+
+    getHazardPosition(hazard, time, angle = hazard.angle) {
+      const focus = ORBIT_FOCI[hazard.focusIndex];
+      const wobble = Math.sin(time * 0.0012 + hazard.wobble) * 22 * focus.scale;
+      const orbitRadius = hazard.radius * focus.scale + wobble;
+      return {
+        x: hazard.centerX + Math.cos(angle) * orbitRadius,
+        y: hazard.centerY + Math.sin(angle) * orbitRadius * 0.58,
+      };
+    },
+
+    positionHazardSafely(hazard, time) {
+      const current = this.getHazardPosition(hazard, time);
+      let bestAngle = hazard.angle;
+      let bestPosition = current;
+      let bestDistance = Phaser.Math.Distance.Between(this.player.x, this.player.y, current.x, current.y);
+
+      for (let attempt = 0; attempt < HAZARD_POSITION_ATTEMPTS; attempt += 1) {
+        const angle = hazard.angle + (Math.PI * 2 * attempt) / HAZARD_POSITION_ATTEMPTS;
+        const candidate = this.getHazardPosition(hazard, time, angle);
+        const distance = Phaser.Math.Distance.Between(this.player.x, this.player.y, candidate.x, candidate.y);
+        if (distance > bestDistance) {
+          bestDistance = distance;
+          bestAngle = angle;
+          bestPosition = candidate;
+        }
+        if (distance >= HAZARD_PLAYER_CLEARANCE) break;
+      }
+
+      hazard.angle = bestAngle;
+      hazard.x = bestPosition.x;
+      hazard.y = bestPosition.y;
+    },
+
+    resetHazardsForRun() {
+      const activeOrbitCount = this.getActiveOrbitCount();
+      for (const [index, hazard] of this.hazards.entries()) {
+        const focusIndex = index % activeOrbitCount;
+        const focus = ORBIT_FOCI[focusIndex];
+        hazard.focusIndex = focusIndex;
+        hazard.centerX = focus.x;
+        hazard.centerY = focus.y;
+        hazard.angle = (Math.PI * 2 * index) / 5 + 0.35;
+        hazard.direction = 1;
+        this.positionHazardSafely(hazard, 0);
+      }
     },
 
     updateDifficulty() {
@@ -211,6 +265,7 @@ export function startPhasebound(options = {}) {
       this.phaseLabel = PHASE_LABELS[Math.min(this.phaseNumber - 1, PHASE_LABELS.length - 1)] || `phase ${this.phaseNumber}`;
       this.phaseWarning = false;
       this.phaseTransition = { elapsed: 0, switched: false };
+      this.spawnGrace = Math.max(this.spawnGrace, HAZARD_SPAWN_GRACE);
       const activeOrbitCount = this.getActiveOrbitCount();
       for (const [index, hazard] of this.hazards.entries()) hazard.focusIndex = index % activeOrbitCount;
       this.drawOrbitMap();
@@ -245,6 +300,7 @@ export function startPhasebound(options = {}) {
       this.spawnClock = 0;
       this.hitCooldown = 0;
       this.hitFreeze = 0;
+      this.spawnGrace = HAZARD_SPAWN_GRACE;
       this.dashTime = 0;
       this.dashCooldown = 0;
       this.autoplayClock = 0;
@@ -253,7 +309,7 @@ export function startPhasebound(options = {}) {
       this.cameras.main.setZoom(1);
       this.playerVelocity.set(0, 0);
       this.pointerTarget = null;
-      for (const hazard of this.hazards) hazard.direction = 1;
+      this.resetHazardsForRun();
       const openingPackets = this.pacing === "busy" ? 6 : 5;
       for (let index = 0; index < openingPackets; index += 1) this.spawnPacket();
       this.publish();
@@ -286,13 +342,14 @@ export function startPhasebound(options = {}) {
       this.spawnClock = 0;
       this.hitCooldown = 0;
       this.hitFreeze = 0;
+      this.spawnGrace = HAZARD_SPAWN_GRACE;
       this.dashTime = 0;
       this.dashCooldown = 0;
       this.player.setPosition(480, 320);
       this.cameras.main.setZoom(1);
       this.playerVelocity.set(0, 0);
       this.pointerTarget = null;
-      for (const hazard of this.hazards) hazard.direction = 1;
+      this.resetHazardsForRun();
       this.drawPlayer();
       this.publish();
     },
@@ -362,6 +419,7 @@ export function startPhasebound(options = {}) {
         return;
       }
       const dt = realDt * (this.slowMode ? SLOW_MODE_TIME_SCALE : 1);
+      this.spawnGrace = Math.max(0, this.spawnGrace - realDt);
       const scoreBefore = this.score;
       this.updateHazards(time, dt);
 
@@ -506,9 +564,7 @@ export function startPhasebound(options = {}) {
         hazard.centerY = Phaser.Math.Linear(hazard.centerY, focus.y, Math.min(1, dt * 2.2));
         const speed = hazard.speed * phaseSpeed * transitionSpeed * runSpeed;
         hazard.angle += speed * hazard.direction * dt;
-        const wobble = Math.sin(time * 0.0012 + hazard.wobble) * 22 * focus.scale;
-        hazard.x = hazard.centerX + Math.cos(hazard.angle) * (hazard.radius * focus.scale + wobble);
-        hazard.y = hazard.centerY + Math.sin(hazard.angle) * (hazard.radius * focus.scale + wobble) * 0.58;
+        this.positionHazardSafely(hazard, time);
         hazard.art.clear();
         const size = hazard.size;
         hazard.art.fillStyle(COLORS.danger, 0.96);
@@ -540,7 +596,7 @@ export function startPhasebound(options = {}) {
     },
 
     updateHazardCollision() {
-      if (this.dashTime > 0 || this.hitCooldown > 0) return;
+      if (this.spawnGrace > 0 || this.dashTime > 0 || this.hitCooldown > 0) return;
       for (const hazard of this.hazards) {
         if (Phaser.Math.Distance.Between(this.player.x, this.player.y, hazard.x, hazard.y) < hazard.size + 17) {
           this.streak = 0;

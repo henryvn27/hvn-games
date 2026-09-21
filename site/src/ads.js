@@ -8,6 +8,8 @@ function hasFilledGoogleAd() {
   if (filledSlot) return true;
 
   return [...document.querySelectorAll("iframe")].some((frame) => {
+    const slot = frame.closest("ins.adsbygoogle");
+    if (slot?.dataset.adStatus === "unfilled") return false;
     const source = frame.getAttribute("src") || "";
     if (!/googleadservices\.com|doubleclick\.net|googlesyndication\.com/.test(source)) return false;
     const rect = frame.getBoundingClientRect();

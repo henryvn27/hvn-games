@@ -21,27 +21,89 @@ export function shelfCard(game, base) {
   </article>`;
 }
 
-export function renderGameShelf({ app, base }) {
+export async function renderGameShelf({ app, base }) {
   const params = new URLSearchParams(window.location.search);
   const selected = SHELF_GAMES.find((game) => game.id === params.get("play"));
   document.body.className = "shelf-page";
 
   if (selected) {
+    document.body.className = "shelf-page shelf-native-mode";
+    app.id = "hvn-shell-app";
     app.innerHTML = `
       <header class="site-header page-width shelf-header">
         <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
         <nav class="site-nav" aria-label="Shelf navigation"><a href="${base}?game=shelf">all games</a><a href="${base}?game=${params.get("from") || "orbit"}">back to Orbit</a></nav>
       </header>
-      <main class="page-width shelf-play-main">
+      <main class="page-width shelf-play-main shelf-native-main">
         <div class="shelf-play-heading"><div><p class="shelf-kicker">game ${selected.number}</p><h1>${selected.name}</h1></div><a class="text-link" href="${base}?game=shelf">← choose another</a></div>
-        <div class="shelf-embed-frame"><iframe title="${selected.name}" src="${base}shelf/embed.html?game=${selected.id}"></iframe></div>
+        <div id="shelf-native-host" aria-label="${selected.name} game"><div id="app"></div></div>
         <p class="shelf-credit">Game engine from Game Shelf, adapted into HVN games under its MIT license.</p>
       </main>
     `;
+    await mountNativeShelfGame({ base, gameId: selected.id });
     return;
   }
 
   renderShelfHome({ app, base, params });
+}
+
+const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
+const SHELF_SCRIPTS = ["word-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
+const NATIVE_SHELF_OVERRIDES = `
+  body.shelf-native-mode { background: #111211; color: #f3f5eb; }
+  body.shelf-native-mode > #hvn-shell-app { width: 100%; }
+  body.shelf-native-mode .site-header { position: relative; height: auto; min-height: 72px; padding-block: 18px; background: #111211; }
+  body.shelf-native-mode .shelf-play-heading h1 { color: #f3f5eb; }
+  body.shelf-native-mode .site-header .site-nav { display: flex; }
+  body.shelf-native-mode .shelf-play-main { max-width: 1180px; padding-block: 54px 80px; }
+  body.shelf-native-mode #shelf-native-host { min-height: 720px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); }
+  body.shelf-native-mode #shelf-native-host > #app { width: 100%; max-width: none; margin: 0; padding: 20px clamp(16px, 4vw, 42px) 34px; color: #12151f; }
+  body.shelf-native-mode #shelf-native-host .game-head { display: none; }
+  body.shelf-native-mode #shelf-native-host .game-wrap { max-width: 900px; }
+  body.shelf-native-mode #shelf-native-host .panel { box-shadow: 5px 5px 0 rgba(18, 21, 31, .18); }
+  body.shelf-native-mode #shelf-native-host footer,
+  body.shelf-native-mode #shelf-native-host header,
+  body.shelf-native-mode #shelf-native-host nav { display: none; }
+  body.shelf-native-mode #shelf-native-host main { min-height: 0; padding: 0; }
+  @media (max-width: 520px) {
+    body.shelf-native-mode .shelf-play-main { padding-block: 42px 58px; }
+    body.shelf-native-mode #shelf-native-host { min-height: 620px; }
+    body.shelf-native-mode #shelf-native-host > #app { padding-inline: 12px; }
+  }
+  @media (prefers-color-scheme: light) {
+    body.shelf-native-mode { background: #f7f7f2; color: #171817; }
+    body.shelf-native-mode .site-header { background: #f7f7f2; }
+    body.shelf-native-mode .shelf-play-heading h1 { color: #171817; }
+  }
+`;
+
+async function mountNativeShelfGame({ base, gameId }) {
+  for (const file of SHELF_STYLES) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `${base}shelf/${file}`;
+    link.dataset.shelfStyle = file;
+    document.head.appendChild(link);
+  }
+
+  const overrides = document.createElement("style");
+  overrides.dataset.shelfStyle = "native-overrides";
+  overrides.textContent = NATIVE_SHELF_OVERRIDES;
+  document.head.appendChild(overrides);
+
+  for (const file of SHELF_SCRIPTS) {
+    await new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = `${base}shelf/${file}`;
+      script.dataset.shelfScript = file;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error(`Could not load shelf game asset: ${file}`));
+      document.body.appendChild(script);
+    });
+  }
+
+  if (typeof window.play !== "function") throw new Error("Shelf game engine did not expose play()");
+  window.play(gameId);
 }
 
 function renderShelfHome({ app, base, params }) {

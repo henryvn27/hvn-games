@@ -63,9 +63,10 @@ for (const marker of ["startComet", "Comet", "setDirection", "spawnFood", "maybe
 }
 
 const shelf = readFileSync(join(root, "site/src/shelf.js"), "utf8");
-for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "embed.html", "Game Shelf source + license"]) {
+for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "shelf-native-host", "mountNativeShelfGame", "Game Shelf source + license"]) {
   if (!shelf.includes(marker)) throw new Error(`Shelf is missing game or route marker: ${marker}`);
 }
+if (shelf.includes("<iframe")) throw new Error("Game Shelf still uses a nested iframe");
 
 const workflow = readFileSync(join(root, ".github/workflows/pages.yml"), "utf8");
 for (const marker of ["actions/upload-pages-artifact@v3", "actions/deploy-pages@v4"]) {

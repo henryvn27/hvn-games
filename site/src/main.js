@@ -13,6 +13,7 @@ const ORBIT_RL_ROUTE = "orbit-rl";
 const SHELF_ROUTE = "shelf";
 const TOWER_DEFENSE_ROUTE = "neon-bastion";
 const COMET_ROUTE = "comet";
+const SPACE_WARS_ROUTE = "space-wars";
 const LEADERBOARD_GAME = "phasebound";
 
 if (params.get("game")) {
@@ -26,9 +27,10 @@ function renderGallery() {
   document.body.className = "gallery-page";
   recordGalleryView();
   const additionalGames = [
-    { number: "02", name: "Comet", kind: "arcade", description: "Eat beacons, dodge rocks, and keep the tail together.", href: `${base}?game=${COMET_ROUTE}`, action: "play" },
-    { number: "03", name: "Neon Bastion", kind: "strategy", description: "Place towers, hold the line, and send the next wave.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
-    ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 3).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
+    { number: "02", name: "Space Wars", kind: "arcade", description: "Pilot a small ship, clear the sky, and hold your shields.", href: `${base}?game=${SPACE_WARS_ROUTE}`, action: "play" },
+    { number: "03", name: "Comet", kind: "arcade", description: "Eat beacons, dodge rocks, and keep the tail together.", href: `${base}?game=${COMET_ROUTE}`, action: "play" },
+    { number: "04", name: "Neon Bastion", kind: "strategy", description: "Place towers, hold the line, and send the next wave.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
+    ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 4).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
   ];
   app.innerHTML = `
     <header class="site-header page-width">
@@ -78,6 +80,85 @@ function galleryGameCard(game) {
     <div><h2>${game.name}</h2><p>${game.description}</p></div>
     <a class="button button-secondary" href="${game.href}">${game.action}</a>
   </article>`;
+}
+
+async function renderSpaceWars() {
+  document.body.className = "game-page game-space-wars";
+  app.innerHTML = `
+    <header class="game-header page-width">
+      <a class="wordmark" href="${base}">HVN games</a>
+      <nav class="site-nav" aria-label="Primary navigation"><a href="${base}">all games</a><a href="${base}?game=${ORBIT_ROUTE}">Orbit</a></nav>
+    </header>
+    <main class="game-main page-width space-wars-main">
+      <div class="game-heading space-wars-heading"><h1>Space Wars</h1><p class="game-blurb">Fly, fire, and keep the sky clear.</p></div>
+      <section class="space-wars-frame" aria-label="Space Wars game">
+        <div class="space-wars-hud" aria-live="polite">
+          <div><span>shields</span><strong id="space-wars-shields">3</strong></div>
+          <div><span>wave</span><strong id="space-wars-wave">1</strong></div>
+          <div><span>score</span><strong id="space-wars-score">0000</strong></div>
+          <button id="space-wars-pause" class="space-wars-pause" type="button" aria-label="Pause">Ⅱ</button>
+        </div>
+        <div id="space-wars-root"></div>
+        <div class="space-wars-overlay" id="space-wars-overlay">
+          <p class="space-wars-overline">a small 3D arcade game</p>
+          <h2 id="space-wars-overlay-title">Clear the sky.</h2>
+          <p id="space-wars-overlay-copy">Move your ship, fire at the red shapes, and keep anything from reaching the horizon.</p>
+          <button id="space-wars-overlay-action" class="button button-primary" type="button">start a run</button>
+          <p class="space-wars-controls">arrows or WASD to fly · Space or tap the field to fire · P pauses</p>
+        </div>
+        <div class="space-wars-touch" aria-label="Touch movement controls">
+          <button type="button" data-space-move="up" aria-label="Fly up">↑</button>
+          <button type="button" data-space-move="left" aria-label="Fly left">←</button>
+          <button type="button" data-space-move="down" aria-label="Fly down">↓</button>
+          <button type="button" data-space-move="right" aria-label="Fly right">→</button>
+        </div>
+      </section>
+      <p class="space-wars-note">A native HVN adaptation of the Space Wars demo from <a href="https://github.com/instructa/viber3d" rel="noreferrer">viber3d</a>, under its MIT license.</p>
+    </main>
+  `;
+
+  const { startSpaceWars } = await import("../../games/spacewars/spacewars.js");
+  const overlay = document.querySelector("#space-wars-overlay");
+  const title = document.querySelector("#space-wars-overlay-title");
+  const copy = document.querySelector("#space-wars-overlay-copy");
+  const action = document.querySelector("#space-wars-overlay-action");
+  const pause = document.querySelector("#space-wars-pause");
+  const score = document.querySelector("#space-wars-score");
+  const wave = document.querySelector("#space-wars-wave");
+  const shields = document.querySelector("#space-wars-shields");
+  let api;
+  let nextAction = () => api.start();
+  const showOverlay = ({ heading, message, label, callback }) => {
+    title.textContent = heading;
+    copy.textContent = message;
+    action.textContent = label;
+    nextAction = callback;
+    overlay.classList.remove("is-hidden");
+  };
+  api = startSpaceWars({
+    parent: "space-wars-root",
+    onState: (state) => {
+      score.textContent = String(state.score).padStart(4, "0");
+      wave.textContent = String(state.wave);
+      shields.textContent = String(state.shields);
+      pause.textContent = state.mode === "pause" ? "▶" : "Ⅱ";
+      pause.setAttribute("aria-label", state.mode === "pause" ? "Resume" : "Pause");
+      if (state.mode === "active") overlay.classList.add("is-hidden");
+      if (state.mode === "pause") showOverlay({ heading: "Paused.", message: "The sky is holding still.", label: "resume", callback: () => api.togglePause() });
+      if (state.mode === "result") showOverlay({ heading: "Shields down.", message: `You cleared ${state.score} targets.`, label: "run it again", callback: () => api.start() });
+    },
+  });
+  action.addEventListener("click", () => nextAction());
+  pause.addEventListener("click", () => api.togglePause());
+  for (const button of document.querySelectorAll("[data-space-move]")) {
+    const direction = button.dataset.spaceMove;
+    const press = (event) => { event.preventDefault(); api.setMove(direction, true); };
+    const release = (event) => { event.preventDefault(); api.setMove(direction, false); };
+    button.addEventListener("pointerdown", press);
+    button.addEventListener("pointerup", release);
+    button.addEventListener("pointercancel", release);
+    button.addEventListener("lostpointercapture", release);
+  }
 }
 
 function commandBlock(label, command, id) {
@@ -403,6 +484,7 @@ async function renderGame() {
   if (params.get("game") === TOWER_DEFENSE_ROUTE) return renderTowerDefense();
   if (params.get("game") === ORBIT_RL_ROUTE) return renderRLWriteup();
   if (params.get("game") === COMET_ROUTE) return renderComet();
+  if (params.get("game") === SPACE_WARS_ROUTE) return renderSpaceWars();
   if (![ORBIT_ROUTE, LEGACY_ORBIT_ROUTE].includes(params.get("game"))) return renderGallery();
   document.body.className = "game-page game-phasebound";
   app.innerHTML = `

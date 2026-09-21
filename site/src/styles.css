@@ -951,40 +951,6 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   overflow: hidden;
 }
 .google-ad-slot:has(ins[data-ad-status="unfilled"]) { min-height: 0; height: 0; margin-block: 0; }
-.ads-consent {
-  position: fixed;
-  z-index: 20;
-  right: 18px;
-  bottom: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  width: min(560px, calc(100% - 36px));
-  padding: 16px 18px;
-  border: 1px solid var(--ink);
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: 6px 6px 0 var(--ink);
-}
-.ads-consent strong { display: block; margin-bottom: 3px; font-size: 0.92rem; }
-.ads-consent p { max-width: 320px; margin: 0; color: var(--muted); font-size: 0.76rem; line-height: 1.35; }
-.ads-consent-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-.ads-consent-actions .button { min-height: 36px; padding: 7px 12px; font-size: 0.75rem; }
-.ads-settings-link {
-  position: fixed;
-  z-index: 19;
-  right: 12px;
-  bottom: 10px;
-  border: 0;
-  padding: 2px 4px;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 0.65rem;
-  opacity: 0.7;
-}
-.ads-settings-link:hover, .ads-settings-link:focus-visible { color: var(--ink); opacity: 1; }
 .ad-preview {
   width: min(728px, calc(100% - 48px));
   min-height: 90px;
@@ -1005,18 +971,10 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .ad-preview-link:focus-visible { outline: 2px solid #ff2b83; outline-offset: -3px; }
 .ad-preview-link img { display: block; width: 100%; height: 100%; min-height: 90px; object-fit: cover; object-position: center; }
 .ad-preview-caption { display: grid; align-content: center; gap: 5px; padding: 14px 18px; }
-.ad-preview-caption .ad-preview-label, .ad-preview-caption > span:last-child { color: #b6b0a6; }
+.ad-preview-caption > span:last-child { color: #b6b0a6; }
 .ad-preview-caption strong { color: #f7f2e7; font-size: 1.05rem; font-weight: 700; }
 .ad-preview-caption > span:last-child { font-size: 0.74rem; line-height: 1.35; }
-.ad-preview-label {
-  color: #ff2b83;
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
 @media (max-width: 620px) {
-  .ads-consent { right: 12px; bottom: 12px; width: calc(100% - 24px); align-items: flex-start; flex-direction: column; gap: 12px; padding: 14px; box-shadow: 4px 4px 0 var(--ink); }
-  .ads-consent-actions { width: 100%; justify-content: space-between; }
   .ad-preview { width: calc(100% - 32px); min-height: 76px; margin-block: 18px 26px; }
   .ad-preview-link { grid-template-columns: minmax(0, 1fr) 128px; min-height: 76px; }
   .ad-preview-link img { min-height: 76px; }

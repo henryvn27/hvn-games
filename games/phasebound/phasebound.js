@@ -199,7 +199,9 @@ export function startPhasebound(options = {}) {
         art: this.add.graphics().setDepth(2),
       };
       this.hazards.push(hazard);
-      this.positionHazardSafely(hazard, 0);
+      // Safe placement belongs to the spawn event. Once an asteroid is in
+      // flight, its angle must remain continuous or it will appear to jump.
+      this.positionHazardSafely(hazard, this.orbitTime);
       if (this.mode === "active" || this.mode === "tutorial") this.spawnGrace = Math.max(this.spawnGrace, HAZARD_SPAWN_GRACE);
     },
 
@@ -255,7 +257,7 @@ export function startPhasebound(options = {}) {
         hazard.centerY = focus.y;
         hazard.angle = (Math.PI * 2 * index) / 5 + 0.35;
         hazard.direction = 1;
-        this.positionHazardSafely(hazard, 0);
+        this.positionHazardSafely(hazard, this.orbitTime);
       }
     },
 
@@ -436,7 +438,7 @@ export function startPhasebound(options = {}) {
         this.dashCooldown = Math.max(0, this.dashCooldown - realDt);
         this.energy = Math.min(100, this.energy + realDt * 2.4);
         this.orbitTime += realDt * 1000;
-        this.updateHazards(this.orbitTime, realDt);
+        this.updateHazards(realDt);
         this.updateMovement(realDt);
         this.drawPlayer();
         return;
@@ -452,7 +454,7 @@ export function startPhasebound(options = {}) {
       this.spawnGrace = Math.max(0, this.spawnGrace - realDt);
       const scoreBefore = this.score;
       this.orbitTime += dt * 1000;
-      this.updateHazards(this.orbitTime, dt);
+      this.updateHazards(dt);
 
       this.elapsed += dt;
       this.updatePhaseTransition(dt);
@@ -579,7 +581,7 @@ export function startPhasebound(options = {}) {
       }
     },
 
-    updateHazards(time, dt) {
+    updateHazards(dt) {
       const phaseSpeed = 1 + Math.min(MAX_PHASE_SPEED_BONUS, (this.phaseNumber - 1) * PHASE_SPEED_STEP);
       let transitionSpeed = 1;
       if (this.phaseTransition) {
@@ -596,7 +598,9 @@ export function startPhasebound(options = {}) {
         hazard.centerY = Phaser.Math.Linear(hazard.centerY, focus.y, Math.min(1, dt * 2.2));
         const speed = hazard.speed * phaseSpeed * transitionSpeed * runSpeed;
         hazard.angle += speed * hazard.direction * dt;
-        this.positionHazardSafely(hazard, time);
+        // Do not re-place live hazards here. Safety checks are for spawn and
+        // reset only; changing the angle every frame makes asteroids teleport
+        // away from the player instead of moving along their orbit.
         hazard.art.clear();
         const size = hazard.size;
         hazard.art.fillStyle(COLORS.danger, 0.96);

@@ -81,7 +81,7 @@ class NeonBastion {
       <div class="nb-shell">
         <header class="nb-header">
           <a class="nb-wordmark" href="${this.base}">HVN games</a>
-          <div class="nb-title"><span class="nb-title-mark"></span><strong>Neon Bastion</strong><span>lunar relay defense</span></div>
+          <div class="nb-title"><span class="nb-title-mark"></span><strong>Space Tower Defense</strong><span>lunar relay defense</span></div>
           <button class="nb-pause" id="nb-pause" type="button">pause</button>
         </header>
         <div class="nb-layout">

@@ -18,8 +18,8 @@ const SPACE_WARS_ROUTE = "space-wars";
 const DEFAULT_LEADERBOARD_GAME = "phasebound";
 const LEADERBOARD_GAMES = [
   { id: "phasebound", label: "Orbit" },
-  { id: "neon-bastion", label: "Neon Bastion" },
-  { id: "reaction", label: "Lights Out" },
+  { id: "neon-bastion", label: "Space Tower Defense" },
+  { id: "reaction", label: "Reaction Test" },
 ];
 
 if (params.get("game")) {
@@ -38,7 +38,7 @@ function renderGallery() {
   recordGalleryView();
   const galleryGames = [
     { number: "01", name: "Orbit", kind: "arcade", description: "Match your color. Dodge the red planets.", href: `${base}?game=${ORBIT_ROUTE}`, action: "play Orbit" },
-    { number: "02", name: "Neon Bastion", kind: "strategy", description: "Build a lunar relay defense, then stop the crawlers before they reach it.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
+    { number: "02", name: "Space Tower Defense", kind: "strategy", description: "Build a lunar relay defense, then stop the crawlers before they reach it.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
     ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 2).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
   ];
   app.innerHTML = `

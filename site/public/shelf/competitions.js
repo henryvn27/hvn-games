@@ -16,7 +16,7 @@
     snake:{name:'Snake',icon:'🐍',seconds:90,rules:'Wrap · Normal speed · 1 apple',rule:'wrap-125-1',score:'5 points per apple. 20 apples = 100 points.'},
     dodger:{name:'Space Dodger',icon:'🚀',seconds:90,rules:'Standard Mars survival',rule:'mars',score:'1 point per 25 score. 2,500 score = 100 points.'},
     flappy:{name:'Sky Flyer',icon:'✈️',seconds:90,rules:'Standard flight from level 1',rule:'sky',score:'5 points per gate. 20 gates = 100 points.'},
-    memory:{name:'Field Kit',icon:'🧰',seconds:90,rules:'8 pairs · same layout for every player',rule:'eight-pairs',score:'5 points per item logged. Finish for 20 bonus points, plus up to 40 for fewer moves (−2 per move beyond 8).'},
+    memory:{name:'Memory Match',icon:'🧰',seconds:90,rules:'8 pairs · same layout for every player',rule:'eight-pairs',score:'5 points per pair found. Finish for 20 bonus points, plus up to 40 for fewer moves (−2 per move beyond 8).'},
     golf:{name:'Mini Golf',icon:'⛳',seconds:180,rules:'First 3 holes · par 8 · 10 strokes per hole',rule:'golf-three',score:'20 points per sunk hole. Sink all 3 for up to 40 bonus points (−4 per stroke over par 8).'}
   };
   const POOLS=[
@@ -24,7 +24,7 @@
       {id:'garden-ten',game:'snake',title:'A basket of apples',description:'Collect 10 apples in one round. Classic or Wrap, Normal speed, 1 apple.',kind:'snake',target:10},
       {id:'quick-tap',game:'reaction',title:'Right on cue',description:'React after the green signal in 350 ms or less.',kind:'reaction',target:1},
       {id:'first-putt',game:'golf',title:'Find the cup',description:'Sink one Mini Golf hole. The three-hole Cup course counts too.',kind:'hole',target:1},
-      {id:'four-pairs',game:'memory',title:'Pair by pair',description:'Log 4 pairs in a single Field Kit inventory.',kind:'pairs',target:4}
+      {id:'four-pairs',game:'memory',title:'Pair by pair',description:'Find 4 pairs in a single Memory Match game.',kind:'pairs',target:4}
     ],
     [
       {id:'ten-gates',game:'flappy',title:'Through the clouds',description:'Clear 10 gates in one Sky Flyer flight.',kind:'score',target:10},

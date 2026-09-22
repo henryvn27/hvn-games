@@ -1,0 +1,7 @@
+Wordle-compatible word data
+
+Source: https://github.com/stuartpb/wordles
+The source repository states that its answer list and accepted-guess list are
+derived from the New York Times Wordle source and are provided without claims
+of authorship or warranty. This project uses the lists at runtime with a local
+SCOWL fallback when the source is unavailable.

@@ -54,7 +54,7 @@ export async function renderGameShelf({ app, base }) {
 }
 
 const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
-const SHELF_SCRIPTS = ["word-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
+const SHELF_SCRIPTS = ["word-list.js", "nyt-wordle-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
 const SHELF_ASSET_VERSION = "fullscreen-arcade-1";
 const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
@@ -461,6 +461,7 @@ async function mountNativeShelfGame({ base, gameId }) {
   document.head.appendChild(overrides);
 
   for (const file of SHELF_SCRIPTS) {
+    if (file === "nyt-wordle-list.js" && gameId !== "word") continue;
     await new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = `${base}shelf/${file}?v=${SHELF_ASSET_VERSION}`;
@@ -472,6 +473,7 @@ async function mountNativeShelfGame({ base, gameId }) {
   }
 
   if (typeof window.play !== "function") throw new Error("Shelf game engine did not expose play()");
+  if (gameId === "word" && window.wordleListPromise) await window.wordleListPromise;
   window.play(gameId);
   const plainCopy = {
     checkers: [["Capture every opposing piece. Pick how tactical the computer should be.", "Take all of the other pieces. Choose a bot."]],

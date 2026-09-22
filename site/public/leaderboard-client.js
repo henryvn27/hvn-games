@@ -49,10 +49,14 @@ function submit(gameId, payload) {
       seconds: Math.max(0, Math.round(Number(payload.seconds) || 0)),
       submissionId: String(payload.submissionId || submissionId()).slice(0, 80),
     }),
-  }).then((response) => response.json())
-    .then((payload) => payload && payload.ok
+  }).then(async (response) => {
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) return { status: "online", ok: true };
+    const payload = await response.json();
+    return payload && payload.ok
       ? ({ status: "online", ok: true, duplicate: Boolean(payload.duplicate) })
-      : ({ status: "unavailable", ok: false, error: new Error(payload && payload.error || "leaderboard write rejected") }))
+      : ({ status: "unavailable", ok: false, error: new Error(payload && payload.error || "leaderboard write rejected") });
+  })
     .catch((error) => ({ status: "unavailable", ok: false, error }));
 }
 function migrationState() {

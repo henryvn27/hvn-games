@@ -51,7 +51,7 @@ export async function renderGameShelf({ app, base }) {
 
 const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
 const SHELF_SCRIPTS = ["word-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
-const SHELF_ASSET_VERSION = "wordle-name-1";
+const SHELF_ASSET_VERSION = "design-taste-1";
 const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode > #hvn-shell-app { width: 100%; }
@@ -186,6 +186,97 @@ const NATIVE_SHELF_OVERRIDES = `
     body.shelf-native-mode .start-lights { padding-inline: 10px; gap: 6px; }
     body.shelf-native-mode .start-light { width: 28px; }
     body.shelf-native-mode .f1-reaction-button { min-height: 58px; }
+  }
+
+  /* Each game gets its own material, palette, and control language. */
+  body.shelf-native-mode { --game-paper: #f1f0e9; --game-ink: #1c201d; --game-muted: #6a6d65; --game-line: rgba(28, 32, 29, .2); }
+  body.shelf-native-mode[data-shelf-game] .shelf-native-main { max-width: 1120px; }
+  body.shelf-native-mode[data-shelf-game] .shelf-game-heading { border-left: 4px solid var(--game-accent, #b8d94b); padding-left: 17px; }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .panel,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .trade-shell,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .trade-setup { border: 1px solid var(--game-line); border-radius: 4px; box-shadow: 8px 8px 0 var(--game-shadow, rgba(28, 32, 29, .13)); }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host button { border-radius: 3px; box-shadow: none; transition: background-color .16s ease, color .16s ease, border-color .16s ease, transform .16s ease; }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host button:hover:not(:disabled) { transform: translateY(-1px); }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host button:focus-visible { outline: 3px solid var(--game-accent, #b8d94b); outline-offset: 3px; }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .controls { gap: 8px; }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .controls button { border: 1px solid var(--game-ink); background: transparent; color: var(--game-ink); }
+
+  body.shelf-native-mode[data-shelf-game="golf"] { --game-paper: #f2efdd; --game-ink: #183f35; --game-muted: #667568; --game-line: rgba(24, 63, 53, .25); --game-accent: #d3aa57; --game-shadow: rgba(24, 63, 53, .2); background: #d9d7c9; }
+  body.shelf-native-mode[data-shelf-game="golf"] .shelf-game-heading { border-color: #d3aa57; }
+  body.shelf-native-mode[data-shelf-game="golf"] .golf-panel { background: var(--game-paper); color: var(--game-ink); }
+  body.shelf-native-mode[data-shelf-game="golf"] .golf-stage { border: 10px solid #1f5747; border-radius: 3px; background: #9fc77c; box-shadow: inset 0 0 0 1px #123a30; }
+  body.shelf-native-mode[data-shelf-game="golf"] .golf-shot-controls { border-top: 1px solid var(--game-line); }
+  body.shelf-native-mode[data-shelf-game="golf"] .golf-shot-controls button { background: #1f5747; color: #f2efdd; border-color: #1f5747; }
+
+  body.shelf-native-mode[data-shelf-game="snake"] { --game-paper: #f2edda; --game-ink: #163d32; --game-accent: #e4e99b; background: #d9d6c9; }
+  body.shelf-native-mode[data-shelf-game="snake"] .shelf-game-heading { border-color: #d95f4d; }
+
+  body.shelf-native-mode[data-shelf-game="dodger"] { --game-paper: #172231; --game-ink: #e9e5d8; --game-muted: #9aa6ae; --game-line: rgba(233, 229, 216, .24); --game-accent: #e17f76; --game-shadow: rgba(14, 25, 38, .28); background: #0e1725; }
+  body.shelf-native-mode[data-shelf-game="dodger"] .shelf-game-heading { border-color: #e17f76; }
+  body.shelf-native-mode[data-shelf-game="dodger"] .shooter-panel { border-color: #71808b; background: #172231; color: var(--game-ink); box-shadow: 8px 8px 0 #09111d; }
+  body.shelf-native-mode[data-shelf-game="dodger"] .shooter-status { border-color: rgba(233, 229, 216, .3); }
+  body.shelf-native-mode[data-shelf-game="dodger"] .shooter-panel .controls button { border-color: #a8b4b8; color: #e9e5d8; }
+  body.shelf-native-mode[data-shelf-game="dodger"] .shooter-panel .controls button:hover:not(:disabled) { background: #e17f76; border-color: #e17f76; color: #172231; }
+
+  body.shelf-native-mode[data-shelf-game="memory"] { --game-paper: #e7e3cf; --game-ink: #343b2f; --game-muted: #6d7564; --game-line: rgba(52, 59, 47, .22); --game-accent: #9baf63; --game-shadow: rgba(52, 59, 47, .18); background: #c9c9b9; }
+  body.shelf-native-mode[data-shelf-game="memory"] .shelf-game-heading { border-color: #9baf63; }
+  body.shelf-native-mode[data-shelf-game="memory"] .field-kit-panel { background: var(--game-paper); color: var(--game-ink); }
+  body.shelf-native-mode[data-shelf-game="memory"] .memory-stage { background: #758367; border: 8px solid #404a3b; border-radius: 3px; }
+  body.shelf-native-mode[data-shelf-game="memory"] .memory-card { border-radius: 2px; border-color: #404a3b; background: #ece8d8; }
+
+  body.shelf-native-mode[data-shelf-game="reaction"] { --game-accent: #d8f35b; background: #d4d4d0; }
+  body.shelf-native-mode[data-shelf-game="reaction"] .shelf-game-heading { border-color: #ef3340; }
+
+  body.shelf-native-mode[data-shelf-game="word"] { --game-paper: #e7eadf; --game-ink: #203d34; --game-muted: #66736a; --game-line: rgba(32, 61, 52, .24); --game-accent: #e6b84d; --game-shadow: rgba(32, 61, 52, .2); background: #cfd5ca; }
+  body.shelf-native-mode[data-shelf-game="word"] .shelf-game-heading { border-color: #e6b84d; }
+  body.shelf-native-mode[data-shelf-game="word"] .vault-panel { background: var(--game-paper); color: var(--game-ink); }
+  body.shelf-native-mode[data-shelf-game="word"] .vault-panel button { border-radius: 2px; }
+
+  body.shelf-native-mode[data-shelf-game="clicker"] { --game-paper: #eee9d9; --game-ink: #3d4334; --game-muted: #707665; --game-line: rgba(61, 67, 52, .24); --game-accent: #c67b4f; --game-shadow: rgba(61, 67, 52, .2); background: #c9c1ab; }
+  body.shelf-native-mode[data-shelf-game="clicker"] .shelf-game-heading { border-color: #c67b4f; }
+  body.shelf-native-mode[data-shelf-game="clicker"] .adventure { background: var(--game-paper); color: var(--game-ink); }
+  body.shelf-native-mode[data-shelf-game="clicker"] .camp-scene { border: 1px solid #3d4334; background: #b9c896; }
+  body.shelf-native-mode[data-shelf-game="clicker"] .adventure-grid { gap: 12px; }
+
+  body.shelf-native-mode[data-shelf-game="flappy"] { --game-paper: #27253a; --game-ink: #f4e9d4; --game-muted: #c0b5a4; --game-line: rgba(244, 233, 212, .24); --game-accent: #efa85f; --game-shadow: rgba(27, 23, 44, .35); background: #1e1d2d; }
+  body.shelf-native-mode[data-shelf-game="flappy"] .shelf-game-heading { border-color: #efa85f; }
+  body.shelf-native-mode[data-shelf-game="flappy"] .flyer-panel { border-color: #d08b65; background: var(--game-paper); color: var(--game-ink); }
+  body.shelf-native-mode[data-shelf-game="flappy"] .flyer-panel .controls button { border-color: #f4e9d4; color: #f4e9d4; }
+
+  body.shelf-native-mode[data-shelf-game="platform"] { --game-paper: #e8e1ee; --game-ink: #342c47; --game-muted: #71677c; --game-line: rgba(52, 44, 71, .23); --game-accent: #db754c; --game-shadow: rgba(52, 44, 71, .2); background: #c9c2d0; }
+  body.shelf-native-mode[data-shelf-game="platform"] .shelf-game-heading { border-color: #db754c; }
+  body.shelf-native-mode[data-shelf-game="platform"] .adventure { background: var(--game-paper); color: var(--game-ink); }
+  body.shelf-native-mode[data-shelf-game="platform"] .trail-map { border-color: #342c47; background: #d3c8dd; }
+  body.shelf-native-mode[data-shelf-game="platform"] .trail-stage { border: 8px solid #342c47; border-radius: 3px; background: #a5c5c7; }
+
+  body.shelf-native-mode[data-shelf-game="tic"] { --game-paper: #f3e8d2; --game-ink: #42302c; --game-muted: #78685e; --game-line: rgba(66, 48, 44, .25); --game-accent: #d56343; --game-shadow: rgba(66, 48, 44, .2); background: #d8c9b8; }
+  body.shelf-native-mode[data-shelf-game="tic"] .shelf-game-heading { border-color: #d56343; }
+  body.shelf-native-mode[data-shelf-game="tic"] .panel { background: var(--game-paper); color: var(--game-ink); }
+  body.shelf-native-mode[data-shelf-game="tic"] .tic-board { border: 8px solid #42302c; background: #d8a47a; gap: 5px; }
+  body.shelf-native-mode[data-shelf-game="tic"] .tic-board button { border: 1px solid #42302c; border-radius: 2px; background: #f3e8d2; color: #42302c; }
+
+  body.shelf-native-mode[data-shelf-game="checkers"] { --game-paper: #eee5d7; --game-ink: #332c2a; --game-muted: #756963; --game-line: rgba(51, 44, 42, .24); --game-accent: #c45f4b; --game-shadow: rgba(51, 44, 42, .18); background: #d0c4b6; }
+  body.shelf-native-mode[data-shelf-game="checkers"] .shelf-game-heading { border-color: #c45f4b; }
+  body.shelf-native-mode[data-shelf-game="checkers"] .panel { background: var(--game-paper); color: var(--game-ink); }
+  body.shelf-native-mode[data-shelf-game="checkers"] .checkers { border: 8px solid #332c2a; border-radius: 2px; background: #bc775f; }
+
+  body.shelf-native-mode[data-shelf-game="trade"] { --game-paper: #e5e0d5; --game-ink: #273438; --game-muted: #697375; --game-line: rgba(39, 52, 56, .24); --game-accent: #d1a85c; --game-shadow: rgba(39, 52, 56, .19); background: #c9cbc3; }
+  body.shelf-native-mode[data-shelf-game="trade"] .shelf-game-heading { border-color: #d1a85c; }
+  body.shelf-native-mode[data-shelf-game="trade"] .trade-shell, body.shelf-native-mode[data-shelf-game="trade"] .trade-setup { background: var(--game-paper); color: var(--game-ink); }
+  body.shelf-native-mode[data-shelf-game="trade"] .trade-layout { gap: 16px; }
+  body.shelf-native-mode[data-shelf-game="trade"] .trade-board { border: 8px solid #273438; border-radius: 2px; background: #d1c49d; }
+  body.shelf-native-mode[data-shelf-game="trade"] .side-panel { border: 1px solid var(--game-line); border-radius: 3px; background: #f0ece3; }
+
+  @media (max-width: 680px) {
+    body.shelf-native-mode[data-shelf-game] .shelf-game-heading { padding-left: 12px; }
+    body.shelf-native-mode[data-shelf-game] #shelf-native-host .game-wrap { width: 100%; }
+    body.shelf-native-mode[data-shelf-game] #shelf-native-host .trade-layout { grid-template-columns: 1fr; }
+    body.shelf-native-mode[data-shelf-game] #shelf-native-host .trade-side { order: -1; }
+    body.shelf-native-mode[data-shelf-game] #shelf-native-host .golf-shot-controls { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body.shelf-native-mode[data-shelf-game] #shelf-native-host button { transition: none; }
+    body.shelf-native-mode[data-shelf-game] #shelf-native-host button:hover:not(:disabled) { transform: none; }
   }
 `;
 

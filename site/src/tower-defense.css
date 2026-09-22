@@ -111,3 +111,20 @@
 @media (prefers-reduced-motion: reduce) {
   .nb-overlay, .nb-meter span { transition: none; }
 }
+
+/* Satellite console: restrained edges, paper-like controls, no neon haze. */
+.tower-defense-page { --nb-ink: #e8e4d7; --nb-panel: #182129; --nb-panel-2: #24333a; --nb-line: rgba(232, 228, 215, .24); --nb-muted: #a6aba5; --nb-cyan: #79d6cb; --nb-amber: #e2b15e; --nb-coral: #d96a58; background: #10181c; }
+.nb-shell { width: min(1440px, calc(100% - 48px)); padding-top: 22px; }
+.nb-header { min-height: 56px; }
+.nb-layout { gap: 16px; padding-top: 24px; }
+.nb-stage { border-color: rgba(121, 214, 203, .28); background: #0d171b; box-shadow: 8px 8px 0 rgba(5, 9, 11, .35); }
+.nb-controls { border-radius: 3px; background: var(--nb-panel); box-shadow: 8px 8px 0 rgba(5, 9, 11, .22); }
+.nb-tower-option, .nb-primary, .nb-secondary { border-radius: 3px; }
+.nb-tower-option:hover, .nb-tower-option.is-selected { border-color: var(--nb-cyan); background: #293b3d; }
+.nb-title-mark { box-shadow: none; }
+.nb-stage-note { border-radius: 2px; background: rgba(13, 23, 27, .88); }
+.nb-overlay-card { border-radius: 3px; background: #182129; box-shadow: 8px 8px 0 rgba(5, 9, 11, .36); }
+
+@media (max-width: 560px) {
+  .nb-shell { width: min(100% - 24px, 1440px); }
+}

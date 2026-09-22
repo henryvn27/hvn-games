@@ -1017,3 +1017,35 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
   .space-wars-overlay { padding: 22px; }
   .space-wars-overlay h2 { font-size: clamp(2.2rem, 12vw, 3.3rem); }
 }
+
+/* Larger routes use the same quiet shell, but each one owns a clear material. */
+.game-page.game-phasebound {
+  --field-ink: #edf0e8;
+  --muted: #9da9a5;
+  --line: rgba(237, 240, 232, .2);
+  --accent: #76e4d1;
+  background: #0d1724;
+}
+.game-page.game-phasebound .game-heading { border-left: 4px solid #76e4d1; padding-left: 17px; }
+.game-page.game-phasebound .game-frame { border: 1px solid rgba(118, 228, 209, .32); background: #101d2d; box-shadow: 8px 8px 0 rgba(4, 10, 17, .38); }
+.game-page.game-phasebound .game-action-button,
+.game-page.game-phasebound .pause-button,
+.game-page.game-phasebound .slow-button { border-radius: 3px; box-shadow: none; }
+.game-page.game-phasebound .game-action-button:focus-visible,
+.game-page.game-phasebound .pause-button:focus-visible,
+.game-page.game-phasebound .slow-button:focus-visible { outline: 3px solid #ffc857; outline-offset: 3px; }
+.game-page.game-comet { --field-ink: #f3ead7; --muted: #ae9d91; --line: rgba(243, 234, 215, .2); --accent: #f0a35d; background: #241d24; }
+.game-page.game-comet .game-heading { border-left: 4px solid #f0a35d; padding-left: 17px; }
+.game-page.game-comet .game-frame { border-color: rgba(240, 163, 93, .36); background: #2b2024; box-shadow: 8px 8px 0 rgba(30, 19, 25, .4); }
+.game-page.game-space-wars { --field-ink: #f2e9d9; --muted: #a69c90; --line: rgba(242, 233, 217, .2); --accent: #dd7b63; background: #1c2023; }
+.game-page.game-space-wars .game-heading { border-left: 4px solid #dd7b63; padding-left: 17px; }
+.game-page.game-space-wars .space-wars-frame { border-color: rgba(221, 123, 99, .4); box-shadow: 8px 8px 0 rgba(13, 16, 18, .4); }
+.game-page.game-phasebound .game-heading h1,
+.game-page.game-comet .game-heading h1,
+.game-page.game-space-wars .game-heading h1 { letter-spacing: -.08em; }
+
+@media (max-width: 600px) {
+  .game-page.game-phasebound .game-heading,
+  .game-page.game-comet .game-heading,
+  .game-page.game-space-wars .game-heading { padding-left: 12px; }
+}

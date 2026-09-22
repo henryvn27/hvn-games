@@ -21,7 +21,7 @@ function request(path, options) {
     signal: controller.signal,
     headers: Object.assign({ "Content-Type": "text/plain;charset=utf-8" }, (options && options.headers) || {}),
   });
-  return fetch(baseUrl + "/" + path, init)
+  return fetch(baseUrl + path, init)
     .then((response) => { if (!response.ok) throw new Error("leaderboard request failed (" + response.status + ")"); return response; })
     .finally(() => window.clearTimeout(timeout));
 }
@@ -29,7 +29,7 @@ function get(gameId, options) {
   if (!configured) return Promise.resolve({ status: "unconfigured", entries: [] });
   const ascending = options && options.order === "asc";
   const query = new URLSearchParams({ game_id: gameId, order: ascending ? "asc" : "desc", limit: "10" });
-  return request("scores?" + query)
+  return request("?" + query)
     .then((response) => response.json())
     .then((payload) => ({ status: "online", entries: (payload.entries || []).map(normalize).filter((entry) => entry.name) }))
     .catch((error) => ({ status: "unavailable", entries: [], error }));
@@ -39,7 +39,7 @@ function submit(gameId, payload) {
   const displayName = cleanName(payload && payload.name);
   const numericScore = Math.max(0, Math.round(Number(payload && payload.score) || 0));
   if (!displayName || !gameId || numericScore < 1) return Promise.resolve({ status: "invalid", ok: false });
-  return request("scores", {
+  return request("", {
     method: "POST",
     body: JSON.stringify({
       gameId: String(gameId).slice(0, 40),

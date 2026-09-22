@@ -266,9 +266,10 @@ function reaction(){
   panel.insertAdjacentHTML('beforeend',`<section class="reaction-leaderboard" aria-labelledby="reaction-leaderboard-title"><div class="reaction-leaderboard-heading"><h2 id="reaction-leaderboard-title">fastest laps</h2><span id="reaction-leaderboard-source">checking the shared board…</span></div><ol id="reaction-leaderboard-list"></ol><form id="reaction-name-form" hidden><label for="reaction-name">name or initials</label><div><input id="reaction-name" maxlength="16" autocomplete="nickname" placeholder="ABC or your name"><button type="submit">save lap</button></div><p id="reaction-name-status" role="status"></p></form></section>`);
   const leaderboardList=document.querySelector('#reaction-leaderboard-list'),nameForm=document.querySelector('#reaction-name-form'),nameInput=document.querySelector('#reaction-name'),nameStatus=document.querySelector('#reaction-name-status'),leaderboardSource=document.querySelector('#reaction-leaderboard-source');
   let pendingScore=null;
+  const online=window.HVNOnlineLeaderboard;
+  if(online?.configured) void online.migrate({reaction:ShelfLeaderboard.cachedScores('reaction')});
   const renderLeaderboard=async()=>{
     let entries=ShelfLeaderboard.get('reaction');
-    const online=window.HVNOnlineLeaderboard;
     if(online?.configured){
       const result=await online.get('reaction',{order:'asc'});
       if(result.status==='online'){entries=result.entries;leaderboardSource.textContent='shared board · fastest laps';}
@@ -284,7 +285,7 @@ function reaction(){
   };
   const saveScore=ms=>{
     const name=ShelfLeaderboard.getName();
-    if(name){ShelfLeaderboard.record('reaction',ms);void window.HVNOnlineLeaderboard?.submit('reaction',{name,score:ms}).then(()=>renderLeaderboard());renderLeaderboard();return;}
+    if(name){ShelfLeaderboard.record('reaction',ms);const localEntry=ShelfLeaderboard.get('reaction').find(entry=>entry.name===name&&entry.score===Math.round(ms));void online?.submit('reaction',{name,score:ms,submissionId:online?.submissionId('reaction',localEntry||{name,score:ms})}).then(()=>renderLeaderboard());renderLeaderboard();return;}
     pendingScore=ms;nameForm.hidden=false;nameInput.focus();nameStatus.textContent='Add your initials once to join the timing board.';
   };
   nameInput.value=ShelfLeaderboard.getName();
@@ -294,7 +295,7 @@ function reaction(){
     event.preventDefault();
     const name=ShelfLeaderboard.setName(nameInput.value);
     if(!name){nameStatus.textContent='Type three letters or a name first.';nameInput.focus();return;}
-    if(pendingScore!==null){ShelfLeaderboard.record('reaction',pendingScore);void window.HVNOnlineLeaderboard?.submit('reaction',{name,score:pendingScore});}
+    if(pendingScore!==null){ShelfLeaderboard.record('reaction',pendingScore);const localEntry=ShelfLeaderboard.get('reaction').find(entry=>entry.name===name&&entry.score===Math.round(pendingScore));void online?.submit('reaction',{name,score:pendingScore,submissionId:online?.submissionId('reaction',localEntry||{name,score:pendingScore})});}
     pendingScore=null;nameForm.hidden=true;nameStatus.textContent=`Saved as ${name}.`;void renderLeaderboard();
   });
   e.onclick=()=>{

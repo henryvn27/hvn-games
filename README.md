@@ -17,7 +17,7 @@ Open the local URL Vite prints, then play Orbit or visit `?game=neon-bastion` fo
 
 ## Play intelligence
 
-The gallery keeps a local fallback board in this browser and can use a shared, anonymous leaderboard for Orbit, Neon Bastion, and Lights Out. Scores use a display name, score, game id, and a few game-specific counters; no account or gameplay analytics is required. To enable the shared board, create a free Supabase project, run [`supabase/leaderboard.sql`](supabase/leaderboard.sql), then put its project URL and public anon key in [`site/public/leaderboard-config.js`](site/public/leaderboard-config.js). Never put a service-role key in the browser.
+The gallery keeps a local fallback board in this browser and can use a shared, anonymous leaderboard for the games. Scores use a player-chosen display name, score, game id, and a few game-specific counters; no account or gameplay analytics is required. The live board is a small Google Apps Script web app backed by a private Google Sheet. Its public web-app URL is the only value in [`site/public/leaderboard-config.js`](site/public/leaderboard-config.js), so no database key is shipped to the browser. When a browser first sees the live endpoint, it retries its previously cached local scores and marks each successful migration with a stable submission id, preventing duplicates.
 
 The site also includes Google AdSense page-level Auto ads. Requests start paused and only resume after the visitor chooses “allow ads”; “ad settings” can reopen that choice. See [`site/public/privacy.html`](site/public/privacy.html) for the current data-flow note. Before public monetization, configure Google’s certified consent message in AdSense for any EEA, UK, or Swiss traffic.
 

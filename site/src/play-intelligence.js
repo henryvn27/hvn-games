@@ -192,5 +192,5 @@ export function recordLeaderboardScore(gameId, score, packets, seconds) {
     .sort((left, right) => right.score - left.score || right.packets - left.packets || left.createdAt.localeCompare(right.createdAt))
     .slice(0, 25);
   writeData(data);
-  return getLeaderboard(gameId);
+  return next;
 }

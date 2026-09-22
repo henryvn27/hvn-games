@@ -275,7 +275,7 @@ function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME, statusNode =
     return Promise.resolve({ status: "unavailable", entries: localEntries });
   }
   if (!online.configured) {
-    if (statusNode) statusNode.textContent = "Local board for now. Add the free Supabase config to share scores.";
+    if (statusNode) statusNode.textContent = "Local board for now. The shared board is not connected.";
     return Promise.resolve({ status: "unconfigured", entries: localEntries });
   }
   if (statusNode) statusNode.textContent = "Loading shared scores…";
@@ -314,6 +314,11 @@ function setupLeaderboard() {
     button.textContent = "Saved";
     window.setTimeout(() => { button.textContent = "Save"; }, 1000);
   });
+  const online = window.HVNOnlineLeaderboard;
+  if (online?.configured) {
+    const cached = Object.fromEntries(LEADERBOARD_GAMES.map((game) => [game.id, getLeaderboard(game.id)]));
+    void online.migrate(cached);
+  }
 }
 
 function beginCountdown({ overlay, title, copy, detail, actionButton, message = "Match the color.", next }) {
@@ -759,9 +764,9 @@ async function renderGame() {
 
   let pendingScore = null;
   async function publishLeaderboardScore(gameId, score) {
-    recordLeaderboardScore(gameId, score.score, score.packets, score.elapsed);
+    const localEntry = recordLeaderboardScore(gameId, score.score, score.packets, score.elapsed);
     const online = window.HVNOnlineLeaderboard;
-    if (online?.configured) await online.submit(gameId, { name: getPlayerName(), score: score.score, packets: score.packets, seconds: score.elapsed });
+    if (online?.configured) await online.submit(gameId, { name: getPlayerName(), score: score.score, packets: score.packets, seconds: score.elapsed, submissionId: online.submissionId(gameId, localEntry) });
     return renderLeaderboard(document.querySelector("#phasebound-leaderboard"), gameId, document.querySelector("#phasebound-leaderboard-connection"));
   }
 
@@ -855,6 +860,11 @@ async function renderGame() {
     pacing: experiment,
   });
   void renderLeaderboard(document.querySelector("#phasebound-leaderboard"), "phasebound", document.querySelector("#phasebound-leaderboard-connection"));
+  const online = window.HVNOnlineLeaderboard;
+  if (online?.configured) {
+    const cached = Object.fromEntries(LEADERBOARD_GAMES.map((game) => [game.id, getLeaderboard(game.id)]));
+    void online.migrate(cached);
+  }
 
   overlayAction.addEventListener("click", () => { if (overlayAction.hidden) return; action(); });
   tutorialStart.addEventListener("click", advanceTutorial);

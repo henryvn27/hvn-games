@@ -51,5 +51,7 @@
     return get(gameId);
   }
 
-  window.ShelfLeaderboard = Object.freeze({get, record, getName, setName});
+  function cachedScores(gameId = 'reaction') { return get(gameId); }
+
+  window.ShelfLeaderboard = Object.freeze({get, record, getName, setName, cachedScores});
 })();

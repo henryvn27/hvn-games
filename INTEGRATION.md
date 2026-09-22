@@ -49,7 +49,7 @@ The gallery preview and `?game=orbit` route both call `startPhasebound`. The leg
 
 ## Leaderboard boundary
 
-`site/public/leaderboard-client.js` uses the Supabase REST API without adding a client dependency. `site/public/leaderboard-config.js` is intentionally empty by default, so local play remains fully functional until an owner supplies a project URL and public anon key. `supabase/leaderboard.sql` enables public reads and constrained anonymous inserts; the unique submission id prevents a retry from creating the same submission twice. The client falls back to local storage if the service is unconfigured or unavailable. Public scores are not verified achievements, so the table needs dashboard moderation or stronger server-side validation before treating it as authoritative competition.
+`site/public/leaderboard-client.js` uses a small Google Apps Script web app without adding a client dependency. `site/public/leaderboard-config.js` contains only the public web-app URL. The script validates game ids, display names, numeric bounds, and stable submission ids, then stores rows in a private Google Sheet with a script lock for concurrent writes. The client falls back to local storage if the service is unconfigured or unavailable. On first connection it migrates cached local entries once per browser; the stable submission id makes retries idempotent. Public scores are not verified achievements, so the sheet needs moderation or stronger server-side validation before treating it as authoritative competition.
 
 ## Proof run
 

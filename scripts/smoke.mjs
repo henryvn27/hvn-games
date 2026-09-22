@@ -10,7 +10,7 @@ const required = [
   "site/public/ads.txt",
   "site/public/leaderboard-config.js",
   "site/public/leaderboard-client.js",
-  "supabase/leaderboard.sql",
+  "apps-script/Code.gs",
   "site/public/assets/scoutly-house-ad.png",
   "site/src/styles.css",
   "site/src/play-intelligence.js",
@@ -44,12 +44,12 @@ for (const marker of ["phasebound", "ORBIT_ROUTE", "ORBIT_RL_ROUTE", "SHELF_ROUT
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
 }
 const leaderboardClient = readFileSync(join(root, "site/public/leaderboard-client.js"), "utf8");
-for (const marker of ["HVNOnlineLeaderboard", "leaderboard_scores", "submission_id", "unconfigured", "unavailable"]) {
+for (const marker of ["HVNOnlineLeaderboard", "migrate", "submissionId", "unconfigured", "unavailable"]) {
   if (!leaderboardClient.includes(marker)) throw new Error(`Online leaderboard client is missing marker: ${marker}`);
 }
-const leaderboardSql = readFileSync(join(root, "supabase/leaderboard.sql"), "utf8");
-for (const marker of ["create table if not exists public.leaderboard_scores", "enable row level security", "Anyone can read leaderboard scores", "Anyone can submit leaderboard scores", "submission_id"]) {
-  if (!leaderboardSql.includes(marker)) throw new Error(`Leaderboard schema is missing marker: ${marker}`);
+const leaderboardScript = readFileSync(join(root, "apps-script/Code.gs"), "utf8");
+for (const marker of ["doGet", "doPost", "SpreadsheetApp.create", "LockService", "submissionId", "MAX_ROWS"]) {
+  if (!leaderboardScript.includes(marker)) throw new Error(`Leaderboard backend is missing marker: ${marker}`);
 }
 const gallerySource = main.slice(0, main.indexOf("async function renderRLWriteup"));
 if (gallerySource.includes("preview: true") || gallerySource.includes("phasebound-card-preview-root")) throw new Error("Landing page still mounts the game demo");

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import "./tower-defense.css";
+import { getPlayerName } from "./play-intelligence.js";
 
 const CELL = 1.55;
 const BOARD = { columns: 9, rows: 7 };
@@ -604,6 +605,9 @@ class NeonBastion {
     this.overlayAction.textContent = "restart shift";
     this.overlayAction.dataset.action = "retry";
     this.stageNote.textContent = "Relay offline. Restart when you are ready.";
+    const online = window.HVNOnlineLeaderboard;
+    const name = getPlayerName();
+    if (online?.configured && name) void online.submit("neon-bastion", { name, score: this.score, packets: this.wave, seconds: this.elapsed });
     this.playTone("fail");
     this.updateHud();
   }

@@ -8,6 +8,9 @@ const required = [
   "site/src/ads.js",
   "site/public/privacy.html",
   "site/public/ads.txt",
+  "site/public/leaderboard-config.js",
+  "site/public/leaderboard-client.js",
+  "supabase/leaderboard.sql",
   "site/public/assets/scoutly-house-ad.png",
   "site/src/styles.css",
   "site/src/play-intelligence.js",
@@ -39,6 +42,14 @@ if (!html.includes('name="google-adsense-account" content="ca-pub-11230126710331
 const main = readFileSync(join(root, "site/src/main.js"), "utf8");
 for (const marker of ["phasebound", "ORBIT_ROUTE", "ORBIT_RL_ROUTE", "SHELF_ROUTE", "TOWER_DEFENSE_ROUTE", "COMET_ROUTE", "SPACE_WARS_ROUTE", "LEADERBOARD_GAMES", "leaderboard-game", "renderRLWriteup", "renderGameShelf", "renderComet", "renderSpaceWars", "startSpaceWars", "reinforcement learning writeup", "?game=${ORBIT_ROUTE}", "?game=${TOWER_DEFENSE_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "saved automatically", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Match your color", "All games.", "galleryGameCard", "Space Wars", "Neon Bastion", "all-games", "SHELF_GAMES", "data-google-ad-slot", "mountGoogleAdSlots"]) {
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
+}
+const leaderboardClient = readFileSync(join(root, "site/public/leaderboard-client.js"), "utf8");
+for (const marker of ["HVNOnlineLeaderboard", "leaderboard_scores", "submission_id", "unconfigured", "unavailable"]) {
+  if (!leaderboardClient.includes(marker)) throw new Error(`Online leaderboard client is missing marker: ${marker}`);
+}
+const leaderboardSql = readFileSync(join(root, "supabase/leaderboard.sql"), "utf8");
+for (const marker of ["create table if not exists public.leaderboard_scores", "enable row level security", "Anyone can read leaderboard scores", "Anyone can submit leaderboard scores", "submission_id"]) {
+  if (!leaderboardSql.includes(marker)) throw new Error(`Leaderboard schema is missing marker: ${marker}`);
 }
 const gallerySource = main.slice(0, main.indexOf("async function renderRLWriteup"));
 if (gallerySource.includes("preview: true") || gallerySource.includes("phasebound-card-preview-root")) throw new Error("Landing page still mounts the game demo");

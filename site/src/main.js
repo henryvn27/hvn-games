@@ -19,6 +19,7 @@ const DEFAULT_LEADERBOARD_GAME = "phasebound";
 const LEADERBOARD_GAMES = [
   { id: "phasebound", label: "Orbit" },
   { id: "neon-bastion", label: "Neon Bastion" },
+  { id: "reaction", label: "Lights Out" },
 ];
 
 if (params.get("game")) {
@@ -66,7 +67,7 @@ function renderGallery() {
       <section class="leaderboard-section page-width" id="leaderboard" aria-labelledby="leaderboard-title">
         <div class="leaderboard-heading">
           <h2 id="leaderboard-title">high scores · Orbit</h2>
-          <p id="leaderboard-connection">Scores saved in this browser. Each game has its own board.</p>
+          <p id="leaderboard-connection">Checking the shared board…</p>
         </div>
         <div class="leaderboard-panel">
           <label class="leaderboard-game-picker" for="leaderboard-game">game<select id="leaderboard-game" aria-label="Choose a game leaderboard">${LEADERBOARD_GAMES.map((game) => `<option value="${game.id}">${game.label}</option>`).join("")}</select></label>
@@ -240,32 +241,54 @@ function setupPlayInsights() {
   });
 }
 
-function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME) {
+function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME, statusNode = null) {
   const game = LEADERBOARD_GAMES.find((item) => item.id === gameId);
-  const entries = getLeaderboard(gameId);
-  node.replaceChildren();
-  if (!entries.length) {
-    const empty = document.createElement("p");
-    empty.className = "leaderboard-empty";
-    empty.textContent = `No ${game?.label || "game"} scores yet.`;
-    node.append(empty);
-    return;
+  const localEntries = getLeaderboard(gameId);
+  const online = window.HVNOnlineLeaderboard;
+  const renderEntries = (entries) => {
+    node.replaceChildren();
+    if (!entries.length) {
+      const empty = document.createElement("p");
+      empty.className = "leaderboard-empty";
+      empty.textContent = `No ${game?.label || "game"} scores yet.`;
+      node.append(empty);
+      return;
+    }
+    const list = document.createElement("ol");
+    list.className = "leaderboard-list";
+    entries.forEach((entry, index) => {
+      const row = document.createElement("li");
+      const rank = document.createElement("span");
+      rank.className = "leaderboard-rank";
+      rank.textContent = String(index + 1).padStart(2, "0");
+      const name = document.createElement("strong");
+      name.textContent = entry.name;
+      const score = document.createElement("b");
+      score.textContent = String(entry.score);
+      row.append(rank, name, score);
+      list.append(row);
+    });
+    node.append(list);
+  };
+  renderEntries(localEntries);
+  if (!online) {
+    if (statusNode) statusNode.textContent = "Scores saved in this browser.";
+    return Promise.resolve({ status: "unavailable", entries: localEntries });
   }
-  const list = document.createElement("ol");
-  list.className = "leaderboard-list";
-  entries.forEach((entry, index) => {
-    const row = document.createElement("li");
-    const rank = document.createElement("span");
-    rank.className = "leaderboard-rank";
-    rank.textContent = String(index + 1).padStart(2, "0");
-    const name = document.createElement("strong");
-    name.textContent = entry.name;
-    const score = document.createElement("b");
-    score.textContent = String(entry.score);
-    row.append(rank, name, score);
-    list.append(row);
+  if (!online.configured) {
+    if (statusNode) statusNode.textContent = "Local board for now. Add the free Supabase config to share scores.";
+    return Promise.resolve({ status: "unconfigured", entries: localEntries });
+  }
+  if (statusNode) statusNode.textContent = "Loading shared scores…";
+  return online.get(gameId).then((result) => {
+    if (result.status === "online") {
+      renderEntries(result.entries);
+      if (statusNode) statusNode.textContent = "Shared board · top 10 scores";
+    } else if (statusNode) {
+      statusNode.textContent = "Shared board unavailable · showing this browser’s scores";
+    }
+    return result;
   });
-  node.append(list);
 }
 
 function setupLeaderboard() {
@@ -274,12 +297,13 @@ function setupLeaderboard() {
   const node = document.querySelector("#leaderboard-list");
   const picker = document.querySelector("#leaderboard-game");
   const title = document.querySelector("#leaderboard-title");
+  const status = document.querySelector("#leaderboard-connection");
   if (!form || !input || !node || !picker) return;
   input.value = getPlayerName();
   const update = () => {
     const game = LEADERBOARD_GAMES.find((item) => item.id === picker.value) || LEADERBOARD_GAMES[0];
     title.textContent = `high scores · ${game.label}`;
-    renderLeaderboard(node, game.id);
+    void renderLeaderboard(node, game.id, status);
   };
   picker.value = DEFAULT_LEADERBOARD_GAME;
   update();
@@ -557,7 +581,7 @@ async function renderGame() {
         </div>
       </section>
       <div class="google-ad-slot" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>
-      <section class="route-leaderboard" id="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><h2 id="route-leaderboard-title">high scores</h2><p>Scores saved in this browser.</p></div><div id="phasebound-leaderboard"></div></section>
+      <section class="route-leaderboard" id="route-leaderboard" aria-labelledby="route-leaderboard-title"><div><h2 id="route-leaderboard-title">high scores</h2><p id="phasebound-leaderboard-connection">Checking the shared board…</p></div><div id="phasebound-leaderboard"></div></section>
       <a class="button button-secondary rl-link" href="${base}?game=${ORBIT_RL_ROUTE}">reinforcement learning writeup</a>
     </main>
   `;
@@ -735,6 +759,13 @@ async function renderGame() {
   }
 
   let pendingScore = null;
+  async function publishLeaderboardScore(gameId, score) {
+    recordLeaderboardScore(gameId, score.score, score.packets, score.elapsed);
+    const online = window.HVNOnlineLeaderboard;
+    if (online?.configured) await online.submit(gameId, { name: getPlayerName(), score: score.score, packets: score.packets, seconds: score.elapsed });
+    return renderLeaderboard(document.querySelector("#phasebound-leaderboard"), gameId, document.querySelector("#phasebound-leaderboard-connection"));
+  }
+
   function showScoreSave(state) {
     pendingScore = { score: Math.max(0, Math.floor(state.score)), packets: state.packets, elapsed: state.elapsed };
     const savedName = getPlayerName();
@@ -747,9 +778,7 @@ async function renderGame() {
     scoreSaveForm.hidden = Boolean(savedName);
     scoreSave.hidden = false;
     if (savedName) {
-      recordLeaderboardScore("phasebound", pendingScore.score, pendingScore.packets, pendingScore.elapsed);
-      renderLeaderboard(document.querySelector("#phasebound-leaderboard"));
-      scoreSaveStatus.textContent = "saved automatically.";
+      void publishLeaderboardScore("phasebound", pendingScore).then(() => { scoreSaveStatus.textContent = "saved automatically."; });
     } else {
       scoreSaveName.focus();
     }
@@ -763,8 +792,7 @@ async function renderGame() {
       scoreSaveName.focus();
       return;
     }
-    recordLeaderboardScore("phasebound", pendingScore.score, pendingScore.packets, pendingScore.elapsed);
-    renderLeaderboard(document.querySelector("#phasebound-leaderboard"));
+    void publishLeaderboardScore("phasebound", pendingScore);
     scoreSaveQuestion.textContent = `Saved as ${name}.`;
     scoreSaveButton.hidden = true;
     scoreSkipButton.hidden = true;
@@ -827,7 +855,7 @@ async function renderGame() {
     },
     pacing: experiment,
   });
-  renderLeaderboard(document.querySelector("#phasebound-leaderboard"));
+  void renderLeaderboard(document.querySelector("#phasebound-leaderboard"), "phasebound", document.querySelector("#phasebound-leaderboard-connection"));
 
   overlayAction.addEventListener("click", () => { if (overlayAction.hidden) return; action(); });
   tutorialStart.addEventListener("click", advanceTutorial);

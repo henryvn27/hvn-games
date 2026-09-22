@@ -263,11 +263,17 @@ function reaction(){
     if(buttonState!=='ready')e.classList.add(`is-${buttonState}`);
     lights.forEach(light=>light.classList.toggle('is-lit',buttonState==='wait'));
   };
-  panel.insertAdjacentHTML('beforeend',`<section class="reaction-leaderboard" aria-labelledby="reaction-leaderboard-title"><div class="reaction-leaderboard-heading"><h2 id="reaction-leaderboard-title">fastest laps</h2><span>personal timing board</span></div><ol id="reaction-leaderboard-list"></ol><form id="reaction-name-form" hidden><label for="reaction-name">name or initials</label><div><input id="reaction-name" maxlength="16" autocomplete="nickname" placeholder="ABC or your name"><button type="submit">save lap</button></div><p id="reaction-name-status" role="status"></p></form></section>`);
-  const leaderboardList=document.querySelector('#reaction-leaderboard-list'),nameForm=document.querySelector('#reaction-name-form'),nameInput=document.querySelector('#reaction-name'),nameStatus=document.querySelector('#reaction-name-status');
+  panel.insertAdjacentHTML('beforeend',`<section class="reaction-leaderboard" aria-labelledby="reaction-leaderboard-title"><div class="reaction-leaderboard-heading"><h2 id="reaction-leaderboard-title">fastest laps</h2><span id="reaction-leaderboard-source">checking the shared board…</span></div><ol id="reaction-leaderboard-list"></ol><form id="reaction-name-form" hidden><label for="reaction-name">name or initials</label><div><input id="reaction-name" maxlength="16" autocomplete="nickname" placeholder="ABC or your name"><button type="submit">save lap</button></div><p id="reaction-name-status" role="status"></p></form></section>`);
+  const leaderboardList=document.querySelector('#reaction-leaderboard-list'),nameForm=document.querySelector('#reaction-name-form'),nameInput=document.querySelector('#reaction-name'),nameStatus=document.querySelector('#reaction-name-status'),leaderboardSource=document.querySelector('#reaction-leaderboard-source');
   let pendingScore=null;
-  const renderLeaderboard=()=>{
-    const entries=ShelfLeaderboard.get('reaction');
+  const renderLeaderboard=async()=>{
+    let entries=ShelfLeaderboard.get('reaction');
+    const online=window.HVNOnlineLeaderboard;
+    if(online?.configured){
+      const result=await online.get('reaction',{order:'asc'});
+      if(result.status==='online'){entries=result.entries;leaderboardSource.textContent='shared board · fastest laps';}
+      else leaderboardSource.textContent='shared board unavailable · showing this browser';
+    }else leaderboardSource.textContent='local board for now · free online setup available';
     leaderboardList.replaceChildren();
     if(!entries.length){const empty=document.createElement('li');empty.className='reaction-leaderboard-empty';empty.textContent='No laps yet. Set the first time.';leaderboardList.append(empty);return;}
     entries.forEach((entry,i)=>{
@@ -278,18 +284,18 @@ function reaction(){
   };
   const saveScore=ms=>{
     const name=ShelfLeaderboard.getName();
-    if(name){ShelfLeaderboard.record('reaction',ms);renderLeaderboard();return;}
+    if(name){ShelfLeaderboard.record('reaction',ms);void window.HVNOnlineLeaderboard?.submit('reaction',{name,score:ms}).then(()=>renderLeaderboard());renderLeaderboard();return;}
     pendingScore=ms;nameForm.hidden=false;nameInput.focus();nameStatus.textContent='Add your initials once to join the timing board.';
   };
   nameInput.value=ShelfLeaderboard.getName();
-  renderLeaderboard();
+  void renderLeaderboard();
   setStage('stand by');
   nameForm.addEventListener('submit',event=>{
     event.preventDefault();
     const name=ShelfLeaderboard.setName(nameInput.value);
     if(!name){nameStatus.textContent='Type three letters or a name first.';nameInput.focus();return;}
-    if(pendingScore!==null)ShelfLeaderboard.record('reaction',pendingScore);
-    pendingScore=null;nameForm.hidden=true;nameStatus.textContent=`Saved as ${name}.`;renderLeaderboard();
+    if(pendingScore!==null){ShelfLeaderboard.record('reaction',pendingScore);void window.HVNOnlineLeaderboard?.submit('reaction',{name,score:pendingScore});}
+    pendingScore=null;nameForm.hidden=true;nameStatus.textContent=`Saved as ${name}.`;void renderLeaderboard();
   });
   e.onclick=()=>{
     if(state==='ready'){

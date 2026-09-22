@@ -17,7 +17,7 @@ Open the local URL Vite prints, then play Orbit or visit `?game=neon-bastion` fo
 
 ## Play intelligence
 
-The gallery keeps a small local Orbit leaderboard and play report in this browser only. It stores starts, completed runs, time played, wins, packets, experiment variants, optional run feedback, a score name, and scores you submit. The play report itself uses no analytics vendor, account, or public score service.
+The gallery keeps a local fallback board in this browser and can use a shared, anonymous leaderboard for Orbit, Neon Bastion, and Lights Out. Scores use a display name, score, game id, and a few game-specific counters; no account or gameplay analytics is required. To enable the shared board, create a free Supabase project, run [`supabase/leaderboard.sql`](supabase/leaderboard.sql), then put its project URL and public anon key in [`site/public/leaderboard-config.js`](site/public/leaderboard-config.js). Never put a service-role key in the browser.
 
 The site also includes Google AdSense page-level Auto ads. Requests start paused and only resume after the visitor chooses “allow ads”; “ad settings” can reopen that choice. See [`site/public/privacy.html`](site/public/privacy.html) for the current data-flow note. Before public monetization, configure Google’s certified consent message in AdSense for any EEA, UK, or Swiss traffic.
 

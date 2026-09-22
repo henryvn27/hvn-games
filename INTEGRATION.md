@@ -8,11 +8,11 @@ The host flow is the public `HVN games` page. A visitor opens the gallery and a 
 
 - Trigger: open the gallery and use a visible game link such as `?game=orbit`.
 - Input: Orbit uses keyboard, pointer, or touch controls. Comet uses keyboard arrows/WASD, Space/P pause, and visible touch direction buttons.
-- Authorized data: gameplay stays local with no account, upload, or gameplay analytics path. Google AdSense is a separate third-party request after the visitor chooses to allow ads.
+- Authorized data: gameplay is anonymous. If the optional shared board is configured, only a player-chosen display name, score, game id, counters, submission id, and server timestamp are sent to Supabase. Google AdSense is a separate third-party request after the visitor chooses to allow ads.
 
 ## Output and next action
 
-- Output: a playable run, a visible result state, a browser-local best score, and a fast restart path.
+- Output: a playable run, a visible result state, a browser-local fallback score, and, when configured, a shared per-game top-10 board.
 - Next action: play again, return to the page, or share the public Pages URL.
 - Adoption point: `site/src/main.js` owns gallery routing; `games/phasebound/` and `games/comet/` own the game runtimes.
 
@@ -49,7 +49,7 @@ The gallery preview and `?game=orbit` route both call `startPhasebound`. The leg
 
 ## Leaderboard boundary
 
-Scores and the remembered three-letter code or name currently live in the browser that saved them. The UI asks before saving a finished run and prevents the same result frame from writing twice. A shared board needs a hosted write API with rate limits, validation, and abuse handling; GitHub Pages alone cannot safely provide that write path.
+`site/public/leaderboard-client.js` uses the Supabase REST API without adding a client dependency. `site/public/leaderboard-config.js` is intentionally empty by default, so local play remains fully functional until an owner supplies a project URL and public anon key. `supabase/leaderboard.sql` enables public reads and constrained anonymous inserts; the unique submission id prevents a retry from creating the same submission twice. The client falls back to local storage if the service is unconfigured or unavailable. Public scores are not verified achievements, so the table needs dashboard moderation or stronger server-side validation before treating it as authoritative competition.
 
 ## Proof run
 

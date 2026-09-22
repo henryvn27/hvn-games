@@ -32,7 +32,7 @@
       {id:'garden-fifteen',game:'snake',title:'Growing ambition',description:'Collect 15 apples in one Snake round. Classic or Wrap, Normal speed, 1 apple.',kind:'snake',target:15}
     ],
     [
-      {id:'vault-four',game:'word',title:'Crack the daily code',description:'Solve a 5-letter Word Vault in 4 guesses or fewer.',kind:'word',target:1},
+      {id:'vault-four',game:'word',title:'Crack the daily word',description:'Solve a 5-letter Wordle in 4 guesses or fewer.',kind:'word',target:1},
       {id:'memory-twenty',game:'memory',title:'Remember the whole deck',description:'Find all 8 pairs in 20 moves or fewer.',kind:'memory',target:1},
       {id:'golf-thirty',game:'golf',title:'An afternoon on the green',description:'Sink all 6 holes within 30 strokes. Pickups and the shorter Cup course do not count.',kind:'golf',target:1}
     ]

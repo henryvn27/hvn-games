@@ -84,7 +84,7 @@ for (const marker of ["startComet", "Comet", "setDirection", "spawnFood", "maybe
 }
 
 const shelf = readFileSync(join(root, "site/src/shelf.js"), "utf8");
-for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "shelf-native-host", "mountNativeShelfGame", "Other HVN games"]) {
+for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "shelf-native-host", "mountNativeShelfGame", "loadNativeShelfRuntime", "renderNativeShelfRewards", "view=rewards", "Achievements", "Other HVN games"]) {
   if (!shelf.includes(marker)) throw new Error(`Shelf is missing game or route marker: ${marker}`);
 }
 if (shelf.includes('name: "Garden Snake"')) throw new Error("Shelf still uses the old Snake name");

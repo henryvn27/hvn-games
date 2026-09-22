@@ -47,6 +47,7 @@ function renderGallery() {
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="#leaderboard">scores</a>
         <a href="#all-games">games</a>
+        <a href="${base}?game=${SHELF_ROUTE}&amp;view=rewards">achievements</a>
       </nav>
     </header>
     <main>

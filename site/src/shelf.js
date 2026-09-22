@@ -30,6 +30,11 @@ export async function renderGameShelf({ app, base }) {
   const selected = [...SHELF_GAMES, ...ARCHIVED_SHELF_GAMES].find((game) => game.id === params.get("play"));
   document.body.className = "shelf-page";
 
+  if (params.get("view") === "rewards") {
+    await renderNativeShelfRewards({ app, base });
+    return;
+  }
+
   if (selected) {
     document.body.className = "game-page shelf-page shelf-native-mode";
     app.id = "hvn-shell-app";
@@ -74,6 +79,10 @@ const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode #shelf-native-host .game-head { display: none; }
   body.shelf-native-mode #shelf-native-host .game-wrap { max-width: 960px; text-align: initial; }
   body.shelf-native-mode #shelf-native-host .game-wrap > p { display: none; }
+  body.shelf-rewards-native #shelf-native-host .game-wrap,
+  body.shelf-rewards-native #shelf-native-host .rewards-wrap { width: 100%; max-width: none; margin: 0; text-align: left; }
+  body.shelf-rewards-native #shelf-native-host .game-wrap > .game-head,
+  body.shelf-rewards-native #shelf-native-host .game-wrap > p { display: none; }
   body.shelf-native-mode #shelf-native-host .game-wrap > .panel { margin: 0; border-radius: 0; box-shadow: none; }
   body.shelf-native-mode #shelf-native-host footer,
   body.shelf-native-mode #shelf-native-host header,
@@ -428,6 +437,10 @@ const NATIVE_SHELF_OVERRIDES = `
     justify-content: flex-start;
   }
   @media (max-width: 680px) {
+    body.shelf-rewards-native .shelf-game-heading,
+    body.shelf-rewards-native .shelf-game-heading > div { min-width: 0; }
+    body.shelf-rewards-native .shelf-game-heading h1 { font-size: clamp(2.65rem, 15vw, 4.6rem); overflow-wrap: anywhere; }
+    body.shelf-rewards-native #shelf-native-host { max-width: 100%; overflow-x: clip; }
     body.shelf-native-mode[data-shelf-game] .shelf-native-main {
       width: min(calc(100% - 28px), 1400px);
       padding-block: 26px 52px;
@@ -446,7 +459,7 @@ const NATIVE_SHELF_OVERRIDES = `
   }
 `;
 
-async function mountNativeShelfGame({ base, gameId }) {
+async function loadNativeShelfRuntime({ base, gameId = null }) {
   for (const file of SHELF_STYLES) {
     const link = document.createElement("link");
     link.rel = "stylesheet";
@@ -471,6 +484,10 @@ async function mountNativeShelfGame({ base, gameId }) {
       document.body.appendChild(script);
     });
   }
+}
+
+async function mountNativeShelfGame({ base, gameId }) {
+  await loadNativeShelfRuntime({ base, gameId });
 
   if (typeof window.play !== "function") throw new Error("Shelf game engine did not expose play()");
   if (gameId === "word" && window.wordleListPromise) await window.wordleListPromise;
@@ -521,16 +538,36 @@ async function mountNativeShelfGame({ base, gameId }) {
   }
 }
 
+async function renderNativeShelfRewards({ app, base }) {
+  document.body.className = "game-page shelf-page shelf-native-mode shelf-rewards-native";
+  app.id = "hvn-shell-app";
+  app.innerHTML = `
+    <header class="game-header page-width shelf-header">
+      <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
+      <nav class="site-nav" aria-label="Rewards navigation"><span class="shelf-game-label">Achievements</span><a href="${base}?game=shelf">all games</a><a href="${base}">home</a></nav>
+    </header>
+    <main class="game-main page-width shelf-native-main">
+      <div class="game-heading shelf-game-heading">
+        <div><p class="game-index">collection</p><h1>Achievements</h1></div>
+        <p class="game-blurb">Small goals, new colours, and a record of what you’ve played.</p>
+      </div>
+      <div id="shelf-native-host" aria-label="HVN Games achievements"><div id="app"></div></div>
+    </main>
+  `;
+  await loadNativeShelfRuntime({ base });
+  if (window.Shelf?.render) window.Shelf.render();
+}
+
 function renderShelfHome({ app, base }) {
   app.innerHTML = `<header class="site-header page-width shelf-header">
     <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
-    <nav class="site-nav" aria-label="Primary navigation"><a href="${base}">home</a></nav>
+    <nav class="site-nav" aria-label="Primary navigation"><a href="${base}?game=shelf&amp;view=rewards">achievements</a><a href="${base}">home</a></nav>
   </header><main class="page-width shelf-main">
     <section class="shelf-intro" aria-labelledby="shelf-title">
       <div><p class="shelf-kicker">the other games</p><h1 id="shelf-title">Pick a game.</h1></div>
       <div class="shelf-intro-note"><p>Short games for a spare minute. Pick one and play.</p><span>no install</span></div>
     </section>
     <section class="shelf-grid" aria-label="Other HVN games">${SHELF_GAMES.map((game) => shelfCard(game, base)).join("")}</section>
-    <footer class="site-footer shelf-footer"><span>HVN games</span><span>11 games</span></footer>
+    <footer class="site-footer shelf-footer"><a href="${base}?game=shelf&amp;view=rewards">achievements</a><span>11 games</span></footer>
   </main>`;
 }

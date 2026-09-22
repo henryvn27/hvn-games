@@ -5,12 +5,16 @@ export const SHELF_GAMES = [
   { id: "memory", number: "04", name: "Field Kit", kind: "arcade", description: "Inventory a field kit by pairing each piece in as few moves as possible." },
   { id: "reaction", number: "05", name: "Lights Out", kind: "arcade", description: "Wait for the start lights to go dark, then set your fastest lap." },
   { id: "word", number: "06", name: "Wordle", kind: "puzzle", description: "Six tries to find the hidden word, with clues for every letter." },
+  { id: "flappy", number: "07", name: "Sky Flyer", kind: "arcade", description: "Tap up through a changing sky without clipping the next gate." },
+  { id: "platform", number: "08", name: "Rooftop Run", kind: "arcade", description: "Carry a route across three districts, collecting markers on the way." },
+  { id: "tic", number: "09", name: "Tic-Tac-Toe", kind: "board", description: "You are X. The computer is paying attention." },
+  { id: "checkers", number: "10", name: "Checkers", kind: "board", description: "Choose a bot, make a jump, and see if you can take the board." },
+  { id: "trade", number: "11", name: "City Trader", kind: "board", description: "Buy streets, build them up, and outlast the other players." },
+];
+
+// Kept out of the collection, but still reachable for old bookmarks and saved runs.
+const ARCHIVED_SHELF_GAMES = [
   { id: "clicker", number: "07", name: "Field Station", kind: "adventure", description: "Fund a research station, train assistants, and send out surveys." },
-  { id: "flappy", number: "08", name: "Sky Flyer", kind: "arcade", description: "Tap up through a changing sky without clipping the next gate." },
-  { id: "platform", number: "09", name: "Rooftop Run", kind: "arcade", description: "Carry a route across three districts, collecting markers on the way." },
-  { id: "tic", number: "10", name: "Tic-Tac-Toe", kind: "board", description: "You are X. The computer is paying attention." },
-  { id: "checkers", number: "11", name: "Checkers", kind: "board", description: "Choose a bot, make a jump, and see if you can take the board." },
-  { id: "trade", number: "12", name: "City Trader", kind: "board", description: "Buy streets, build them up, and outlast the other players." },
 ];
 
 export function shelfCard(game, base) {
@@ -23,7 +27,7 @@ export function shelfCard(game, base) {
 
 export async function renderGameShelf({ app, base }) {
   const params = new URLSearchParams(window.location.search);
-  const selected = SHELF_GAMES.find((game) => game.id === params.get("play"));
+  const selected = [...SHELF_GAMES, ...ARCHIVED_SHELF_GAMES].find((game) => game.id === params.get("play"));
   document.body.className = "shelf-page";
 
   if (selected) {
@@ -51,7 +55,7 @@ export async function renderGameShelf({ app, base }) {
 
 const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
 const SHELF_SCRIPTS = ["word-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
-const SHELF_ASSET_VERSION = "design-taste-1";
+const SHELF_ASSET_VERSION = "hide-clicker-1";
 const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode > #hvn-shell-app { width: 100%; }
@@ -334,9 +338,9 @@ function renderShelfHome({ app, base }) {
   </header><main class="page-width shelf-main">
     <section class="shelf-intro" aria-labelledby="shelf-title">
       <div><p class="shelf-kicker">the other games</p><h1 id="shelf-title">Pick a game.</h1></div>
-      <div class="shelf-intro-note"><p>Short games for a spare minute. Pick one and start playing.</p><span>12 games · no install</span></div>
+      <div class="shelf-intro-note"><p>Short games for a spare minute. Pick one and start playing.</p><span>11 games · no install</span></div>
     </section>
     <section class="shelf-grid" aria-label="Other HVN games">${SHELF_GAMES.map((game) => shelfCard(game, base)).join("")}</section>
-    <footer class="site-footer shelf-footer"><span>HVN games</span><span>12 games</span></footer>
+    <footer class="site-footer shelf-footer"><span>HVN games</span><span>11 games</span></footer>
   </main>`;
 }

@@ -4,7 +4,7 @@ export const SHELF_GAMES = [
   { id: "dodger", number: "03", name: "Space Dodger", kind: "arcade", description: "Keep the fighter moving while Mars gets busier around you." },
   { id: "memory", number: "04", name: "Field Kit", kind: "arcade", description: "Inventory a field kit by pairing each piece in as few moves as possible." },
   { id: "reaction", number: "05", name: "Lights Out", kind: "arcade", description: "Wait for the start lights to go dark, then set your fastest lap." },
-  { id: "word", number: "06", name: "Word Vault", kind: "puzzle", description: "Six tries to find the hidden word, with clues for every letter." },
+  { id: "word", number: "06", name: "Wordle", kind: "puzzle", description: "Six tries to find the hidden word, with clues for every letter." },
   { id: "clicker", number: "07", name: "Field Station", kind: "adventure", description: "Fund a research station, train assistants, and send out surveys." },
   { id: "flappy", number: "08", name: "Sky Flyer", kind: "arcade", description: "Tap up through a changing sky without clipping the next gate." },
   { id: "platform", number: "09", name: "Rooftop Run", kind: "arcade", description: "Carry a route across three districts, collecting markers on the way." },

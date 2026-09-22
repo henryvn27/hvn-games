@@ -280,7 +280,7 @@ function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME, statusNode =
     return Promise.resolve({ status: "unconfigured", entries: localEntries });
   }
   if (options.localOnly) {
-    if (statusNode) statusNode.textContent = "Score saved to the shared board. Rankings will refresh shortly.";
+    if (statusNode) statusNode.textContent = options.localOnlyMessage || "Score saved to the shared board. Rankings will refresh shortly.";
     return Promise.resolve({ status: "pending-refresh", entries: localEntries });
   }
   if (statusNode) statusNode.textContent = "Loading shared scores…";
@@ -289,7 +289,9 @@ function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME, statusNode =
       renderEntries(result.entries);
       if (statusNode) statusNode.textContent = "Shared board · top 10 scores";
     } else if (statusNode) {
-      statusNode.textContent = "Shared board unavailable · showing this browser’s scores";
+      statusNode.textContent = options.preserveSaved
+        ? "Score saved to the shared board. Rankings are still loading."
+        : "Shared board unavailable · showing this browser’s scores";
     }
     return result;
   });
@@ -787,9 +789,11 @@ async function renderGame() {
       const submitted = await online.submit(gameId, { name: localEntry.name, score: score.score, packets: score.packets, seconds: score.elapsed, submissionId: online.submissionId(gameId, localEntry) });
       if (submitted.status === "online") {
         await renderLeaderboard(leaderboard, gameId, connection, { localOnly: true });
-        window.setTimeout(() => { void renderLeaderboard(leaderboard, gameId, connection); }, 1800);
+        window.setTimeout(() => { void renderLeaderboard(leaderboard, gameId, connection, { preserveSaved: true }); }, 1800);
         return submitted;
       }
+      await renderLeaderboard(leaderboard, gameId, connection, { localOnly: true, localOnlyMessage: "Saved in this browser. The shared board will retry when it is reachable." });
+      return submitted;
     }
     return renderLeaderboard(leaderboard, gameId, connection);
   }

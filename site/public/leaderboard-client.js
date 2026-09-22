@@ -4,6 +4,7 @@ const config = window.HVN_LEADERBOARD_CONFIG || {};
 const baseUrl = String(config.endpoint || "");
 const configured = Boolean(baseUrl);
 const MIGRATION_KEY = "hvn-games:leaderboard-migration:v1";
+const REQUEST_TIMEOUT_MS = 10000;
 const PLACEHOLDER_NAMES = new Set(["YOU"]);
 function cleanName(value) {
   const raw = String(value || "").trim().replace(/\s+/g, " ").slice(0, 16);
@@ -21,9 +22,10 @@ function normalize(row) {
 }
 function request(path, options) {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 5000);
+  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   const init = Object.assign({}, options || {}, {
     signal: controller.signal,
+    cache: "no-store",
     headers: Object.assign({ "Content-Type": "text/plain;charset=utf-8" }, (options && options.headers) || {}),
   });
   return fetch(baseUrl + path, init)

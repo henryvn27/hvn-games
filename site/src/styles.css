@@ -1089,3 +1089,71 @@ body.game-page.game-comet .game-blurb,
 body.game-page.game-space-wars .game-blurb {
   color: var(--field-ink);
 }
+
+/* Use the real page margins for ads on wide screens; keep the game surface intact. */
+.game-ad-layout {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1400px) minmax(0, 1fr);
+  gap: clamp(18px, 2.8vw, 44px);
+  align-items: start;
+}
+.game-ad-layout > .game-main {
+  grid-column: 2;
+  width: 100%;
+  max-width: 1400px;
+  min-width: 0;
+}
+.game-ad-layout > .ad-rail {
+  grid-row: 1;
+  align-self: start;
+  min-width: 0;
+  margin-top: clamp(170px, 12vw, 250px);
+}
+.game-ad-layout > .ad-rail-left { grid-column: 1; }
+.game-ad-layout > .ad-rail-right { grid-column: 3; }
+.ad-rail .google-ad-slot {
+  min-height: 250px;
+  margin: 0;
+  overflow: hidden;
+}
+.ad-rail .google-ad-slot:has(+ .ad-preview:not([hidden])) {
+  min-height: 0;
+  height: 0;
+  margin: 0;
+}
+.ad-rail .ad-preview {
+  width: 100%;
+  margin: 0;
+}
+
+@media (max-width: 1439px) {
+  .game-ad-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .game-ad-layout > .game-main {
+    grid-column: 1;
+    grid-row: 1;
+    width: min(1400px, calc(100% - 48px));
+    margin-inline: auto;
+  }
+  .game-ad-layout > .ad-rail {
+    grid-column: 1;
+    width: min(728px, calc(100% - 48px));
+    margin: 22px auto;
+  }
+  .game-ad-layout > .ad-rail-left { grid-row: 2; }
+  .game-ad-layout > .ad-rail-right { grid-row: 3; }
+}
+
+@media (max-width: 620px) {
+  .game-ad-layout > .game-main {
+    width: min(100% - 30px, 1400px);
+  }
+  .game-ad-layout > .ad-rail {
+    width: calc(100% - 30px);
+    margin-block: 18px 26px;
+  }
+}

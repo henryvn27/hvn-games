@@ -55,7 +55,7 @@ export async function renderGameShelf({ app, base }) {
 
 const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
 const SHELF_SCRIPTS = ["word-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
-const SHELF_ASSET_VERSION = "hide-clicker-1";
+const SHELF_ASSET_VERSION = "fullscreen-arcade-1";
 const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode > #hvn-shell-app { width: 100%; }
@@ -281,6 +281,93 @@ const NATIVE_SHELF_OVERRIDES = `
   @media (prefers-reduced-motion: reduce) {
     body.shelf-native-mode[data-shelf-game] #shelf-native-host button { transition: none; }
     body.shelf-native-mode[data-shelf-game] #shelf-native-host button:hover:not(:disabled) { transform: none; }
+  }
+
+  /* The game route is the frame. Keep each game's play surface wide and let its
+     own board or canvas provide the only meaningful boundary. */
+  body.shelf-native-mode[data-shelf-game] .shelf-native-main {
+    width: min(1400px, calc(100% - 48px));
+    max-width: 1400px;
+    padding-block: 34px 70px;
+  }
+  body.shelf-native-mode[data-shelf-game] .shelf-game-heading {
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+  }
+  body.shelf-native-mode[data-shelf-game] .game-header {
+    background: transparent;
+    border-bottom-color: var(--game-line, var(--native-line));
+  }
+  body.shelf-native-mode[data-shelf-game] .game-header .wordmark,
+  body.shelf-native-mode[data-shelf-game] .game-header .site-nav a {
+    color: var(--game-ink, var(--native-ink));
+  }
+  body.shelf-native-mode[data-shelf-game] .shelf-game-label {
+    color: var(--game-muted, var(--native-muted));
+  }
+  body.shelf-native-mode[data-shelf-game] .shelf-game-heading h1 {
+    color: var(--game-ink, var(--native-ink));
+  }
+  body.shelf-native-mode[data-shelf-game] .shelf-game-heading .game-blurb {
+    color: var(--game-muted, var(--native-muted));
+  }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .game-wrap {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .game-wrap > .panel,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .game-wrap > .trade-shell,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .game-wrap > .trade-setup {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border-width: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .game-wrap > .arcade-panel {
+    padding: clamp(18px, 3vw, 36px);
+  }
+  body.shelf-native-mode[data-shelf-game="flappy"] #shelf-native-host .flyer-panel,
+  body.shelf-native-mode[data-shelf-game="dodger"] #shelf-native-host .shooter-panel {
+    min-height: min(720px, calc(100dvh - 220px));
+    display: grid;
+    align-content: start;
+    padding: 0;
+    background: transparent;
+  }
+  body.shelf-native-mode[data-shelf-game="flappy"] #shelf-native-host .flyer-panel .arcade-stage,
+  body.shelf-native-mode[data-shelf-game="dodger"] #shelf-native-host .shooter-panel .arcade-stage {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+  }
+  body.shelf-native-mode[data-shelf-game="flappy"] #shelf-native-host .flyer-panel .canvas,
+  body.shelf-native-mode[data-shelf-game="dodger"] #shelf-native-host .shooter-panel .canvas {
+    width: 100%;
+    height: auto;
+  }
+  body.shelf-native-mode[data-shelf-game="flappy"] #shelf-native-host .flyer-panel .controls,
+  body.shelf-native-mode[data-shelf-game="dodger"] #shelf-native-host .shooter-panel .controls {
+    justify-content: flex-start;
+  }
+  @media (max-width: 680px) {
+    body.shelf-native-mode[data-shelf-game] .shelf-native-main {
+      width: min(calc(100% - 28px), 1400px);
+      padding-block: 26px 52px;
+    }
+    body.shelf-native-mode[data-shelf-game] .shelf-game-heading {
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+    }
+    body.shelf-native-mode[data-shelf-game] #shelf-native-host .game-wrap > .arcade-panel {
+      padding: 14px;
+    }
+    body.shelf-native-mode[data-shelf-game="flappy"] #shelf-native-host .flyer-panel,
+    body.shelf-native-mode[data-shelf-game="dodger"] #shelf-native-host .shooter-panel {
+      min-height: 0;
+    }
   }
 `;
 

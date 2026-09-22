@@ -1044,8 +1044,48 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .game-page.game-comet .game-heading h1,
 .game-page.game-space-wars .game-heading h1 { letter-spacing: -.08em; }
 
+/* Let the playfield be the page surface. A second border around an already
+   bounded canvas made the arcade routes read like a window inside a window. */
+.game-page .game-frame,
+.game-page .space-wars-frame {
+  border: 0;
+  box-shadow: none;
+}
+.game-page .game-frame { background: transparent; }
+body.game-page.game-phasebound .game-frame,
+body.game-page.game-comet .game-frame,
+body.game-page.game-space-wars .space-wars-frame {
+  border: 0;
+  box-shadow: none;
+}
+body.game-page.game-phasebound .game-frame,
+body.game-page.game-comet .game-frame { background: transparent; }
+
 @media (max-width: 600px) {
   .game-page.game-phasebound .game-heading,
   .game-page.game-comet .game-heading,
   .game-page.game-space-wars .game-heading { padding-left: 12px; }
+}
+
+body.game-page.game-phasebound .game-header,
+body.game-page.game-comet .game-header,
+body.game-page.game-space-wars .game-header {
+  background: transparent;
+  border-bottom-color: var(--line);
+}
+body.game-page.game-phasebound .game-header .wordmark,
+body.game-page.game-phasebound .game-header .site-nav a,
+body.game-page.game-comet .game-header .wordmark,
+body.game-page.game-comet .game-header .site-nav a,
+body.game-page.game-space-wars .game-header .wordmark,
+body.game-page.game-space-wars .game-header .site-nav a {
+  color: var(--field-ink);
+}
+body.game-page.game-phasebound .game-heading h1,
+body.game-page.game-comet .game-heading h1,
+body.game-page.game-space-wars .game-heading h1,
+body.game-page.game-phasebound .game-blurb,
+body.game-page.game-comet .game-blurb,
+body.game-page.game-space-wars .game-blurb {
+  color: var(--field-ink);
 }

@@ -74,6 +74,7 @@ function renderGallery() {
             <label for="leaderboard-name">name or initials</label>
             <div><input id="leaderboard-name" name="name" maxlength="16" autocomplete="nickname" placeholder="ABC or your name"><button class="button button-secondary" type="submit">Save</button></div>
           </form>
+          <p id="leaderboard-name-status" class="name-status" role="status" aria-live="polite"></p>
           <div id="leaderboard-list" aria-live="polite"></div>
         </div>
       </section>
@@ -297,6 +298,7 @@ function setupLeaderboard() {
   const picker = document.querySelector("#leaderboard-game");
   const title = document.querySelector("#leaderboard-title");
   const status = document.querySelector("#leaderboard-connection");
+  const nameStatus = document.querySelector("#leaderboard-name-status");
   if (!form || !input || !node || !picker) return;
   input.value = getPlayerName();
   const update = () => {
@@ -309,8 +311,16 @@ function setupLeaderboard() {
   picker.addEventListener("change", update);
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    input.value = setPlayerName(input.value);
+    const name = setPlayerName(input.value);
     const button = form.querySelector("button");
+    if (!name) {
+      input.value = "";
+      if (nameStatus) nameStatus.textContent = "Pick your own initials or name. YOU is only a placeholder.";
+      input.focus();
+      return;
+    }
+    input.value = name;
+    if (nameStatus) nameStatus.textContent = `Saved as ${name}. New scores will use it automatically.`;
     button.textContent = "Saved";
     window.setTimeout(() => { button.textContent = "Save"; }, 1000);
   });
@@ -765,8 +775,9 @@ async function renderGame() {
   let pendingScore = null;
   async function publishLeaderboardScore(gameId, score) {
     const localEntry = recordLeaderboardScore(gameId, score.score, score.packets, score.elapsed);
+    if (!localEntry) return { status: "needs-name", entries: [] };
     const online = window.HVNOnlineLeaderboard;
-    if (online?.configured) await online.submit(gameId, { name: getPlayerName(), score: score.score, packets: score.packets, seconds: score.elapsed, submissionId: online.submissionId(gameId, localEntry) });
+    if (online?.configured) await online.submit(gameId, { name: localEntry.name, score: score.score, packets: score.packets, seconds: score.elapsed, submissionId: online.submissionId(gameId, localEntry) });
     return renderLeaderboard(document.querySelector("#phasebound-leaderboard"), gameId, document.querySelector("#phasebound-leaderboard-connection"));
   }
 

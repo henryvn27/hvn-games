@@ -18,14 +18,18 @@
   }
 
   function getName() {
-    try { return localStorage.getItem(PROFILE_KEY) || ''; } catch { return ''; }
+    try {
+      const name = localStorage.getItem(PROFILE_KEY) || '';
+      return name.trim().toUpperCase() === 'YOU' ? '' : name;
+    } catch { return ''; }
   }
 
   function setName(value) {
     const raw = String(value || '').trim().replace(/\s+/g, ' ').slice(0, 16);
     const name = /^[a-zA-Z]{3}$/.test(raw) ? raw.toUpperCase() : raw;
-    try { localStorage.setItem(PROFILE_KEY, name); } catch { /* play still works */ }
-    return name;
+    const safeName = name.toUpperCase() === 'YOU' ? '' : name;
+    try { localStorage.setItem(PROFILE_KEY, safeName); } catch { /* play still works */ }
+    return safeName;
   }
 
   function get(gameId = 'reaction') {

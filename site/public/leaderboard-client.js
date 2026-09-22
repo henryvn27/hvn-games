@@ -4,9 +4,14 @@ const config = window.HVN_LEADERBOARD_CONFIG || {};
 const baseUrl = String(config.endpoint || "");
 const configured = Boolean(baseUrl);
 const MIGRATION_KEY = "hvn-games:leaderboard-migration:v1";
+const PLACEHOLDER_NAMES = new Set(["YOU"]);
 function cleanName(value) {
   const raw = String(value || "").trim().replace(/\s+/g, " ").slice(0, 16);
   return /^[a-zA-Z]{3}$/.test(raw) ? raw.toUpperCase() : raw;
+}
+function usableName(value) {
+  const name = cleanName(value);
+  return name && !PLACEHOLDER_NAMES.has(name) ? name : "";
 }
 function submissionId() {
   return globalThis.crypto && globalThis.crypto.randomUUID ? globalThis.crypto.randomUUID() : String(Date.now()) + "-" + Math.random().toString(16).slice(2);
@@ -36,9 +41,9 @@ function get(gameId, options) {
 }
 function submit(gameId, payload) {
   if (!configured) return Promise.resolve({ status: "unconfigured", ok: false });
-  const displayName = cleanName(payload && payload.name);
+  const displayName = usableName(payload && payload.name);
   const numericScore = Math.max(0, Math.round(Number(payload && payload.score) || 0));
-  if (!displayName || !gameId || numericScore < 1) return Promise.resolve({ status: "invalid", ok: false });
+  if (!displayName || !gameId || numericScore < 1) return Promise.resolve({ status: displayName ? "invalid" : "needs-name", ok: false });
   return request("", {
     method: "POST",
     body: JSON.stringify({
@@ -63,7 +68,7 @@ function migrationState() {
   try { return JSON.parse(window.localStorage.getItem(MIGRATION_KEY) || "{}"); } catch { return {}; }
 }
 function migrationId(gameId, entry) {
-  return ["local", gameId, entry.name || "YOU", entry.score || 0, entry.packets || 0, entry.seconds || 0, entry.createdAt || ""].join("-").replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 80);
+  return ["local", gameId, usableName(entry.name) || "unnamed", entry.score || 0, entry.packets || 0, entry.seconds || 0, entry.createdAt || ""].join("-").replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 80);
 }
 async function migrate(entriesByGame) {
   if (!configured) return { status: "unconfigured", migrated: 0, pending: 0 };
@@ -72,6 +77,7 @@ async function migrate(entriesByGame) {
   let pending = 0;
   for (const [gameId, entries] of Object.entries(entriesByGame || {})) {
     for (const entry of Array.isArray(entries) ? entries : []) {
+      if (!usableName(entry.name)) { pending += 1; continue; }
       const id = migrationId(gameId, entry);
       if (state[id]) continue;
       const result = await submit(gameId, Object.assign({}, entry, { submissionId: id }));
@@ -82,5 +88,5 @@ async function migrate(entriesByGame) {
   try { window.localStorage.setItem(MIGRATION_KEY, JSON.stringify(state)); } catch { /* retry later */ }
   return { status: pending ? "partial" : "online", migrated, pending };
 }
-window.HVNOnlineLeaderboard = Object.freeze({ configured, get, submit, migrate, submissionId: migrationId });
+window.HVNOnlineLeaderboard = Object.freeze({ configured, get, submit, migrate, submissionId: migrationId, usableName });
 })();

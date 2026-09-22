@@ -136,6 +136,18 @@ function leaderboardEntries(data, gameId) {
   return data.leaderboards[gameId];
 }
 
+const PLACEHOLDER_NAMES = new Set(["YOU"]);
+
+function normalizePlayerName(value) {
+  const raw = String(value || "").trim().replace(/\s+/g, " ").slice(0, 16);
+  return /^[a-zA-Z]{3}$/.test(raw) ? raw.toUpperCase() : raw;
+}
+
+function usablePlayerName(value) {
+  const name = normalizePlayerName(value);
+  return name && !PLACEHOLDER_NAMES.has(name) ? name : "";
+}
+
 function removeRapidDuplicates(entries) {
   const kept = [];
   for (const entry of entries) {
@@ -151,13 +163,17 @@ function removeRapidDuplicates(entries) {
 
 export function getPlayerName() {
   const data = readData();
-  return data.playerName || "";
+  const name = usablePlayerName(data.playerName);
+  if (data.playerName && !name) {
+    data.playerName = "";
+    writeData(data);
+  }
+  return name;
 }
 
 export function setPlayerName(value) {
   const data = readData();
-  const raw = String(value || "").trim().replace(/\s+/g, " ").slice(0, 16);
-  const name = /^[a-zA-Z]{3}$/.test(raw) ? raw.toUpperCase() : raw;
+  const name = usablePlayerName(value);
   data.playerName = name;
   writeData(data);
   return name;
@@ -166,7 +182,7 @@ export function setPlayerName(value) {
 export function getLeaderboard(gameId = "phasebound") {
   const data = readData();
   const entries = leaderboardEntries(data, gameId);
-  const cleaned = removeRapidDuplicates(entries);
+  const cleaned = removeRapidDuplicates(entries).filter((entry) => usablePlayerName(entry.name));
   if (cleaned.length !== entries.length) {
     data.leaderboards[gameId] = cleaned;
     writeData(data);
@@ -180,8 +196,10 @@ export function getLeaderboard(gameId = "phasebound") {
 export function recordLeaderboardScore(gameId, score, packets, seconds) {
   const data = readData();
   const entries = leaderboardEntries(data, gameId);
+  const name = getPlayerName();
+  if (!name) return null;
   const next = {
-    name: data.playerName || "YOU",
+    name,
     score: Math.max(0, Math.round(score || 0)),
     packets: Math.max(0, Math.round(packets || 0)),
     seconds: Math.max(0, Math.round(seconds || 0)),

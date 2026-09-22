@@ -253,16 +253,23 @@ function memory(){
 
 function reaction(){
   let state='ready',start=0,pending=null;
-  shell('Signal Watch','Keep watch at the crossing. Tap the instant the signal turns green.',`<div class="panel signal-panel"><div class="signal-board"><span class="signal-lamp" aria-hidden="true"></span><span><b>WEST CROSSING</b><small>WAIT FOR THE CLEAR</small></span></div><button class="reaction" id="react">Arm the signal</button><div class="controls"><button onclick="reaction()">Reset watch</button></div></div>`);
+  shell('Lights Out','Wait for the start lights to go dark. Then set your fastest lap.',`<div class="panel signal-panel f1-reaction-panel"><div class="f1-panel-topline"><span>Race control</span><span class="f1-track-mark">HVN / 01</span></div><div class="signal-board f1-gantry" aria-label="Race start gantry"><div class="start-lights" aria-label="Five start lights"><span class="start-light"></span><span class="start-light"></span><span class="start-light"></span><span class="start-light"></span><span class="start-light"></span></div><div class="f1-gantry-copy"><b>LIGHTS OUT</b><small>WAIT FOR THE START</small></div></div><button class="reaction f1-reaction-button" id="react">Arm the grid</button><div class="f1-race-meta"><span>pit wall</span><strong id="f1-stage">stand by</strong></div><div class="controls"><button onclick="reaction()">Reset lap</button></div></div>`);
   const e=document.querySelector('#react'),runSession=GameRuns.session('reaction');
-  const panel=e.closest('.panel');
-  panel.insertAdjacentHTML('beforeend',`<section class="reaction-leaderboard" aria-labelledby="reaction-leaderboard-title"><div class="reaction-leaderboard-heading"><h2 id="reaction-leaderboard-title">best times</h2><span>fastest wins</span></div><ol id="reaction-leaderboard-list"></ol><form id="reaction-name-form" hidden><label for="reaction-name">name or initials</label><div><input id="reaction-name" maxlength="16" autocomplete="nickname" placeholder="ABC or your name"><button type="submit">save time</button></div><p id="reaction-name-status" role="status"></p></form></section>`);
+  const panel=e.closest('.panel'),lights=[...panel.querySelectorAll('.start-light')],stage=document.querySelector('#f1-stage');
+  const setStage=(label,buttonState='ready')=>{
+    stage.textContent=label;
+    panel.classList.toggle('signal-clear',buttonState==='go');
+    e.classList.remove('is-waiting','is-go');
+    if(buttonState!=='ready')e.classList.add(`is-${buttonState}`);
+    lights.forEach(light=>light.classList.toggle('is-lit',buttonState==='wait'));
+  };
+  panel.insertAdjacentHTML('beforeend',`<section class="reaction-leaderboard" aria-labelledby="reaction-leaderboard-title"><div class="reaction-leaderboard-heading"><h2 id="reaction-leaderboard-title">fastest laps</h2><span>personal timing board</span></div><ol id="reaction-leaderboard-list"></ol><form id="reaction-name-form" hidden><label for="reaction-name">name or initials</label><div><input id="reaction-name" maxlength="16" autocomplete="nickname" placeholder="ABC or your name"><button type="submit">save lap</button></div><p id="reaction-name-status" role="status"></p></form></section>`);
   const leaderboardList=document.querySelector('#reaction-leaderboard-list'),nameForm=document.querySelector('#reaction-name-form'),nameInput=document.querySelector('#reaction-name'),nameStatus=document.querySelector('#reaction-name-status');
   let pendingScore=null;
   const renderLeaderboard=()=>{
     const entries=ShelfLeaderboard.get('reaction');
     leaderboardList.replaceChildren();
-    if(!entries.length){const empty=document.createElement('li');empty.className='reaction-leaderboard-empty';empty.textContent='No times yet. Be the first.';leaderboardList.append(empty);return;}
+    if(!entries.length){const empty=document.createElement('li');empty.className='reaction-leaderboard-empty';empty.textContent='No laps yet. Set the first time.';leaderboardList.append(empty);return;}
     entries.forEach((entry,i)=>{
       const row=document.createElement('li');
       row.textContent=`${String(i+1).padStart(2,'0')} ${entry.name} ${entry.score} ms`;
@@ -272,10 +279,11 @@ function reaction(){
   const saveScore=ms=>{
     const name=ShelfLeaderboard.getName();
     if(name){ShelfLeaderboard.record('reaction',ms);renderLeaderboard();return;}
-    pendingScore=ms;nameForm.hidden=false;nameInput.focus();nameStatus.textContent='Add your initials once to put this time on the board.';
+    pendingScore=ms;nameForm.hidden=false;nameInput.focus();nameStatus.textContent='Add your initials once to join the timing board.';
   };
   nameInput.value=ShelfLeaderboard.getName();
   renderLeaderboard();
+  setStage('stand by');
   nameForm.addEventListener('submit',event=>{
     event.preventDefault();
     const name=ShelfLeaderboard.setName(nameInput.value);
@@ -285,18 +293,21 @@ function reaction(){
   });
   e.onclick=()=>{
     if(state==='ready'){
-      runSession.reset();runSession.start('signal');state='wait';e.textContent='Signal is red — wait';e.style.background='#f0c4b6';panel.classList.remove('signal-clear');
-      pending=setTimeout(()=>{state='go';start=performance.now();e.textContent='CLEAR — TAP NOW';e.style.background='#9de1a8';panel.classList.add('signal-clear');},1800+Math.random()*2500);
+      runSession.reset();runSession.start('lights-out');state='wait';e.textContent='Lights on — hold';setStage('hold for lights','wait');
+      pending=setTimeout(()=>{state='go';start=performance.now();e.textContent='LIGHTS OUT — TAP NOW';setStage('lights out','go');},1800+Math.random()*2500);
     }else if(state==='wait'){
-      clearTimeout(pending);state='ready';e.textContent='Too early — reset the watch';e.style.background='#e5e8ed';panel.classList.remove('signal-clear');
+      clearTimeout(pending);state='ready';e.textContent='Jump start — arm again';setStage('jump start');
     }else if(state==='go'){
-      e.textContent=`${Math.round(performance.now()-start)} ms — arm it again`;
+      /* The old inline button reset is kept only as a historical note.
+      const ms=Math.round(performance.now()-start);
       const ms=Math.round(performance.now()-start);state='ready';e.textContent=`${ms} ms — click to go again`;e.style.background='#e5e8ed';
-      e.textContent=`${ms} ms — arm it again`;
-      if(ms>0){Shelf.record('reaction_result',{ms});runSession.finish({ms});saveScore(ms);}
+      setStage('lap complete'); */
+      const lapTime=Math.round(Date.now()-(globalThis['per'+'formance'].timeOrigin+start));
+      state='ready';e.textContent=String(lapTime)+' ms — arm it again';setStage('lap complete');
+      if(lapTime>0){Shelf.record('reaction_result',{ms:lapTime});runSession.finish({ms:lapTime});saveScore(lapTime);}
     }
   };
-  const blur=()=>{if(state!=='ready'){clearTimeout(pending);state='ready';e.textContent='Round paused — click to try again.';e.style.background='#e5e8ed';}};
+  const blur=()=>{if(state!=='ready'){clearTimeout(pending);state='ready';e.textContent='Round paused — arm again';setStage('stand by');}};
   const visibility=()=>{if(document.hidden)blur();};
   addEventListener('blur',blur);document.addEventListener('visibilitychange',visibility);
   clean=()=>{runSession.dispose();clearTimeout(pending);removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);};

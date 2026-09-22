@@ -3,7 +3,7 @@ export const SHELF_GAMES = [
   { id: "snake", number: "02", name: "Snake", kind: "arcade", description: "Eat apples, grow longer, and don’t hit the wall." },
   { id: "dodger", number: "03", name: "Space Dodger", kind: "arcade", description: "Keep the fighter moving while Mars gets busier around you." },
   { id: "memory", number: "04", name: "Field Kit", kind: "arcade", description: "Inventory a field kit by pairing each piece in as few moves as possible." },
-  { id: "reaction", number: "05", name: "Signal Watch", kind: "arcade", description: "Keep watch at the crossing and tap the instant the signal turns green." },
+  { id: "reaction", number: "05", name: "Lights Out", kind: "arcade", description: "Wait for the start lights to go dark, then set your fastest lap." },
   { id: "word", number: "06", name: "Word Vault", kind: "puzzle", description: "Six tries to find the hidden word, with clues for every letter." },
   { id: "clicker", number: "07", name: "Field Station", kind: "adventure", description: "Fund a research station, train assistants, and send out surveys." },
   { id: "flappy", number: "08", name: "Sky Flyer", kind: "arcade", description: "Tap up through a changing sky without clipping the next gate." },
@@ -142,6 +142,50 @@ const NATIVE_SHELF_OVERRIDES = `
     body.shelf-native-mode .snake-stat strong { font-size: 1.55rem; }
     body.shelf-native-mode .snake-controls { display: grid; grid-template-columns: repeat(4, 1fr); }
     body.shelf-native-mode .snake-controls #pause-game, body.shelf-native-mode .snake-controls #restart-game { grid-column: span 2; }
+  }
+  body.shelf-native-mode .f1-reaction-panel {
+    --f1-ink: #151515;
+    --f1-paper: #f5f3ed;
+    --f1-red: #ef3340;
+    --f1-lime: #d8f35b;
+    --f1-muted: #696b68;
+    display: grid;
+    gap: 20px;
+    padding: clamp(18px, 4vw, 34px);
+    border: 1px solid var(--f1-ink);
+    border-radius: 3px;
+    background: var(--f1-paper);
+    color: var(--f1-ink);
+    box-shadow: 8px 8px 0 rgba(21, 21, 21, .2);
+    overflow: hidden;
+  }
+  body.shelf-native-mode .f1-panel-topline { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid rgba(21, 21, 21, .24); padding-bottom: 14px; color: var(--f1-muted); font-size: .65rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+  body.shelf-native-mode .f1-track-mark { color: var(--f1-ink); }
+  body.shelf-native-mode .f1-gantry { display: grid; justify-items: center; gap: 12px; max-width: 440px; margin: 0 auto; padding: 18px 22px 15px; border: 1px solid var(--f1-ink); border-radius: 2px; background: #202020; color: #f5f3ed; box-shadow: inset 0 -5px 0 #d8f35b; }
+  body.shelf-native-mode .f1-gantry-copy { display: flex; align-items: baseline; justify-content: space-between; width: 100%; gap: 14px; }
+  body.shelf-native-mode .f1-gantry-copy b { font-size: clamp(1.1rem, 3vw, 1.55rem); letter-spacing: -.04em; }
+  body.shelf-native-mode .f1-gantry-copy small { color: #c2c4bd; font-size: .62rem; letter-spacing: .11em; }
+  body.shelf-native-mode .start-lights { display: flex; gap: clamp(8px, 2vw, 14px); padding: 12px 18px; border: 1px solid #565656; border-radius: 3px; background: #090909; }
+  body.shelf-native-mode .start-light { width: clamp(26px, 6vw, 38px); aspect-ratio: 1; border-radius: 50%; background: #282828; border: 2px solid #575757; box-shadow: inset 0 0 0 4px #141414; }
+  body.shelf-native-mode .start-light.is-lit { background: var(--f1-red); border-color: #ff858c; box-shadow: 0 0 0 2px #681821, inset 0 0 0 4px #b71927; }
+  body.shelf-native-mode .f1-reaction-button { min-height: 68px; border: 2px solid var(--f1-ink); border-radius: 2px; background: #e7e6df; color: var(--f1-ink); font: 800 clamp(1.15rem, 3vw, 1.7rem)/1 var(--ui-font, "Avenir Next", sans-serif); letter-spacing: -.04em; cursor: pointer; }
+  body.shelf-native-mode .f1-reaction-button.is-waiting { background: var(--f1-red); color: #fff; border-color: var(--f1-red); }
+  body.shelf-native-mode .f1-reaction-button.is-go { background: var(--f1-lime); color: var(--f1-ink); border-color: var(--f1-ink); }
+  body.shelf-native-mode .f1-race-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--f1-muted); font-size: .74rem; }
+  body.shelf-native-mode .f1-race-meta strong { color: var(--f1-ink); font-weight: 800; text-transform: uppercase; }
+  body.shelf-native-mode .f1-reaction-panel .controls { justify-content: flex-start; margin-top: -4px; }
+  body.shelf-native-mode .f1-reaction-panel .controls button { border-color: var(--f1-ink); border-radius: 2px; background: transparent; color: var(--f1-ink); font-size: .74rem; }
+  body.shelf-native-mode .f1-reaction-panel .controls button:hover { background: var(--f1-ink); color: var(--f1-paper); }
+  body.shelf-native-mode .f1-reaction-panel .reaction-leaderboard { max-width: none; margin-top: 2px; border-top-color: rgba(21, 21, 21, .28); }
+  body.shelf-native-mode .f1-reaction-panel .reaction-leaderboard-heading h2 { letter-spacing: -.04em; }
+  body.shelf-native-mode .f1-reaction-panel .reaction-leaderboard form button { border-radius: 2px; background: var(--f1-lime); }
+  @media (max-width: 520px) {
+    body.shelf-native-mode .f1-reaction-panel { gap: 16px; padding: 14px; }
+    body.shelf-native-mode .f1-gantry { padding-inline: 12px; }
+    body.shelf-native-mode .f1-gantry-copy { align-items: start; flex-direction: column; gap: 4px; }
+    body.shelf-native-mode .start-lights { padding-inline: 10px; gap: 6px; }
+    body.shelf-native-mode .start-light { width: 28px; }
+    body.shelf-native-mode .f1-reaction-button { min-height: 58px; }
   }
 `;
 

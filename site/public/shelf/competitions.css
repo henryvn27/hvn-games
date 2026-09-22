@@ -4,3 +4,43 @@ body[data-shelf-theme="daybreak"]{--paper:#fff5df;--ink:#483526;--muted:#786454;
 @media(max-width:1050px){header{height:auto;min-height:72px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px;gap:6px 18px}}
 @media(max-width:760px){.daily-grid{grid-template-columns:1fr}.daily-card{padding:20px}.daily-card h2{margin-top:7px}.daily-icon{margin-top:12px}.daily-milestones{flex-direction:column}.event-emblem{font-size:48px}.event-banner{padding:22px}.event-banner h2{font-size:30px}.event-home-grid strong{font-size:21px}.event-panel{padding:20px}.cup-table th,.cup-table td{padding:12px 5px}.cup-table thead span{font-size:9px}.cup-table small{font-size:9px}}
 @media(max-width:520px){header nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:3px}header nav button{padding:8px 4px;font-size:12px}.event-home-grid{grid-template-columns:1fr}.event-banner{gap:12px;padding:19px}.event-banner .eyebrow{font-size:9px}.event-banner h2{font-size:27px;overflow-wrap:anywhere}.event-banner p{font-size:12px}.event-emblem{font-size:36px}.cup-setup #cup-names{grid-template-columns:1fr}.cup-table{font-size:12px}.cup-table th:first-child{width:22%}.cup-table td:last-child,.cup-table th:last-child{width:17%}.cup-table thead span{font-size:8px}.cup-table small{font-size:8px}.cup-session{padding:12px;gap:10px}.cup-session .event-link{font-size:11px}.event-panel h2{font-size:23px}}
+
+/* The tournament and daily challenges share the same native shelf tokens as
+   achievements. Keep this here for the standalone shelf build too. */
+body.shelf-native-mode #shelf-native-host .events-page {
+  --events-paper: var(--game-surface, #f1f0e9);
+  --events-ink: var(--game-ink, #1c201d);
+  --events-muted: var(--game-muted, #6a6d65);
+  --events-line: var(--game-line, rgba(28, 32, 29, .2));
+  --events-accent: var(--game-accent, #b8d94b);
+  font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: var(--events-ink);
+}
+body.shelf-native-mode #shelf-native-host .events-page .event-banner,
+body.shelf-native-mode #shelf-native-host .events-page .event-panel,
+body.shelf-native-mode #shelf-native-host .events-page .daily-card {
+  border-color: var(--events-line);
+  border-radius: 4px;
+  background: var(--events-paper);
+  box-shadow: none;
+}
+body.shelf-native-mode #shelf-native-host .events-page .event-banner {
+  border-left: 4px solid var(--events-accent);
+}
+body.shelf-native-mode #shelf-native-host .events-page .daily-card.is-complete,
+body.shelf-native-mode #shelf-native-host .events-page .daily-milestones .reached { background: color-mix(in srgb, var(--events-accent) 18%, var(--events-paper)); border-color: var(--events-ink); }
+body.shelf-native-mode #shelf-native-host .events-page .daily-grid { gap: 10px; }
+body.shelf-native-mode #shelf-native-host .events-page .event-panel { margin-block: 18px; }
+body.shelf-native-mode #shelf-native-host .events-page .daily-card,
+body.shelf-native-mode #shelf-native-host .events-page .daily-milestones > div { padding: 15px; }
+body.shelf-native-mode #shelf-native-host .events-page .daily-milestones > div,
+body.shelf-native-mode #shelf-native-host .events-page .daily-badges span,
+body.shelf-native-mode #shelf-native-host .events-page .cup-medals span,
+body.shelf-native-mode #shelf-native-host .events-page .cup-session { border-radius: 3px; }
+body.shelf-native-mode #shelf-native-host .events-page .event-home-grid { gap: 10px; }
+body.shelf-native-mode #shelf-native-host .events-page .event-home-grid button,
+body.shelf-native-mode #shelf-native-host .events-page .cup-end button { border-radius: 3px; background: var(--events-paper); color: var(--events-ink); }
+body.shelf-native-mode #shelf-native-host .events-page .event-home-grid button + button { background: var(--events-paper); }
+body.shelf-native-mode #shelf-native-host .events-page .event-home-grid button:hover,
+body.shelf-native-mode #shelf-native-host .events-page .cup-end button:hover { background: var(--events-accent); }
+body.shelf-native-mode #shelf-native-host .events-page :focus-visible { outline-color: var(--events-accent); }

@@ -10,3 +10,104 @@ body[data-shelf-theme="sunset"] header,body[data-shelf-theme="ocean"] header,bod
 @media(max-width:800px){.shelf-home-progress{flex-wrap:wrap;gap:16px}.shelf-home-progress .action{margin-left:0}.shelf-achievement-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.shelf-rewards-hero{gap:20px;padding:23px}.shelf-reward-totals{padding-left:20px}.shelf-cosmetic-title h4{font-size:13px}.shelf-cosmetic-body{padding:12px}}
 @media(max-width:560px){.shelf-home-progress{padding:19px}.shelf-home-mark{font-size:32px}.shelf-home-progress h2{font-size:21px}.shelf-home-progress .eyebrow{font-size:8px}.shelf-home-progress p{font-size:11px}.shelf-home-progress .action{width:100%;font-size:12px}.shelf-rewards-hero{grid-template-columns:1fr;gap:20px;padding:23px;margin-top:21px}.shelf-rewards-hero h2{font-size:33px}.shelf-reward-totals{border-left:0;border-top:1px solid var(--ink);padding:18px 0 0;gap:8px}.shelf-reward-totals strong{font-size:44px}.shelf-rewards-heading{align-items:start;flex-direction:column;gap:8px}.shelf-rewards-heading>span{text-align:left}.shelf-achievement-grid{gap:9px}.shelf-achievement{padding:12px}.shelf-achievement.is-earned{padding:11px}.shelf-achievement h3{font-size:15px}.shelf-achievement p{font-size:11px}.shelf-medal{font-size:23px}.shelf-status{font-size:8px}.shelf-cosmetic-grid{grid-template-columns:1fr}.shelf-cosmetic{display:grid;grid-template-columns:95px 1fr}.shelf-cosmetic-preview{height:100%;min-height:150px}.shelf-cosmetic-title h4{font-size:15px}.shelf-cosmetic-body p{margin:7px 0}.shelf-unlock-note{min-height:0}.shelf-equip{margin-top:10px}.shelf-swatch-row{right:7px;bottom:10px}.preview-theme .shelf-preview-object{transform:scale(.8)}.preview-snake .shelf-preview-object{transform:translate(20px,-5px) scale(.8)}.preview-plane .shelf-preview-object{transform:scale(.8)}.shelf-toast{right:15px;bottom:15px;padding:14px}.shelf-toast strong{font-size:14px}}
 @media(prefers-reduced-motion:reduce){.shelf-toast{animation:none}.shelf-home-progress *,.shelf-rewards *{scroll-behavior:auto;transition:none}}
+
+/* Shared native shelf language: rewards should feel like part of the arcade,
+   not a separate rounded-card product. The game-specific board keeps its own
+   material; this layer owns the page frame, controls, and state surfaces. */
+body.shelf-native-mode #shelf-native-host .rewards-wrap,
+body.shelf-native-mode #shelf-native-host .events-wrap {
+  --rewards-paper: var(--game-surface, #f1f0e9);
+  --rewards-ink: var(--game-ink, #1c201d);
+  --rewards-muted: var(--game-muted, #6a6d65);
+  --rewards-line: var(--game-line, rgba(28, 32, 29, .2));
+  --rewards-accent: var(--game-accent, #b8d94b);
+  width: 100%;
+  max-width: none;
+  color: var(--rewards-ink);
+  font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+body.shelf-native-mode #shelf-native-host .rewards-wrap > p,
+body.shelf-native-mode #shelf-native-host .events-wrap > p { color: var(--rewards-muted); }
+body.shelf-native-mode #shelf-native-host .shelf-rewards-hero,
+body.shelf-native-mode #shelf-native-host .event-banner,
+body.shelf-native-mode #shelf-native-host .event-panel,
+body.shelf-native-mode #shelf-native-host .shelf-home-progress,
+body.shelf-native-mode #shelf-native-host .shelf-achievement,
+body.shelf-native-mode #shelf-native-host .shelf-cosmetic,
+body.shelf-native-mode #shelf-native-host .daily-card {
+  border: 1px solid var(--rewards-line);
+  border-radius: 4px;
+  background: var(--rewards-paper);
+  box-shadow: none;
+}
+body.shelf-native-mode #shelf-native-host .shelf-rewards-hero,
+body.shelf-native-mode #shelf-native-host .event-banner {
+  border-left: 4px solid var(--rewards-accent);
+  padding: clamp(18px, 3vw, 28px);
+}
+body.shelf-native-mode #shelf-native-host .shelf-rewards-hero { grid-template-columns: minmax(0, 1.5fr) minmax(170px, .8fr); gap: 28px; margin: 0 0 20px; }
+body.shelf-native-mode #shelf-native-host .shelf-rewards-hero h2,
+body.shelf-native-mode #shelf-native-host .event-banner h2 { margin: 9px 0 12px; letter-spacing: -.06em; }
+body.shelf-native-mode #shelf-native-host .shelf-reward-totals { border-left-color: var(--rewards-line); font-family: inherit; }
+body.shelf-native-mode #shelf-native-host .shelf-reward-totals strong { font-family: inherit; letter-spacing: -.07em; font-variant-numeric: tabular-nums; }
+body.shelf-native-mode #shelf-native-host .shelf-storage-note,
+body.shelf-native-mode #shelf-native-host .event-save-note,
+body.shelf-native-mode #shelf-native-host .shelf-status,
+body.shelf-native-mode #shelf-native-host .shelf-progress-label,
+body.shelf-native-mode #shelf-native-host .event-card-top { font-family: inherit; letter-spacing: .04em; }
+body.shelf-native-mode #shelf-native-host .shelf-jump-links { margin: 20px 0 28px; }
+body.shelf-native-mode #shelf-native-host .shelf-jump-links button,
+body.shelf-native-mode #shelf-native-host .event-link,
+body.shelf-native-mode #shelf-native-host .shelf-equip,
+body.shelf-native-mode #shelf-native-host .event-home-grid button,
+body.shelf-native-mode #shelf-native-host .cup-end button {
+  border: 1px solid var(--rewards-ink);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--rewards-ink);
+  font-family: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+body.shelf-native-mode #shelf-native-host .shelf-jump-links button:hover,
+body.shelf-native-mode #shelf-native-host .shelf-jump-links button:last-child:hover,
+body.shelf-native-mode #shelf-native-host .shelf-equip:enabled:hover,
+body.shelf-native-mode #shelf-native-host .event-link:hover,
+body.shelf-native-mode #shelf-native-host .event-home-grid button:hover { background: var(--rewards-accent); color: var(--rewards-ink); }
+body.shelf-native-mode #shelf-native-host .shelf-rewards-heading { border-bottom: 1px solid var(--rewards-line); padding-bottom: 11px; }
+body.shelf-native-mode #shelf-native-host .shelf-rewards-heading h2,
+body.shelf-native-mode #shelf-native-host .shelf-cosmetic-group > h3 { letter-spacing: -.04em; }
+body.shelf-native-mode #shelf-native-host .shelf-rewards .action,
+body.shelf-native-mode #shelf-native-host .events-page .action { border: 1px solid var(--rewards-ink); border-radius: 3px; background: var(--rewards-ink); color: var(--rewards-paper); }
+body.shelf-native-mode #shelf-native-host .shelf-medal,
+body.shelf-native-mode #shelf-native-host .daily-icon { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid var(--rewards-line); border-radius: 3px; background: color-mix(in srgb, var(--rewards-accent) 28%, var(--rewards-paper)); font-size: 20px; }
+body.shelf-native-mode #shelf-native-host .shelf-achievement-grid,
+body.shelf-native-mode #shelf-native-host .shelf-cosmetic-grid,
+body.shelf-native-mode #shelf-native-host .daily-grid { gap: 10px; }
+body.shelf-native-mode #shelf-native-host .shelf-achievement,
+body.shelf-native-mode #shelf-native-host .shelf-cosmetic,
+body.shelf-native-mode #shelf-native-host .daily-card { padding: 15px; }
+body.shelf-native-mode #shelf-native-host .shelf-achievement.is-earned,
+body.shelf-native-mode #shelf-native-host .daily-card.is-complete { border-color: var(--rewards-ink); background: color-mix(in srgb, var(--rewards-accent) 18%, var(--rewards-paper)); }
+body.shelf-native-mode #shelf-native-host .shelf-card-reward { border-top-color: var(--rewards-line); font-family: inherit; }
+body.shelf-native-mode #shelf-native-host .shelf-rewards progress,
+body.shelf-native-mode #shelf-native-host .daily-card progress { height: 5px; border-radius: 0; background: var(--rewards-line); accent-color: var(--rewards-accent); }
+body.shelf-native-mode #shelf-native-host .shelf-rewards progress::-webkit-progress-bar { background: var(--rewards-line); border-radius: 0; }
+body.shelf-native-mode #shelf-native-host .shelf-rewards progress::-webkit-progress-value { background: var(--rewards-accent); border-radius: 0; }
+body.shelf-native-mode #shelf-native-host .shelf-rewards progress::-moz-progress-bar { background: var(--rewards-accent); border-radius: 0; }
+body.shelf-native-mode #shelf-native-host .event-banner { margin: 0 0 20px; }
+body.shelf-native-mode #shelf-native-host .daily-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+body.shelf-native-mode #shelf-native-host .event-panel { margin: 18px 0; padding: 20px; }
+body.shelf-native-mode #shelf-native-host .daily-milestones > div,
+body.shelf-native-mode #shelf-native-host .cup-session,
+body.shelf-native-mode #shelf-native-host .daily-badges span,
+body.shelf-native-mode #shelf-native-host .cup-medals span { border-radius: 3px; }
+body.shelf-native-mode #shelf-native-host .event-home-grid button { background: var(--rewards-paper); }
+body.shelf-native-mode #shelf-native-host .event-home-grid button + button { background: var(--rewards-paper); }
+body.shelf-native-mode .shelf-toast { right: 18px; bottom: 18px; border: 1px solid var(--game-ink, #1c201d); border-radius: 4px; background: var(--game-surface, #f1f0e9); box-shadow: 5px 5px 0 var(--game-ink, #1c201d); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+body.shelf-native-mode #shelf-native-host :focus-visible { outline-color: var(--rewards-accent); }
+@media (max-width: 680px) {
+  body.shelf-native-mode #shelf-native-host .shelf-rewards-hero { grid-template-columns: 1fr; }
+  body.shelf-native-mode #shelf-native-host .shelf-reward-totals { border-left: 0; border-top: 1px solid var(--rewards-line); padding: 16px 0 0; }
+  body.shelf-native-mode #shelf-native-host .daily-grid { grid-template-columns: 1fr; }
+}

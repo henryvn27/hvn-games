@@ -36,7 +36,8 @@ if (params.get("game")) {
 function renderGallery() {
   document.body.className = "gallery-page";
   recordGalleryView();
-  const additionalGames = [
+  const galleryGames = [
+    { number: "01", name: "Orbit", kind: "arcade", description: "Match your color. Dodge the red planets.", href: `${base}?game=${ORBIT_ROUTE}`, action: "play Orbit" },
     { number: "02", name: "Neon Bastion", kind: "strategy", description: "Build a lunar relay defense, then stop the crawlers before they reach it.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
     ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 2).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
   ];
@@ -49,24 +50,21 @@ function renderGallery() {
       </nav>
     </header>
     <main>
-      <section class="phasebound-home page-width" aria-labelledby="hero-title">
-        <div class="phasebound-home-copy">
-          <h1 id="hero-title">Orbit</h1>
-          <p class="phasebound-rule">Match your color. Dodge the red planets.</p>
-          <div class="hero-actions"><a class="button button-primary" href="${base}?game=${ORBIT_ROUTE}">play Orbit</a></div>
-        </div>
+      <section class="gallery-intro page-width" aria-labelledby="gallery-title">
+        <div><p class="shelf-kicker">the collection</p><h1 id="gallery-title">All games.</h1></div>
+        <p>Pick a game and start playing.</p>
       </section>
       <div class="google-ad-slot page-width" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>
 
       <section class="gallery-shelf page-width" id="all-games" aria-labelledby="all-games-title">
-        <div class="gallery-shelf-heading"><div><p class="shelf-kicker">the collection</p><h2 id="all-games-title">All games.</h2></div><p>Pick a card. Every game opens right here.</p></div>
-        <div class="shelf-grid" aria-label="All HVN games">${additionalGames.map((game) => galleryGameCard(game)).join("")}</div>
+        <div class="gallery-shelf-heading"><h2 id="all-games-title">Choose a game.</h2><p>Short games, right here.</p></div>
+        <div class="shelf-grid" aria-label="All HVN games">${galleryGames.map((game) => galleryGameCard(game)).join("")}</div>
       </section>
       <div class="google-ad-slot page-width" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>
 
       <section class="leaderboard-section page-width" id="leaderboard" aria-labelledby="leaderboard-title">
         <div class="leaderboard-heading">
-          <h2 id="leaderboard-title">high scores · Orbit</h2>
+          <h2 id="leaderboard-title">high scores</h2>
           <p id="leaderboard-connection">Checking the shared board…</p>
         </div>
         <div class="leaderboard-panel">
@@ -79,7 +77,7 @@ function renderGallery() {
         </div>
       </section>
     </main>
-    <footer class="site-footer page-width"><span>HVN games</span><span>Orbit</span></footer>
+    <footer class="site-footer page-width"><span>HVN games</span><span>play something</span></footer>
   `;
   setupCopyButtons();
   setupLeaderboard();
@@ -302,7 +300,7 @@ function setupLeaderboard() {
   input.value = getPlayerName();
   const update = () => {
     const game = LEADERBOARD_GAMES.find((item) => item.id === picker.value) || LEADERBOARD_GAMES[0];
-    title.textContent = `high scores · ${game.label}`;
+    title.textContent = "high scores";
     void renderLeaderboard(node, game.id, status);
   };
   picker.value = DEFAULT_LEADERBOARD_GAME;

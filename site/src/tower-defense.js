@@ -87,11 +87,11 @@ class NeonBastion {
         <div class="nb-layout">
           <section class="nb-stage" aria-label="Lunar relay defense map">
             <div id="nb-canvas" class="nb-canvas"></div>
-            <div class="nb-map-label"><span>outpost 07</span><span>relay route</span></div>
+            <div class="nb-map-label"><span>moon relay</span><span>crawler route</span></div>
             <div class="nb-stage-note" id="nb-stage-note">Place a tower on a marked pad. Send the wave when ready.</div>
             <div class="nb-overlay" id="nb-overlay">
               <div class="nb-overlay-card">
-                <p class="nb-overline" id="nb-overlay-overline">outpost 07 · moon side</p>
+                <p class="nb-overline" id="nb-overlay-overline">moon relay</p>
                 <h1 id="nb-overlay-title">Stop the crawlers.</h1>
                 <p id="nb-overlay-copy">Place towers beside the route, then send a wave.</p>
                 <button class="nb-primary" id="nb-overlay-action" type="button">start</button>
@@ -415,7 +415,7 @@ class NeonBastion {
     this.mode = "menu";
     this.overlay.classList.remove("is-hidden");
     this.overlay.setAttribute("aria-hidden", "false");
-    this.overlayOverline.textContent = "outpost 07 · moon side";
+    this.overlayOverline.textContent = "moon relay";
     this.overlayTitle.textContent = "Stop the crawlers.";
     this.overlayCopy.textContent = "Place towers beside the route, then send a wave.";
     this.overlayAction.textContent = "start";
@@ -599,7 +599,7 @@ class NeonBastion {
     this.waveRunning = false;
     this.overlay.classList.remove("is-hidden");
     this.overlay.setAttribute("aria-hidden", "false");
-    this.overlayOverline.textContent = "outpost 07 · relay offline";
+    this.overlayOverline.textContent = "relay offline";
     this.overlayTitle.textContent = `Score ${this.score}`;
     this.overlayCopy.textContent = `You stopped ${this.wave} wave${this.wave === 1 ? "" : "s"}.`;
     this.overlayAction.textContent = "play again";
@@ -617,7 +617,7 @@ class NeonBastion {
       this.mode = "pause";
       this.overlay.classList.remove("is-hidden");
       this.overlay.setAttribute("aria-hidden", "false");
-      this.overlayOverline.textContent = "outpost 07 · paused";
+      this.overlayOverline.textContent = "paused";
       this.overlayTitle.textContent = "Paused.";
       this.overlayCopy.textContent = "The relay, crawlers, and shots are stopped.";
       this.overlayAction.textContent = "resume";

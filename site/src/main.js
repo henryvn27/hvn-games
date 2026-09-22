@@ -452,7 +452,7 @@ async function renderComet() {
         </div>
       </section>
       <section class="comet-note" aria-label="How to play Comet Courier">
-        <p><strong>One rule.</strong> Every beacon adds another instrument to the tail. The route gets tighter as the survey continues.</p>
+        <p><strong>One rule.</strong> Green beacons add to your tail. Red debris and your own tail end the run.</p>
         <p>Inspired by <a href="https://github.com/adrianov/snake" rel="noreferrer">adrianov/snake</a>, rebuilt for HVN Games under its MIT License.</p>
       </section>
     </main>

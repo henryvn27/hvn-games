@@ -134,6 +134,81 @@ const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode .snake-panel .arcade-overlay p { max-width: 260px; font-size: .88rem; }
   body.shelf-native-mode .snake-panel .arcade-overlay .action { border-color: #e4e99b; border-radius: 2px; background: #e4e99b; color: var(--snake-ink); }
   body.shelf-native-mode .snake-footnote { margin: -7px 0 0; color: var(--snake-muted); font-size: .72rem; text-align: center; }
+  /* One quiet page frame, then one game-specific board. */
+  body.shelf-native-mode[data-shelf-game] {
+    --game-radius: 3px;
+    --game-surface: var(--game-paper, #f1f0e9);
+    --game-surface: color-mix(in srgb, var(--game-paper, #f1f0e9) 94%, white 6%);
+    font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host button,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host input,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host select {
+    font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  body.shelf-native-mode[data-shelf-game] .game-header { min-height: 68px; }
+  body.shelf-native-mode[data-shelf-game] .shelf-native-main { padding-block: 28px 72px; }
+  body.shelf-native-mode[data-shelf-game] .shelf-game-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(190px, .38fr);
+    align-items: end;
+    gap: 24px;
+    margin-bottom: 24px;
+    padding: 0 0 18px 15px;
+  }
+  body.shelf-native-mode[data-shelf-game] .shelf-game-heading .game-index {
+    margin-bottom: 10px;
+    color: var(--game-accent, #557300);
+    font-size: .65rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  body.shelf-native-mode[data-shelf-game] .shelf-game-heading h1 {
+    margin: 0;
+    font-size: clamp(2.65rem, 6vw, 5rem);
+    letter-spacing: -.08em;
+  }
+  body.shelf-native-mode[data-shelf-game] .shelf-game-heading .game-blurb {
+    max-width: 300px;
+    margin: 0 0 3px;
+    font-size: .95rem;
+    line-height: 1.35;
+  }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .panel,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .trade-shell,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .trade-setup { border-radius: var(--game-radius); }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .stats,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .arcade-banner,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .arcade-footnote,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .setup-label,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .tile-meta,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .center-kicker {
+    font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    letter-spacing: .08em;
+  }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .panel,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .trade-shell,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .trade-setup { background: var(--game-surface, #f1f0e9); }
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .controls button,
+  body.shelf-native-mode[data-shelf-game] #shelf-native-host .choice {
+    min-height: 38px;
+    border-radius: var(--game-radius);
+    font-size: .78rem;
+  }
+  body.shelf-native-mode[data-shelf-game="flappy"] #shelf-native-host .flyer-panel,
+  body.shelf-native-mode[data-shelf-game="dodger"] #shelf-native-host .shooter-panel { min-height: min(720px, calc(100dvh - 190px)); }
+  @media (max-width: 680px) {
+    body.shelf-native-mode[data-shelf-game] .shelf-game-heading {
+      grid-template-columns: 1fr;
+      gap: 9px;
+      padding-left: 11px;
+    }
+    body.shelf-native-mode[data-shelf-game] .shelf-game-heading .game-blurb { max-width: 34ch; }
+    body.shelf-native-mode[data-shelf-game] .shelf-native-main { padding-block: 24px 52px; }
+  }
+
   @media (max-width: 680px) {
     body.shelf-native-mode .snake-layout { grid-template-columns: 1fr; }
     body.shelf-native-mode .snake-rail { grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -398,6 +473,32 @@ async function mountNativeShelfGame({ base, gameId }) {
 
   if (typeof window.play !== "function") throw new Error("Shelf game engine did not expose play()");
   window.play(gameId);
+  const plainCopy = {
+    checkers: [["Capture every opposing piece. Pick how tactical the computer should be.", "Take all of the other pieces. Choose a bot."]],
+    trade: [["You'll play as ", "You are "], [" set to ", " · "]],
+    flappy: [["Holding pattern.", "Paused."], ["Take a break. The sunset can wait.", "Nothing moves until you resume."], ["Resume flight →", "Resume →"]],
+    tic: [["The computer plays perfect moves. Or pass the same board to a second person.", "Play the computer or pass the board to another person."]],
+  };
+  const copyRules = plainCopy[gameId];
+  let copyObserver;
+  const syncPlainCopy = () => {
+    if (!copyRules) return;
+    const root = document.querySelector("#shelf-native-host");
+    if (!root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    for (const node of nodes) {
+      for (const [from, to] of copyRules) {
+        if (node.nodeValue.includes(from)) node.nodeValue = node.nodeValue.replaceAll(from, to);
+      }
+    }
+  };
+  if (copyRules) {
+    copyObserver = new MutationObserver(syncPlainCopy);
+    copyObserver.observe(document.querySelector("#shelf-native-host"), { subtree: true, childList: true, characterData: true });
+    syncPlainCopy();
+  }
   if (gameId === "snake") {
     const syncSnakeCopy = () => {
       const title = document.querySelector("#overlay-title");
@@ -425,7 +526,7 @@ function renderShelfHome({ app, base }) {
   </header><main class="page-width shelf-main">
     <section class="shelf-intro" aria-labelledby="shelf-title">
       <div><p class="shelf-kicker">the other games</p><h1 id="shelf-title">Pick a game.</h1></div>
-      <div class="shelf-intro-note"><p>Short games for a spare minute. Pick one and start playing.</p><span>11 games · no install</span></div>
+      <div class="shelf-intro-note"><p>Short games for a spare minute. Pick one and play.</p><span>no install</span></div>
     </section>
     <section class="shelf-grid" aria-label="Other HVN games">${SHELF_GAMES.map((game) => shelfCard(game, base)).join("")}</section>
     <footer class="site-footer shelf-footer"><span>HVN games</span><span>11 games</span></footer>

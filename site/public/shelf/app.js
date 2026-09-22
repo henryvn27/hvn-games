@@ -3,7 +3,7 @@ const games=[['golf','⛳','Mini Golf','Six holes. Find your perfect line.'],['s
 function cards(filter='all'){return games.filter(g=>filter==='all'||(filter==='board'?['checkers','trade'].includes(g[0]):!['checkers','trade'].includes(g[0]))).map(g=>`<article class="card"><div class="art">${g[1]}</div><h3>${g[2]}</h3><p>${g[3]}</p><button onclick="play('${g[0]}')">Play now →</button></article>`).join('')}
 function carousel(){return `<section class="carousel" aria-roledescription="carousel" aria-label="Browse all games"><div class="section-title"><div><span class="eyebrow">Spin the shelf</span><h2>Browse them all</h2></div><div class="car-controls"><button class="car-btn" id="carPrev" aria-label="Previous game">←</button><button class="car-btn" id="carNext" aria-label="Next game">→</button></div></div><div class="car-viewport"><div class="car-track" id="carTrack">${games.map(g=>`<article class="card car-slide"><div class="art">${g[1]}</div><h3>${g[2]}</h3><p>${g[3]}</p><button onclick="play('${g[0]}')">Play now →</button></article>`).join('')}</div></div><div class="car-dots" id="carDots">${games.map((_,i)=>`<button data-i="${i}" class="${i===0?'active':''}" aria-label="Go to slide ${i+1}"></button>`).join('')}</div></section>`}
 function initCarousel(){let track=document.querySelector('#carTrack'),dots=[...document.querySelectorAll('#carDots button')],box=document.querySelector('.carousel'),gap=parseFloat(getComputedStyle(track).columnGap)||15;carIndex=0;let step=()=>track.children[0].getBoundingClientRect().width+gap;let go=i=>{carIndex=(i+games.length)%games.length;track.style.transform=`translateX(-${carIndex*step()}px)`;dots.forEach((d,j)=>d.classList.toggle('active',j===carIndex))};let next=()=>go(carIndex+1);let start=()=>carTimer=setInterval(next,3500);let restart=()=>{clearInterval(carTimer);start()};document.querySelector('#carNext').onclick=()=>{next();restart()};document.querySelector('#carPrev').onclick=()=>{go(carIndex-1);restart()};dots.forEach(d=>d.onclick=()=>{go(+d.dataset.i);restart()});box.onmouseenter=()=>clearInterval(carTimer);box.onmouseleave=start;box.ontouchstart=()=>clearInterval(carTimer);box.ontouchend=start;let onResize=()=>go(carIndex);addEventListener('resize',onResize);start();clean=()=>{clearInterval(carTimer);removeEventListener('resize',onResize)}}
-function home(){delete document.body.dataset.shelfGame;clean();app.innerHTML=`<section class="hero"><div><span class="eyebrow">A little collection of browser games</span><h1>Pick a game.<br><em>Make a moment.</em></h1><p>Eleven games for a quick break. Chase high scores, collect trophies, and make the shelf your own.</p></div><aside class="feature"><span class="kicker">New on the shelf</span><b>Mini Golf ⛳</b><p>Six little greens. Banks, bunkers, and a perfect putt waiting to happen.</p><button onclick="play('golf')">Play Mini Golf →</button></aside></section>${DailyChallenges.homeSummary()}${Shelf.summary()}${carousel()}<div class="section-title"><div><span class="eyebrow">The full shelf</span><h2>Choose your challenge</h2></div></div><section class="grid">${cards()}</section>`;initCarousel()}
+function home(){delete document.body.dataset.shelfGame;clean();app.innerHTML=`<section class="hero"><div><span class="eyebrow">11 games</span><h1>Pick a game.<br><em>Play a round.</em></h1><p>Short games for a quick break. Choose one and get straight to it.</p></div><aside class="feature"><span class="kicker">Try this one</span><b>Mini Golf ⛳</b><p>Six greens. Find the line and sink the putt.</p><button onclick="play('golf')">Play Mini Golf →</button></aside></section>${DailyChallenges.homeSummary()}${Shelf.summary()}${carousel()}<div class="section-title"><div><span class="eyebrow">All games</span><h2>Pick one.</h2></div></div><section class="grid">${cards()}</section>`;initCarousel()}
 function list(view){clean();clean=()=>{};let t=view==='board'?'Board games':'Arcade games';app.innerHTML=`<div class="game-head"><button class="back" onclick="home()">←</button><h1>${t}</h1></div><section class="grid">${cards(view)}</section>`}
 function shell(title,sub,body){clean();clean=()=>{};app.innerHTML=`<div class="game-head"><div><span class="eyebrow">HVN games</span><h1>${title}</h1></div></div><div class="game-wrap"><p>${sub}</p>${body}</div>`}
 window.play=id=>{const game={golf,snake,dodger,memory,reaction,word,clicker,flappy,platform,tic,checkers,trade}[id];if(typeof game!=='function')return;document.body.dataset.shelfGame=id;game();Shelf.record('game_play',{id});};window.home=home;document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>b.dataset.view==='home'?home():b.dataset.view==='rewards'?Shelf.render():b.dataset.view==='daily'?DailyChallenges.render():b.dataset.view==='cup'?ArcadeCup.render():list(b.dataset.view));
@@ -83,7 +83,7 @@ function snake(){
     const hasFood=fillFood();draw();hud();if(!hasFood)finish(true);
   }
   function run(){if(state==='over')return runSession.cup?ArcadeCup.render():reset(true);runSession.start(`${mode.value}-${speed.value}-${count.value}`);state='running';$('#game-overlay').hidden=true;hud();clearInterval(timer);timer=setInterval(tick,Number(speed.value));}
-  function pause(){if(state==='running'){state='paused';runSession.pause();clearInterval(timer);hud();overlay('Take a breather.','Your garden will be right here.','Keep growing →');}else if(state==='paused')run();}
+  function pause(){if(state==='running'){state='paused';runSession.pause();clearInterval(timer);hud();overlay('Paused.','Your score is safe.','Resume →');}else if(state==='paused')run();}
   function steer(key){
     const direction={w:[0,-1],a:[-1,0],s:[0,1],d:[1,0],ArrowUp:[0,-1],ArrowLeft:[-1,0],ArrowDown:[0,1],ArrowRight:[1,0]}[key];
     if(!direction||state==='over'||state==='paused')return;
@@ -101,7 +101,7 @@ function snake(){
   clean=()=>{runSession.dispose();clearInterval(timer);removeEventListener('keydown',keydown);removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);};reset();
 }
 function dodger(){
-  shell('Space Dodger','Move around Mars and shoot the incoming fleet.',`
+  shell('Space Dodger','Shoot the red ships before they reach Mars.',`
     <div class="panel arcade-panel shooter-panel">
       <div class="arcade-banner"><span>MARS / ORBITAL DEFENCE</span><span>STARFIGHTER SURVIVAL</span></div>
       <div class="arcade-stats"><span>SCORE <b id="score">0000</b></span><span>BEST <b id="best">0000</b></span><span id="shooter-state">READY</span></div>
@@ -140,14 +140,14 @@ function dodger(){
   function reset(start=false){
     runSession.reset();ship={x:320,y:400,r:12,hp:3,weapon:1,inv:0};enemies=[];shots=[];hostile=[];pickups=[];particles=[];boss=null;
     wave=1;score=0;kills=0;spawned=0;spawnTimer=.8;fireTimer=0;elapsed=0;breakTimer=0;noticeTimer=0;keys.clear();pointers.clear();drag=null;state='ready';hud();draw();
-    message('Move with WASD. The guns are ready.');overlay('Keep Mars clear.','Move with WASD. Your guns fire automatically. Grab upgrades. Boss every five waves.','start');if(start)run();
+    message('Move with WASD. Your guns fire automatically.');overlay('Keep Mars clear.','Move with WASD. Grab upgrades between waves.','start');if(start)run();
   }
   function run(){if(state==='over')return runSession.cup?ArcadeCup.render():reset(true);runSession.start('mars');if(state==='ready')startWave();state='running';last=0;$('#game-overlay').hidden=true;hud();}
-  function pause(){keys.clear();pointers.clear();drag=null;if(state==='running'){state='paused';runSession.pause();hud();overlay('Orbit on hold.','Take a breather, pilot.','Resume mission →');}else if(state==='paused')run();}
+  function pause(){keys.clear();pointers.clear();drag=null;if(state==='running'){state='paused';runSession.pause();hud();overlay('Paused.','Nothing moves until you resume.','Resume →');}else if(state==='paused')run();}
   function damage(){
     if(ship.inv>0||state!=='running')return;
     ship.hp--;ship.inv=1.5;burst(ship.x,ship.y,'#ffbb82');hud();
-    if(ship.hp===0){state='over';keys.clear();pointers.clear();drag=null;hud();overlay('Signal lost.',`Score ${score} · Wave ${wave}. Mars needs another pilot.`,runSession.cup?'See Cup standings →':'Launch again →');runSession.finish({score});}
+    if(ship.hp===0){state='over';keys.clear();pointers.clear();drag=null;hud();overlay('Mars was hit.',`Score ${score} · wave ${wave}.`,runSession.cup?'See Cup standings →':'Play again →');runSession.finish({score});}
     else message('Hull hit / temporary shield active.');
   }
   function fire(){

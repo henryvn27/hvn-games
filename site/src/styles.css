@@ -768,6 +768,12 @@ h3 { font-size: clamp(2rem, 3vw, 3rem); margin-bottom: 16px; }
 .game-page .route-leaderboard > div:last-child { border-top: 1px solid #1b1c19; }
 .game-page .route-leaderboard p { color: #6a6d66; }
 .game-page .route-leaderboard .leaderboard-list li { border-bottom-color: rgba(27, 28, 25, 0.18); }
+.game-page.game-phasebound .route-leaderboard { color: #f5f7ff; }
+.game-page.game-phasebound .route-leaderboard > div:last-child { border-top-color: rgba(224, 232, 255, 0.22); }
+.game-page.game-phasebound .route-leaderboard p { color: #8e9bb4; }
+.game-page.game-phasebound .route-leaderboard .leaderboard-list li { border-bottom-color: rgba(224, 232, 255, 0.16); }
+.game-page.game-phasebound .rl-link { color: #f5f7ff; border-color: rgba(224, 232, 255, 0.3); }
+.game-page.game-phasebound .rl-link:hover { color: #071124; border-color: #54e2f5; background: #54e2f5; }
 
 @media (max-width: 600px) {
   .game-page .game-main { padding-block: 44px 52px; }

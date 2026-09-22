@@ -241,7 +241,7 @@ function setupPlayInsights() {
   });
 }
 
-function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME, statusNode = null) {
+function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME, statusNode = null, options = {}) {
   const game = LEADERBOARD_GAMES.find((item) => item.id === gameId);
   const localEntries = getLeaderboard(gameId);
   const online = window.HVNOnlineLeaderboard;
@@ -278,6 +278,10 @@ function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME, statusNode =
   if (!online.configured) {
     if (statusNode) statusNode.textContent = "Local board for now. The shared board is not connected.";
     return Promise.resolve({ status: "unconfigured", entries: localEntries });
+  }
+  if (options.localOnly) {
+    if (statusNode) statusNode.textContent = "Score saved to the shared board. Rankings will refresh shortly.";
+    return Promise.resolve({ status: "pending-refresh", entries: localEntries });
   }
   if (statusNode) statusNode.textContent = "Loading shared scores…";
   return online.get(gameId).then((result) => {
@@ -777,8 +781,17 @@ async function renderGame() {
     const localEntry = recordLeaderboardScore(gameId, score.score, score.packets, score.elapsed);
     if (!localEntry) return { status: "needs-name", entries: [] };
     const online = window.HVNOnlineLeaderboard;
-    if (online?.configured) await online.submit(gameId, { name: localEntry.name, score: score.score, packets: score.packets, seconds: score.elapsed, submissionId: online.submissionId(gameId, localEntry) });
-    return renderLeaderboard(document.querySelector("#phasebound-leaderboard"), gameId, document.querySelector("#phasebound-leaderboard-connection"));
+    const leaderboard = document.querySelector("#phasebound-leaderboard");
+    const connection = document.querySelector("#phasebound-leaderboard-connection");
+    if (online?.configured) {
+      const submitted = await online.submit(gameId, { name: localEntry.name, score: score.score, packets: score.packets, seconds: score.elapsed, submissionId: online.submissionId(gameId, localEntry) });
+      if (submitted.status === "online") {
+        await renderLeaderboard(leaderboard, gameId, connection, { localOnly: true });
+        window.setTimeout(() => { void renderLeaderboard(leaderboard, gameId, connection); }, 1800);
+        return submitted;
+      }
+    }
+    return renderLeaderboard(leaderboard, gameId, connection);
   }
 
   function showScoreSave(state) {

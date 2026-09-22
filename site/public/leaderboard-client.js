@@ -30,14 +30,18 @@ function request(path, options) {
     .then((response) => { if (!response.ok) throw new Error("leaderboard request failed (" + response.status + ")"); return response; })
     .finally(() => window.clearTimeout(timeout));
 }
+function wait(milliseconds) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
 function get(gameId, options) {
   if (!configured) return Promise.resolve({ status: "unconfigured", entries: [] });
   const ascending = options && options.order === "asc";
   const query = new URLSearchParams({ game_id: gameId, order: ascending ? "asc" : "desc", limit: "10" });
-  return request("?" + query)
+  const read = () => request("?" + query)
     .then((response) => response.json())
-    .then((payload) => ({ status: "online", entries: (payload.entries || []).map(normalize).filter((entry) => entry.name) }))
-    .catch((error) => ({ status: "unavailable", entries: [], error }));
+    .then((payload) => ({ status: "online", entries: (payload.entries || []).map(normalize).filter((entry) => entry.name) }));
+  return read()
+    .catch((firstError) => wait(800).then(read).catch((secondError) => ({ status: "unavailable", entries: [], error: secondError || firstError })));
 }
 function submit(gameId, payload) {
   if (!configured) return Promise.resolve({ status: "unconfigured", ok: false });

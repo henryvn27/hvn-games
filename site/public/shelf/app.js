@@ -101,15 +101,15 @@ function snake(){
   clean=()=>{runSession.dispose();clearInterval(timer);removeEventListener('keydown',keydown);removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);};reset();
 }
 function dodger(){
-  shell('Space Dodger','Mars perimeter · hold the line against an incoming fleet.',`
+  shell('Space Dodger','Move around Mars and shoot the incoming fleet.',`
     <div class="panel arcade-panel shooter-panel">
       <div class="arcade-banner"><span>MARS / ORBITAL DEFENCE</span><span>STARFIGHTER SURVIVAL</span></div>
       <div class="arcade-stats"><span>SCORE <b id="score">0000</b></span><span>BEST <b id="best">0000</b></span><span id="shooter-state">READY</span></div>
       <div class="shooter-status"><span id="wave-label">WAVE 01</span><span id="hull-label">HULL ●●●</span><span id="weapon-label">SINGLE SHOT</span></div>
       <div class="arcade-stage"><canvas class="canvas" width="640" height="480" aria-label="Starfighter survival above Mars. Move with WASD or arrow keys; weapons fire automatically."></canvas>
-        <div class="arcade-overlay" id="game-overlay"><span class="kicker">LAST SHIP ON THE RED FRONTIER</span><h2 id="overlay-title">Defend the<br>red planet.</h2><p id="overlay-note">Move with WASD. Weapons fire automatically.<br>Collect upgrades. Face a boss every five waves.</p><button class="action" id="start-game">Launch fighter →</button></div>
+        <div class="arcade-overlay" id="game-overlay"><span class="kicker">MARS / WAVE 01</span><h2 id="overlay-title">Keep Mars clear.</h2><p id="overlay-note">Move with WASD. Your guns fire automatically.<br>Grab upgrades. A boss arrives every five waves.</p><button class="action" id="start-game">start</button></div>
       </div>
-      <p class="shooter-message" id="mission-note" aria-live="polite">Flight clearance granted. Ready when you are.</p>
+      <p class="shooter-message" id="mission-note" aria-live="polite">Move with WASD. The guns are ready.</p>
       <div class="controls"><button data-steer="w" aria-label="Move up">W ↑</button><button data-steer="a" aria-label="Move left">A ←</button><button data-steer="s" aria-label="Move down">S ↓</button><button data-steer="d" aria-label="Move right">D →</button><button id="pause-game" disabled>Pause</button><button id="restart-game">Restart</button></div>
       <p class="arcade-footnote">WASD / arrows · auto-fire · P to pause<br>Touch: drag the ship or hold direction buttons · U upgrade / + repair</p>
     </div>`);
@@ -140,7 +140,7 @@ function dodger(){
   function reset(start=false){
     runSession.reset();ship={x:320,y:400,r:12,hp:3,weapon:1,inv:0};enemies=[];shots=[];hostile=[];pickups=[];particles=[];boss=null;
     wave=1;score=0;kills=0;spawned=0;spawnTimer=.8;fireTimer=0;elapsed=0;breakTimer=0;noticeTimer=0;keys.clear();pointers.clear();drag=null;state='ready';hud();draw();
-    message('Flight clearance granted. Ready when you are.');overlay('Defend the red planet.','Move with WASD. Auto-fire is on. Collect upgrades. Boss every five waves.','Launch fighter →');if(start)run();
+    message('Move with WASD. The guns are ready.');overlay('Keep Mars clear.','Move with WASD. Your guns fire automatically. Grab upgrades. Boss every five waves.','start');if(start)run();
   }
   function run(){if(state==='over')return runSession.cup?ArcadeCup.render():reset(true);runSession.start('mars');if(state==='ready')startWave();state='running';last=0;$('#game-overlay').hidden=true;hud();}
   function pause(){keys.clear();pointers.clear();drag=null;if(state==='running'){state='paused';runSession.pause();hud();overlay('Orbit on hold.','Take a breather, pilot.','Resume mission →');}else if(state==='paused')run();}
@@ -346,9 +346,9 @@ function word(){
     profiles[n]=data;return data;
   }
   function save(){try{localStorage.setItem(`word-vault-${size}`,JSON.stringify(profile(size)));}catch{storageOK=false;}}
-  shell('Wordle','One hidden word. Six attempts. Find the word.',`
-    <div class="panel vault-panel"><div class="vault-topline"><span>LEXICON SYSTEMS / TERMINAL 04</span><span class="vault-led">● ONLINE</span></div>
-      <div class="vault-heading"><div><span class="kicker">SIX TRIES. ONE WAY IN.</span><h2>Access by instinct.<br>Unlock with logic.</h2></div><label class="vault-size">CODE LENGTH<select id="vault-size"><option value="4">4 letters</option><option value="5" selected>5 letters</option><option value="6">6 letters</option></select></label></div>
+  shell('Wordle','Find the hidden word in six guesses.',`
+    <div class="panel vault-panel"><div class="vault-topline"><span>WORDLE</span><span class="vault-led">● READY</span></div>
+      <div class="vault-heading"><div><span class="kicker">6 GUESSES</span><h2>Find the word.</h2></div><label class="vault-size">WORD LENGTH<select id="vault-size"><option value="4">4 letters</option><option value="5" selected>5 letters</option><option value="6">6 letters</option></select></label></div>
       <div class="vault-stats"><span>WINS <b id="vault-wins">0</b></span><span>STREAK <b id="vault-streak">0</b></span><span>BEST <b id="vault-best">0</b></span></div>
       <div class="vault-readout"><span id="vault-attempt"></span><span id="vault-state"></span></div>
       <div id="vault-board" class="vault-board" role="group" aria-label="Six attempts to find the hidden word"></div>
@@ -372,10 +372,10 @@ function word(){
     $('#vault-keyboard').innerHTML=['QWERTYUIOP','ASDFGHJKL','↵ZXCVBNM⌫'].map(row=>`<div class="vault-keyrow">${[...row].map(k=>`<button data-key="${k}" class="${keyboard[k]||''} ${'↵⌫'.includes(k)?'wide':''}" aria-label="${k==='↵'?'Submit guess':k==='⌫'?'Delete letter':k+(keyboard[k]?', '+labels[keyboard[k]]:'')}" ${busy||round.status!=='playing'?'disabled':''}>${k}</button>`).join('')}</div>`).join('');
     $('#vault-wins').textContent=data.wins;$('#vault-streak').textContent=data.streak;$('#vault-best').textContent=data.best;
     $('#vault-attempt').textContent=`ATTEMPT ${Math.min(round.guesses.length+1,6)} / 6`;
-    $('#vault-state').textContent=busy?'DECODING…':round.status==='won'?'ACCESS GRANTED':round.status==='lost'?'ACCESS DENIED':`${size}-LETTER CIPHER`;
-    $('#vault-notice').textContent=busy?'Checking your guess…':notice||(round.status==='won'?`Wordle solved: ${round.answer}. Solved in ${round.guesses.length} / 6.`:round.status==='lost'?`The word was ${round.answer}. A fresh Wordle awaits.`:round.guesses.length?'Use the clues to refine your next guess.':'Enter a word to start.');
+    $('#vault-state').textContent=busy?'CHECKING…':round.status==='won'?'SOLVED':round.status==='lost'?'NOT SOLVED':`${size}-LETTER WORD`;
+    $('#vault-notice').textContent=busy?'Checking…':notice||(round.status==='won'?`Solved: ${round.answer} in ${round.guesses.length} / 6.`:round.status==='lost'?`The word was ${round.answer}.`:round.guesses.length?'Use the colors to narrow it down.':'Enter a word.');
     $('#vault-new').disabled=busy;$('#vault-size').disabled=busy;
-    $('#vault-new').textContent=round.status==='playing'&&round.guesses.length?'New Wordle (ends streak)':'New Wordle →';
+    $('#vault-new').textContent=round.status==='playing'&&round.guesses.length?'New game (ends streak)':'New game →';
     if(!storageOK)$('#vault-save-note').textContent='Storage unavailable · progress lasts for this visit';
   }
   function submit(){
@@ -655,7 +655,7 @@ function trade(){
   };
 
   function renderSetup(){
-    shell('City Trader','Set up your game, then roll to build a property empire.',`
+    shell('City Trader','Choose players, then buy streets and collect rent.',`
       <div class="trade-setup">
         <div class="setup-row"><span class="setup-label">Computer opponents</span><div class="difficulty">${[1,2,3].map(n=>`<button class="choice ${n===botCount?'active':''}" data-bots="${n}" aria-label="${n} bot${n>1?'s':''}">${n}</button>`).join('')}</div></div>
         <div class="setup-row"><span class="setup-label">Bot difficulty</span><div class="difficulty">${['easy','normal','hard'].map(x=>`<button class="choice ${x===difficulty?'active':''}" data-diff="${x}" aria-label="Difficulty ${x}">${cap(x)}</button>`).join('')}</div></div>
@@ -753,12 +753,12 @@ function trade(){
 }
 function clicker(){expeditionCamp();}
 function flappy(){
-  shell('Sky Flyer','A sunset, a little prop plane, and a sky full of close calls.',`
+  shell('Sky Flyer','Fly through the gates without hitting one.',`
     <div class="panel arcade-panel flyer-panel"><div class="arcade-banner"><span>SKY PATROL / 1986</span><span>02 / FLYER</span></div>
       <div class="arcade-stats"><span>GATES <b id="score">00</b></span><span>BEST <b id="best">00</b></span><span id="flight-state">READY</span></div>
       <div class="flight-level"><span id="flight-level" aria-live="polite"></span><span id="flight-progress"></span></div>
       <div class="arcade-stage"><canvas class="canvas" width="640" height="400" aria-label="Retro flying game"></canvas>
-        <div class="arcade-overlay" id="game-overlay"><span class="kicker">ONE PLANE. OPEN SKIES.</span><h2 id="overlay-title">Chase the<br>horizon.</h2><p id="overlay-note">Tap W to climb. Hold S to dive.<br>Keep tapping to stay airborne. New level every 10 gates.</p><button class="action" id="start-game">Take off →</button></div>
+        <div class="arcade-overlay" id="game-overlay"><span class="kicker">SKY PATROL / 1986</span><h2 id="overlay-title">Fly through the gates.</h2><p id="overlay-note">Tap W to climb. Hold S to dive.<br>Clear 10 gates to reach the next level.</p><button class="action" id="start-game">start</button></div>
       </div>
       <div class="controls"><button data-flight="w">W ↑ Climb</button><button data-flight="s">S ↓ Dive</button><button id="pause-game" disabled>Pause</button><button id="restart-game">Restart</button></div>
       <p class="arcade-footnote">Tap W to climb / hold S to dive · P to pause · clear a gate to score</p>
@@ -827,7 +827,7 @@ function flappy(){
     rect('#e4e1c4',147,y-(frame%12<6?11:5),3,frame%12<6?22:10);rect('#302c47',144,y-2,5,5);
     for(let row=0;row<400;row+=4)rect('rgba(20,20,40,.08)',0,row,640,1);
   }
-  function reset(start=false){runSession.reset();y=200;v=0;pipes=[];score=0;elapsed=0;spawn=0;frame=0;keys.clear();touch.clear();state='ready';hud();draw();overlay('Chase the horizon.','Tap W to climb. Hold S to dive. Keep tapping to stay airborne. New level every 10 gates.','Take off →');if(start)run();}
+  function reset(start=false){runSession.reset();y=200;v=0;pipes=[];score=0;elapsed=0;spawn=0;frame=0;keys.clear();touch.clear();state='ready';hud();draw();overlay('Fly through the gates.','Tap W to climb. Hold S to dive. Clear 10 gates to reach the next level.','start');if(start)run();}
   function run(){if(state==='over')return runSession.cup?ArcadeCup.render():reset(true);runSession.start('sky');state='running';last=0;$('#game-overlay').hidden=true;hud();}
   function pause(){keys.clear();touch.clear();if(state==='running'){state='paused';runSession.pause();hud();overlay('Holding pattern.','Take a break. The sunset can wait.','Resume flight →');}else if(state==='paused')run();}
   function crash(){if(state==='over')return;state='over';keys.clear();touch.clear();hud();overlay('Flight complete.',`${score} gates cleared. Ready for another run?`,runSession.cup?'See Cup standings →':'Fly again →');runSession.finish({score});}

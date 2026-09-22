@@ -88,14 +88,14 @@ class NeonBastion {
           <section class="nb-stage" aria-label="Lunar relay defense map">
             <div id="nb-canvas" class="nb-canvas"></div>
             <div class="nb-map-label"><span>outpost 07</span><span>relay route</span></div>
-            <div class="nb-stage-note" id="nb-stage-note">Build on a marked pad. Start the next wave when ready.</div>
+            <div class="nb-stage-note" id="nb-stage-note">Place a tower on a marked pad. Send the wave when ready.</div>
             <div class="nb-overlay" id="nb-overlay">
               <div class="nb-overlay-card">
                 <p class="nb-overline" id="nb-overlay-overline">outpost 07 · moon side</p>
-                <h1 id="nb-overlay-title">Keep the relay online.</h1>
-                <p id="nb-overlay-copy">Build guns beside the route. Stop the crawlers before they reach the relay.</p>
-                <button class="nb-primary" id="nb-overlay-action" type="button">start a shift</button>
-                <p class="nb-keyline">click a pad to build · 1–3 choose a tower · space sends a wave · p pauses</p>
+                <h1 id="nb-overlay-title">Stop the crawlers.</h1>
+                <p id="nb-overlay-copy">Place towers beside the route, then send a wave.</p>
+                <button class="nb-primary" id="nb-overlay-action" type="button">start</button>
+                <p class="nb-keyline">click a pad to build · 1–3 choose a tower · Space sends a wave · P pauses</p>
               </div>
             </div>
           </section>
@@ -107,7 +107,7 @@ class NeonBastion {
               <div><span>score</span><strong id="nb-score">0000</strong></div>
             </div>
             <div class="nb-meter"><span id="nb-core-meter"></span></div>
-            <div class="nb-section-heading"><h2>Build a defense</h2><span id="nb-build-note">choose one</span></div>
+            <div class="nb-section-heading"><h2>Place a tower</h2><span id="nb-build-note">choose one</span></div>
             <div class="nb-tower-list">
               <button class="nb-tower-option is-selected" data-tower="arc" type="button"><span class="nb-tower-icon nb-icon-arc"></span><span><b>Relay gun</b><small>quick · 70 credits</small></span><i>1</i></button>
               <button class="nb-tower-option" data-tower="rail" type="button"><span class="nb-tower-icon nb-icon-rail"></span><span><b>Coil cannon</b><small>long range · 105 credits</small></span><i>2</i></button>
@@ -117,7 +117,7 @@ class NeonBastion {
             <div class="nb-divider"></div>
             <button class="nb-primary nb-wave-button" id="nb-wave-button" type="button">send wave 1</button>
             <button class="nb-secondary nb-speed" id="nb-speed" type="button">speed: 1×</button>
-            <p class="nb-status" id="nb-status">Choose a defense before sending the first wave.</p>
+            <p class="nb-status" id="nb-status">Choose a tower, then click a marked pad.</p>
             <div class="nb-legend"><span><i class="nb-dot nb-dot-path"></i>route</span><span><i class="nb-dot nb-dot-pad"></i>build site</span><span><i class="nb-dot nb-dot-enemy"></i>crawler</span></div>
           </aside>
         </div>
@@ -322,7 +322,7 @@ class NeonBastion {
     this.selectedType = type;
     this.node.querySelectorAll("[data-tower]").forEach((button) => button.classList.toggle("is-selected", button.dataset.tower === type));
     this.node.querySelector("#nb-build-note").textContent = `${TOWERS[type].name} selected`;
-    this.stageNote.textContent = `Click a marked pad to place ${TOWERS[type].name}.`;
+    this.stageNote.textContent = `Click a marked pad for ${TOWERS[type].name}.`;
   }
 
   buildAt(pad) {
@@ -416,9 +416,9 @@ class NeonBastion {
     this.overlay.classList.remove("is-hidden");
     this.overlay.setAttribute("aria-hidden", "false");
     this.overlayOverline.textContent = "outpost 07 · moon side";
-    this.overlayTitle.textContent = "Keep the relay online.";
-    this.overlayCopy.textContent = "Build guns beside the route. Stop the crawlers before they reach the relay.";
-    this.overlayAction.textContent = "start a shift";
+    this.overlayTitle.textContent = "Stop the crawlers.";
+    this.overlayCopy.textContent = "Place towers beside the route, then send a wave.";
+    this.overlayAction.textContent = "start";
     this.overlayAction.dataset.action = "start";
     this.updateHud();
   }
@@ -601,10 +601,10 @@ class NeonBastion {
     this.overlay.setAttribute("aria-hidden", "false");
     this.overlayOverline.textContent = "outpost 07 · relay offline";
     this.overlayTitle.textContent = `Score ${this.score}`;
-    this.overlayCopy.textContent = `You held through ${this.wave} wave${this.wave === 1 ? "" : "s"}. Rebuild the defense and try again.`;
-    this.overlayAction.textContent = "restart shift";
+    this.overlayCopy.textContent = `You stopped ${this.wave} wave${this.wave === 1 ? "" : "s"}.`;
+    this.overlayAction.textContent = "play again";
     this.overlayAction.dataset.action = "retry";
-    this.stageNote.textContent = "Relay offline. Restart when you are ready.";
+    this.stageNote.textContent = "Relay offline. Start another run.";
     const online = window.HVNOnlineLeaderboard;
     const name = getPlayerName();
     if (online?.configured && name) void online.submit("neon-bastion", { name, score: this.score, packets: this.wave, seconds: this.elapsed });
@@ -617,9 +617,9 @@ class NeonBastion {
       this.mode = "pause";
       this.overlay.classList.remove("is-hidden");
       this.overlay.setAttribute("aria-hidden", "false");
-      this.overlayOverline.textContent = "outpost 07 · holding pattern";
+      this.overlayOverline.textContent = "outpost 07 · paused";
       this.overlayTitle.textContent = "Paused.";
-      this.overlayCopy.textContent = "The relay, crawlers, and projectiles are all held in place.";
+      this.overlayCopy.textContent = "The relay, crawlers, and shots are stopped.";
       this.overlayAction.textContent = "resume";
       this.overlayAction.dataset.action = "resume";
     } else if (this.mode === "pause") {

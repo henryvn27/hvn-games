@@ -99,7 +99,7 @@ async function renderSpaceWars() {
       <nav class="site-nav" aria-label="Primary navigation"><a href="${base}">all games</a><a href="${base}?game=${ORBIT_ROUTE}">Orbit</a></nav>
     </header>
     <main class="game-main page-width space-wars-main">
-      <div class="game-heading space-wars-heading"><h1>Space Wars</h1><p class="game-blurb">Fly, fire, and keep the sky clear.</p></div>
+      <div class="game-heading space-wars-heading"><h1>Space Wars</h1><p class="game-blurb">Fly, shoot, and keep the base clear.</p></div>
       <section class="space-wars-frame" aria-label="Space Wars game">
         <div class="space-wars-hud" aria-live="polite">
           <div><span>shields</span><strong id="space-wars-shields">3</strong></div>
@@ -109,11 +109,11 @@ async function renderSpaceWars() {
         </div>
         <div id="space-wars-root"></div>
         <div class="space-wars-overlay" id="space-wars-overlay">
-          <p class="space-wars-overline">a small 3D arcade game</p>
-          <h2 id="space-wars-overlay-title">Clear the sky.</h2>
-          <p id="space-wars-overlay-copy">Move your ship, fire at the red shapes, and keep anything from reaching the horizon.</p>
-          <button id="space-wars-overlay-action" class="button button-primary" type="button">start a run</button>
-          <p class="space-wars-controls">arrows or WASD to fly · Space or tap the field to fire · P pauses</p>
+          <p class="space-wars-overline">Mars airspace</p>
+          <h2 id="space-wars-overlay-title">Keep them out.</h2>
+          <p id="space-wars-overlay-copy">Move your ship and shoot the red ships before they reach the base.</p>
+          <button id="space-wars-overlay-action" class="button button-primary" type="button">start</button>
+          <p class="space-wars-controls">WASD or arrows to move · Space or tap to shoot · P pauses</p>
         </div>
         <div class="space-wars-touch" aria-label="Touch movement controls">
           <button type="button" data-space-move="up" aria-label="Fly up">↑</button>
@@ -153,8 +153,8 @@ async function renderSpaceWars() {
       pause.textContent = state.mode === "pause" ? "▶" : "Ⅱ";
       pause.setAttribute("aria-label", state.mode === "pause" ? "Resume" : "Pause");
       if (state.mode === "active") overlay.classList.add("is-hidden");
-      if (state.mode === "pause") showOverlay({ heading: "Paused.", message: "The sky is holding still.", label: "resume", callback: () => api.togglePause() });
-      if (state.mode === "result") showOverlay({ heading: "Shields down.", message: `You cleared ${state.score} targets.`, label: "run it again", callback: () => api.start() });
+      if (state.mode === "pause") showOverlay({ heading: "Paused.", message: "Nothing moves while paused.", label: "resume", callback: () => api.togglePause() });
+      if (state.mode === "result") showOverlay({ heading: "Ship lost.", message: `Targets hit: ${state.score}.`, label: "play again", callback: () => api.start() });
     },
   });
   action.addEventListener("click", () => nextAction());
@@ -425,9 +425,9 @@ async function renderComet() {
       <nav class="site-nav" aria-label="Primary navigation"><a href="${base}?game=${ORBIT_ROUTE}">Orbit</a><a href="${base}">home</a></nav>
     </header>
     <main class="game-main page-width">
-      <div class="game-heading">
+    <div class="game-heading">
         <h1>Comet Courier</h1>
-        <p class="game-blurb">Carry survey beacons through a crowded comet tail.</p>
+        <p class="game-blurb">Bring green beacons home through the tail.</p>
       </div>
       <section class="game-frame comet-frame" aria-label="Comet Courier game">
         <div class="comet-hud" aria-live="polite">
@@ -445,10 +445,10 @@ async function renderComet() {
           <button type="button" data-direction="right" aria-label="Move right">→</button>
         </div>
         <div id="game-overlay" class="game-overlay">
-          <h2 id="overlay-title">Ready for the pass?</h2>
-          <p id="overlay-copy">Bring each green survey beacon home. Red debris and your own tail end the run.</p>
-          <button id="overlay-action" class="button button-primary" type="button">Start the pass</button>
-          <p id="overlay-detail" class="overlay-detail">arrows or WASD to steer · Space pauses</p>
+          <h2 id="overlay-title">Ready?</h2>
+          <p id="overlay-copy">Bring green beacons home. Red debris and your tail end the run.</p>
+          <button id="overlay-action" class="button button-primary" type="button">start</button>
+          <p id="overlay-detail" class="overlay-detail">WASD or arrows to steer · Space pauses</p>
         </div>
       </section>
       <section class="comet-note" aria-label="How to play Comet Courier">
@@ -489,7 +489,7 @@ async function renderComet() {
     copy: overlayCopy,
     detail: overlayDetail,
     actionButton: overlayAction,
-    message: "Steer the comet.",
+    message: "Bring a beacon home.",
     next: () => api.start(),
   });
 
@@ -511,8 +511,8 @@ async function renderComet() {
       if (state.mode === "active" && previousMode !== "active") tracker.start();
       if (state.mode === "result" && previousMode !== "result") tracker.finish(state);
       if (state.mode === "active") overlay.classList.add("is-hidden");
-      if (state.mode === "pause") showOverlay({ title: "Paused.", copy: "The comet is holding its line.", detail: "Press Space or choose resume.", label: "Resume", next: () => api.togglePause() });
-      if (state.mode === "result" && previousMode !== "result") showOverlay({ title: "Tail gone.", copy: `Score ${score}.`, detail: `Best ${savedBest}. Try a cleaner route.`, label: "Run it again", next: startWithCountdown });
+      if (state.mode === "pause") showOverlay({ title: "Paused.", copy: "Nothing moves while paused.", detail: "Press Space or click resume.", label: "resume", next: () => api.togglePause() });
+      if (state.mode === "result" && previousMode !== "result") showOverlay({ title: "Crash.", copy: `Score ${score}.`, detail: `Best ${savedBest}.`, label: "play again", next: startWithCountdown });
       previousMode = state.mode;
     },
   });
@@ -538,7 +538,7 @@ async function renderGame() {
     <main class="game-main page-width">
       <div class="game-heading">
         <h1>Orbit</h1>
-        <p class="game-blurb">Match your color. Dodge the red planets.</p>
+        <p class="game-blurb">Collect matching dots. Avoid red planets.</p>
       </div>
       <section class="game-frame" aria-label="Orbit game">
         <div class="hud" aria-live="polite">
@@ -549,7 +549,7 @@ async function renderGame() {
         <div id="game-root"></div>
         <div id="game-overlay" class="game-overlay">
           <div id="first-play-tutorial" class="first-play-tutorial" hidden>
-            <p class="tutorial-kicker">try it once</p>
+            <p class="tutorial-kicker">practice</p>
             <p id="tutorial-step" class="tutorial-step">lesson 1 of 4</p>
             <h2 id="tutorial-title">Move your triangle.</h2>
             <p id="tutorial-copy" class="tutorial-intro">Use WASD or an arrow key, or tap the move button below on a phone.</p>
@@ -562,10 +562,10 @@ async function renderGame() {
             <button id="tutorial-start" class="button button-primary" type="button" disabled>move to continue</button>
             <button id="tutorial-skip" class="text-button tutorial-skip" type="button">skip tutorial</button>
           </div>
-          <h2 id="overlay-title">Ready?</h2>
-          <p id="overlay-copy">Match your color. Dodge the red planets.</p>
-          <button id="overlay-action" class="button button-primary" type="button">Start</button>
-          <p id="overlay-detail" class="overlay-detail">move with WASD or arrows · square or Space changes color · slow costs points</p>
+          <h2 id="overlay-title">Your move.</h2>
+          <p id="overlay-copy">Collect cyan or yellow dots. Avoid red planets.</p>
+          <button id="overlay-action" class="button button-primary" type="button">start</button>
+          <p id="overlay-detail" class="overlay-detail">WASD or arrows move · Space or square switches color · Q slows time</p>
           <div id="score-save" class="score-save" hidden>
             <p id="score-save-question">Save this score?</p>
             <div class="score-save-actions"><button id="score-save-button" class="button button-primary" type="button">save it</button><button id="score-skip-button" class="text-button" type="button">not this time</button></div>
@@ -641,33 +641,33 @@ async function renderGame() {
   const tutorialLessons = [
     {
       title: "Move your triangle.",
-      copy: "Use WASD or an arrow key to move. On a phone, tap the move button below. In the game, you steer this triangle around the field.",
-      waiting: "move the triangle once",
-      ready: "That is you. Use it to reach matching dots.",
+      copy: "Use WASD or an arrow key. On a phone, tap the move button.",
+      waiting: "move once",
+      ready: "Now move to a matching dot.",
       blocked: "move to continue",
       next: "next: match a color",
     },
     {
       title: "Match the dot's color.",
-      copy: "Press Space, or tap the square. Your triangle changes color. Collect dots with the same color.",
-      waiting: "change your color",
-      ready: "Good. Now look for a dot that matches.",
+      copy: "Press Space, or tap the square, to switch between cyan and yellow.",
+      waiting: "switch color",
+      ready: "Now collect a dot of that color.",
       blocked: "change color to continue",
       next: "next: use a dash",
     },
     {
       title: "Dash when you need room.",
-      copy: "Press Shift, or tap the dash button below on a phone. The triangle surges forward for a moment, which helps you escape a red planet.",
-      waiting: "press Shift once",
-      ready: "That burst is your escape move.",
+      copy: "Press Shift, or tap dash on a phone. Use the burst to get past a red planet.",
+      waiting: "dash once",
+      ready: "Use it when a planet gets close.",
       blocked: "dash to continue",
       next: "next: play a run",
     },
     {
       title: "Collect matching dots.",
-      copy: "Grab cyan or yellow dots that match your triangle. Red planets hurt. Pink stars give you another life.",
-      waiting: "you have the basics",
-      ready: "Matching dots raise your score. Red planets end the run.",
+      copy: "Collect dots that match your triangle. Red planets cost a life. Pink stars add one.",
+      waiting: "you know the controls",
+      ready: "Start when you’re ready.",
       blocked: "start the run",
       next: "start the run",
     },
@@ -749,9 +749,9 @@ async function renderGame() {
     markTutorialSeen();
     showOverlay({
       title: "Ready?",
-      copy: "Match your color. Dodge the red planets.",
-      detail: "move with WASD or arrows · square or Space changes color · slow costs points",
-      label: "Start",
+      copy: "Collect matching dots. Avoid red planets.",
+      detail: "WASD or arrows move · Space or square switches color · Q slows time",
+      label: "start",
       next: startWithCountdown,
     });
   }
@@ -823,7 +823,7 @@ async function renderGame() {
     tutorialActive = false;
     markTutorialSeen();
     hideTutorial();
-    beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, message: "Match your color.", next: () => api.start() });
+    beginCountdown({ overlay, title: overlayTitle, copy: overlayCopy, detail: overlayDetail, actionButton: overlayAction, message: "Collect matching dots.", next: () => api.start() });
   };
 
   api = startPhasebound({
@@ -842,11 +842,11 @@ async function renderGame() {
       frame.classList.toggle("is-active", state.mode === "active" || state.mode === "tutorial");
       if (state.mode === "active") overlay.classList.add("is-hidden");
       if (state.mode === "pause") {
-        showOverlay({ title: "Paused.", copy: "Your run is safe.", detail: "Press P or choose resume.", label: "Resume", next: () => api.resume() });
+        showOverlay({ title: "Paused.", copy: "Nothing moves while paused.", detail: "Press P or click resume.", label: "resume", next: () => api.resume() });
       }
       if (state.mode === "result" && previousMode !== "result") {
         const won = state.result === "won";
-        showOverlay({ title: won ? "Still playing?" : "Run over.", copy: `Score ${Math.max(0, Math.floor(state.score))}.`, detail: won ? "It gets faster." : "Try again if you want.", label: "Run it again", next: startWithCountdown });
+        showOverlay({ title: "Run over.", copy: `Score ${Math.max(0, Math.floor(state.score))}.`, detail: "The next run starts at phase 1.", label: "play again", next: startWithCountdown });
         showScoreSave(state);
       }
       previousMode = state.mode;

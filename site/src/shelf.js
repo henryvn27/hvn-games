@@ -275,7 +275,7 @@ const NATIVE_SHELF_OVERRIDES = `
     body.shelf-native-mode[data-shelf-game] .shelf-game-heading { padding-left: 12px; }
     body.shelf-native-mode[data-shelf-game] #shelf-native-host .game-wrap { width: 100%; }
     body.shelf-native-mode[data-shelf-game] #shelf-native-host .trade-layout { grid-template-columns: 1fr; }
-    body.shelf-native-mode[data-shelf-game] #shelf-native-host .trade-side { order: -1; }
+    body.shelf-native-mode[data-shelf-game] #shelf-native-host .trade-side { order: 0; }
     body.shelf-native-mode[data-shelf-game] #shelf-native-host .golf-shot-controls { grid-template-columns: 1fr; }
   }
   @media (prefers-reduced-motion: reduce) {

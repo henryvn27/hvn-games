@@ -641,6 +641,12 @@ function trade(){
   }
 
   const tilePlayers=i=>players.filter(p=>p.pos===i);
+  const boardPosition=i=>{
+    if(i<6)return '1 / '+(i+1);
+    if(i<10)return (i-4)+' / 6';
+    if(i<16)return '6 / '+(16-i);
+    return (21-i)+' / 1';
+  };
 
   function renderSetup(){
     shell('City Trader','Set up your game, then roll to build a property empire.',`
@@ -669,13 +675,21 @@ function trade(){
       <div class="trade-shell">
         <div class="turn-banner" role="status">${p.human?'Your turn':`${p.name}'s turn (thinking…)`} — standing on <b>${tile.name}</b>${turnPhase==='moved'&&lastRoll?` (rolled a ${lastRoll})`:''}</div>
         <div class="trade-layout">
-          <div class="trade-board" role="list" aria-label="City board">${board.map((t,i)=>`
-            <div class="tile ${t.type}${i===p.pos?' current-tile':''}${t.owner!=null?' owned':''}" role="listitem">
-              ${t.group?`<span class="tile-stripe" style="background:${GROUP_COLORS[t.group]}"></span>`:''}
-              <span class="tile-name">${t.name}</span>
-              <span class="tile-meta">${t.type==='property'?(t.owner!=null?`${owner(t).name}${t.houses?' · '+t.houses+' 🏠':''}`:'$'+t.price):t.type==='tax'?'Fee $'+t.amount:t.type==='event'?'Event':t.type==='start'?'Start & collect':'Rest'}</span>
-              <span class="tile-tokens">${tilePlayers(i).map(pp=>`<span class="token" title="${pp.name}">${pp.avatar}</span>`).join('')}</span>
-            </div>`).join('')}</div>
+          <div class="trade-board" role="list" aria-label="City board with 20 spaces">
+            <div class="board-center" aria-hidden="true">
+              <span class="center-kicker">City Trader</span>
+              <strong>Build the block</strong>
+              <div class="center-dice"><span>last roll</span><b>${lastRoll||'—'}</b></div>
+              <p>Buy a street. Build it up. Collect rent.</p>
+            </div>
+            ${board.map((t,i)=>`
+              <div class="tile ${t.type}${[0,5,10,15].includes(i)?' corner-tile':''}${i===p.pos?' current-tile':''}${t.owner!=null?' owned':''}" style="grid-area:${boardPosition(i)}" role="listitem">
+                ${t.group?`<span class="tile-stripe" style="background:${GROUP_COLORS[t.group]}"></span>`:''}
+                <span class="tile-name">${t.name}</span>
+                <span class="tile-meta">${t.type==='property'?(t.owner!=null?`${owner(t).name}${t.houses?' · '+t.houses+' 🏠':''}`:'$'+t.price):t.type==='tax'?'Fee $'+t.amount:t.type==='event'?'Event':t.type==='start'?'Start & collect':'Rest'}</span>
+                <span class="tile-tokens">${tilePlayers(i).map(pp=>`<span class="token" title="${pp.name}">${pp.avatar}</span>`).join('')}</span>
+              </div>`).join('')}
+          </div>
           <aside class="trade-side">
             <div class="side-panel players-panel">
               <h3>Players</h3>

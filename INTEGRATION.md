@@ -8,7 +8,7 @@ The host flow is the public `HVN games` page. A visitor opens the gallery and a 
 
 - Trigger: open the gallery and use a visible game link such as `?game=orbit`.
 - Input: Orbit uses keyboard, pointer, or touch controls. Comet uses keyboard arrows/WASD, Space/P pause, and visible touch direction buttons.
-- Authorized data: gameplay is anonymous. If the optional shared board is configured, only a player-chosen display name, score, game id, counters, submission id, and server timestamp are sent to Supabase. Google AdSense is a separate third-party request after the visitor chooses to allow ads.
+- Authorized data: gameplay is anonymous. If the optional shared board is configured, only a player-chosen display name, score, game id, counters, submission id, and server timestamp are sent to the HVN Games Google Apps Script web app, which writes to a private Google Sheet. Google AdSense is a separate third-party request after the visitor chooses to allow ads.
 
 ## Output and next action
 

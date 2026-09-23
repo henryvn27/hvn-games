@@ -1,8 +1,9 @@
 import "./styles.css";
 import { mountGoogleAdSlots, mountScoutlyFallback } from "./ads.js";
-import { createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlayerName } from "./play-intelligence.js";
+import { createGamePlaytimeTracker, createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, getPlaytimeSharing, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlaytimeSharing, setPlayerName } from "./play-intelligence.js";
 import orbitPolicyArtifact from "../../games/phasebound/orbit-policy.json";
 import { renderGameShelf, SHELF_GAMES } from "./shelf.js";
+import { hiddenGames, rankFeaturedGames } from "./featured-games.js";
 
 const app = document.querySelector("#app");
 const base = import.meta.env.BASE_URL;
@@ -27,40 +28,91 @@ if (params.get("game")) {
   renderGame().finally(() => {
     mountGoogleAdSlots();
     mountScoutlyFallback();
+    setupPlaytimePreferences();
   });
 } else {
   renderGallery();
   mountGoogleAdSlots();
   mountScoutlyFallback();
+  setupPlaytimePreferences();
+}
+
+function currentPlaytimeGameId() {
+  const route = params.get("game");
+  if (route === "orbit" || route === "phasebound") return "phasebound";
+  if ([TOWER_DEFENSE_ROUTE, COMET_ROUTE, SPACE_WARS_ROUTE].includes(route)) return route;
+  if (route === SHELF_ROUTE) return params.get("play") || "";
+  return "";
+}
+
+function setupPlaytimePreferences() {
+  if (document.querySelector("#playtime-sharing")) return;
+  const root = document.createElement("aside");
+  root.id = "playtime-sharing";
+  root.className = "playtime-sharing page-width";
+  root.setAttribute("aria-live", "polite");
+  const gameId = currentPlaytimeGameId();
+  let stop = () => {};
+  const updateTracker = () => {
+    stop();
+    stop = () => {};
+    if (getPlaytimeSharing() === "yes" && gameId) stop = createGamePlaytimeTracker(gameId);
+  };
+  const render = () => {
+    const choice = getPlaytimeSharing();
+    if (choice === "yes") {
+      root.innerHTML = `<p>Playtime sharing is on. Only the game and seconds in this visible tab are counted. <a href="${base}privacy.html">Details</a></p><button type="button" data-playtime="off">Turn off</button>`;
+    } else if (choice === "no") {
+      root.innerHTML = `<p>Playtime sharing is off. The home page uses shared totals and game requests to pick its ten. <a href="${base}privacy.html">Details</a></p><button type="button" data-playtime="on">Turn on</button>`;
+    } else {
+      root.innerHTML = `<div><strong>Help choose the games on the home page.</strong><p>Share time spent with each game in this visible tab. No name, score, or account is sent; totals are grouped by game.</p><a href="${base}privacy.html">Details</a></div><div><button type="button" data-playtime="on">Share playtime</button><button type="button" data-playtime="off">No thanks</button></div>`;
+    }
+  };
+  root.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-playtime]");
+    if (!button) return;
+    if (!setPlaytimeSharing(button.dataset.playtime === "on")) {
+      root.setAttribute("role", "status");
+      root.textContent = "Your browser couldn’t save that choice.";
+      return;
+    }
+    updateTracker();
+    render();
+  });
+  document.body.append(root);
+  updateTracker();
+  render();
 }
 
 function renderGallery() {
   document.body.className = "gallery-page";
   recordGalleryView();
-  const galleryGames = [
-    { number: "01", name: "Orbit", kind: "arcade", description: "Match your color. Dodge the red planets.", href: `${base}?game=${ORBIT_ROUTE}`, action: "play Orbit" },
-    { number: "02", name: "Space Tower Defense", kind: "strategy", description: "Build a lunar relay defense, then stop the crawlers before they reach it.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
-    ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 2).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
-  ];
+  const galleryGames = getGalleryGames();
+  if (params.get("view") === "hidden-games") {
+    renderHiddenGameCatalog(galleryGames);
+    return;
+  }
+  const initial = rankFeaturedGames(galleryGames, []);
   app.innerHTML = `
     <header class="site-header page-width">
       <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="#leaderboard">scores</a>
-        <a href="#all-games">games</a>
+        <a href="#featured-games">games</a>
         <a href="${base}?game=${SHELF_ROUTE}&amp;view=rewards">achievements</a>
       </nav>
     </header>
     <main>
       <section class="gallery-intro page-width" aria-labelledby="gallery-title">
-        <div><p class="shelf-kicker">the collection</p><h1 id="gallery-title">All games.</h1></div>
-        <p>Pick a game and start playing.</p>
+        <div><p class="shelf-kicker">the collection</p><h1 id="gallery-title">Games people stick with.</h1></div>
+        <p>Ten on the home page. The rest are still here if you want them.</p>
       </section>
       <div class="google-ad-slot page-width" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>
 
-      <section class="gallery-shelf page-width" id="all-games" aria-labelledby="all-games-title">
-        <div class="gallery-shelf-heading"><h2 id="all-games-title">Choose a game.</h2><p>Short games, right here.</p></div>
-        <div class="shelf-grid" aria-label="All HVN games">${galleryGames.map((game) => galleryGameCard(game)).join("")}</div>
+      <section class="gallery-shelf page-width" id="featured-games" aria-labelledby="featured-games-title">
+        <div class="gallery-shelf-heading"><h2 id="featured-games-title">Featured games</h2><p id="featured-games-note">A starter set while playtime totals build.</p></div>
+        <div class="shelf-grid" id="featured-games-grid" aria-label="Ten featured games">${initial.games.map((game, index) => galleryGameCard({ ...game, number: String(index + 1).padStart(2, "0") })).join("")}</div>
+        <a class="hidden-games-link" href="${base}?view=hidden-games">Browse the other five games</a>
       </section>
       <div class="google-ad-slot page-width" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>
 
@@ -79,18 +131,104 @@ function renderGallery() {
           <div id="leaderboard-list" aria-live="polite"></div>
         </div>
       </section>
-    </main>
-    <footer class="site-footer page-width"><span>HVN games</span><span>play something</span></footer>
+      </main>
+    <footer class="site-footer page-width"><span>HVN games</span><a href="${base}?view=hidden-games">browse hidden games</a></footer>
   `;
   setupCopyButtons();
   setupLeaderboard();
+  void refreshFeaturedGames(galleryGames);
 }
 
-function galleryGameCard(game) {
+function getGalleryGames() {
+  return [
+    { id: "phasebound", number: "01", name: "Orbit", kind: "arcade", description: "Match your color. Dodge the red planets.", href: `${base}?game=${ORBIT_ROUTE}`, action: "play Orbit" },
+    { id: "neon-bastion", number: "02", name: "Space Tower Defense", kind: "strategy", description: "Build a lunar relay defense, then stop the crawlers before they reach it.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
+    ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 2).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
+  ];
+}
+
+async function refreshFeaturedGames(catalog) {
+  const grid = document.querySelector("#featured-games-grid");
+  const note = document.querySelector("#featured-games-note");
+  if (!grid || !note) return;
+  const online = window.HVNOnlineLeaderboard;
+  if (!online?.configured || !online.getGameUsage) {
+    note.textContent = "Waiting for shared playtime totals; this starter set stays available for now.";
+    return;
+  }
+  const result = await online.getGameUsage();
+  if (result.status !== "online") {
+    note.textContent = "Couldn’t load shared playtime. Showing the starter set.";
+    return;
+  }
+  const ranking = rankFeaturedGames(catalog, result.games, 10, result.requests);
+  grid.innerHTML = ranking.games.map((game, index) => galleryGameCard({ ...game, number: String(index + 1).padStart(2, "0") })).join("");
+  note.textContent = ranking.ranked
+    ? "Sorted by playtime. A recent request can move a game onto the home page."
+    : "No shared playtime yet. This starter set stays up while totals build.";
+}
+
+function renderHiddenGameCatalog(catalog) {
+  document.body.className = "gallery-page hidden-games-page";
+  const initial = rankFeaturedGames(catalog, []);
+  const hidden = hiddenGames(catalog, initial.games);
+  app.innerHTML = `
+    <header class="site-header page-width"><a class="wordmark" href="${base}">HVN games</a><nav class="site-nav" aria-label="Game navigation"><a href="${base}">home</a></nav></header>
+    <main class="hidden-games-main page-width">
+      <div class="game-heading"><div><p class="game-index">${hidden.length} games</p><h1>Hidden games.</h1></div><p class="game-blurb">They’re off the home page, but the games still work. Pick one to play.</p></div>
+      <div class="shelf-grid" id="hidden-games-grid" aria-label="Hidden games">${hidden.map((game) => galleryGameCard(game, { requestFeature: true })).join("")}</div>
+      <p id="hidden-games-note" role="status" aria-live="polite"></p>
+    </main>
+    <footer class="site-footer page-width"><span>HVN games</span><a href="${base}">back to featured games</a></footer>
+  `;
+  const grid = document.querySelector("#hidden-games-grid");
+  const status = document.querySelector("#hidden-games-note");
+  grid?.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-feature-request]");
+    if (!button) return;
+    button.disabled = true;
+    button.textContent = "Sending…";
+    const gameId = button.dataset.featureRequest;
+    const response = await window.HVNOnlineLeaderboard?.requestGameFeature?.(gameId);
+    if (response?.status === "already-requested") {
+      button.textContent = "Already requested";
+      status.textContent = "You’ve already requested that game.";
+      return;
+    }
+    if (response?.status !== "online") {
+      button.disabled = false;
+      button.textContent = "Request a spot on the home page";
+      status.textContent = "Couldn’t send the request. Check your connection and try again.";
+      return;
+    }
+    const updated = await window.HVNOnlineLeaderboard.getGameUsage();
+    if (updated.status !== "online") {
+      status.textContent = "Request received. The featured games will update when totals load.";
+      return;
+    }
+    const next = rankFeaturedGames(catalog, updated.games, 10, updated.requests);
+    const isFeatured = next.games.some((game) => game.id === gameId);
+    grid.innerHTML = hiddenGames(catalog, next.games).map((game) => galleryGameCard(game, { requestFeature: true })).join("");
+    status.textContent = isFeatured ? "Added to the featured games on the home page." : "Request counted. It’ll move up as more players request it.";
+  });
+  const online = window.HVNOnlineLeaderboard;
+  if (!online?.configured || !online.getGameUsage) return;
+  void online.getGameUsage().then((result) => {
+    if (result.status !== "online") return;
+    const ranking = rankFeaturedGames(catalog, result.games, 10, result.requests);
+    const other = hiddenGames(catalog, ranking.games);
+    const grid = document.querySelector("#hidden-games-grid");
+    const note = document.querySelector("#hidden-games-note");
+    if (grid) grid.innerHTML = other.map((game) => galleryGameCard(game, { requestFeature: true })).join("");
+    if (note) note.textContent = ranking.ranked ? "The home-page set updates as shared playtime changes." : "The home page will sort these after playtime totals build.";
+  });
+}
+
+function galleryGameCard(game, options = {}) {
   return `<article class="shelf-card shelf-card-${game.kind}">
     <div class="shelf-card-top"><span>${game.number}</span><span>${game.kind}</span></div>
     <div><h2>${game.name}</h2><p>${game.description}</p></div>
-    <a class="button button-secondary" href="${game.href}">${game.action}</a>
+    <div class="shelf-card-actions"><a class="button button-secondary" href="${game.href}">${game.action}</a>${options.requestFeature ? `<button class="hidden-game-request" type="button" data-feature-request="${game.id}">Request a spot on the home page</button>` : ""}</div>
   </article>`;
 }
 

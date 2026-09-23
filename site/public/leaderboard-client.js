@@ -4,6 +4,7 @@ const config = window.HVN_LEADERBOARD_CONFIG || {};
 const baseUrl = String(config.endpoint || "");
 const configured = Boolean(baseUrl);
 const MIGRATION_KEY = "hvn-games:leaderboard-migration:v1";
+const FEATURE_REQUEST_KEY = "hvn-games:feature-requests:v1";
 const REQUEST_TIMEOUT_MS = 10000;
 const PLACEHOLDER_NAMES = new Set(["YOU"]);
 function cleanName(value) {
@@ -44,6 +45,47 @@ function get(gameId, options) {
     .then((payload) => ({ status: "online", entries: (payload.entries || []).map(normalize).filter((entry) => entry.name) }));
   return read()
     .catch((firstError) => wait(800).then(read).catch((secondError) => ({ status: "unavailable", entries: [], error: secondError || firstError })));
+}
+function getGameUsage() {
+  if (!configured) return Promise.resolve({ status: "unconfigured", games: [] });
+  return request("?action=game_usage")
+    .then((response) => response.json())
+    .then((payload) => payload && payload.ok
+      ? ({ status: "online", games: Array.isArray(payload.games) ? payload.games : [], requests: Array.isArray(payload.requests) ? payload.requests : [] })
+      : ({ status: "unavailable", games: [], requests: [] }))
+    .catch((error) => ({ status: "unavailable", games: [], requests: [], error }));
+}
+function reportPlaytime(payload) {
+  if (!configured) return Promise.resolve({ status: "unconfigured", ok: false });
+  const gameId = String(payload && payload.gameId || "").slice(0, 40);
+  const seconds = Math.max(0, Math.round(Number(payload && payload.seconds) || 0));
+  const id = String(payload && payload.submissionId || submissionId()).slice(0, 80);
+  if (!gameId || seconds < 1 || seconds > 300 || id.length < 8) return Promise.resolve({ status: "invalid", ok: false });
+  return request("", { method: "POST", body: JSON.stringify({ action: "playtime", gameId, seconds, submissionId: id }), keepalive: Boolean(payload.keepalive) })
+    .then((response) => response.json())
+    .then((result) => result && result.ok ? ({ status: "online", ok: true, duplicate: Boolean(result.duplicate) }) : ({ status: "unavailable", ok: false }))
+    .catch((error) => ({ status: "unavailable", ok: false, error }));
+}
+function requestGameFeature(gameId, requestId) {
+  if (!configured) return Promise.resolve({ status: "unconfigured", ok: false });
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(FEATURE_REQUEST_KEY) || "{}"); } catch { saved = {}; }
+  const key = String(gameId || "").slice(0, 40);
+  if (!requestId && saved[key] && saved[key].done) return Promise.resolve({ status: "already-requested", ok: true });
+  const id = String(requestId || (saved[key] && saved[key].id) || submissionId()).slice(0, 80);
+  if (!gameId || id.length < 8) return Promise.resolve({ status: "invalid", ok: false });
+  if (!requestId) {
+    saved[key] = { id, done: false };
+    try { localStorage.setItem(FEATURE_REQUEST_KEY, JSON.stringify(saved)); } catch { return Promise.resolve({ status: "storage-unavailable", ok: false }); }
+  }
+  return request("", { method: "POST", body: JSON.stringify({ action: "feature_request", gameId: key, submissionId: id }) })
+    .then((response) => response.json())
+    .then((result) => {
+      if (!result || !result.ok) return { status: "unavailable", ok: false };
+      if (!requestId) { saved[key] = { id, done: true }; try { localStorage.setItem(FEATURE_REQUEST_KEY, JSON.stringify(saved)); } catch { /* Server accepted the request. */ } }
+      return { status: "online", ok: true, duplicate: Boolean(result.duplicate) };
+    })
+    .catch((error) => ({ status: "unavailable", ok: false, error }));
 }
 function submit(gameId, payload) {
   if (!configured) return Promise.resolve({ status: "unconfigured", ok: false });
@@ -94,5 +136,5 @@ async function migrate(entriesByGame) {
   try { window.localStorage.setItem(MIGRATION_KEY, JSON.stringify(state)); } catch { /* retry later */ }
   return { status: pending ? "partial" : "online", migrated, pending };
 }
-window.HVNOnlineLeaderboard = Object.freeze({ configured, get, submit, migrate, submissionId: migrationId, usableName });
+window.HVNOnlineLeaderboard = Object.freeze({ configured, get, getGameUsage, reportPlaytime, requestGameFeature, submit, migrate, submissionId: migrationId, usableName });
 })();

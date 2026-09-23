@@ -14,6 +14,8 @@ const required = [
   "site/public/assets/scoutly-house-ad.png",
   "site/src/styles.css",
   "site/src/play-intelligence.js",
+  "site/src/featured-games.js",
+  "site/src/featured-games.test.mjs",
   "site/src/shelf.js",
   "site/public/shelf/embed.html",
   "site/public/shelf/app.js",
@@ -48,15 +50,15 @@ if (!html.includes("src/main.js")) throw new Error("Gallery entry point is not w
 if (!html.includes('name="google-adsense-account" content="ca-pub-1123012671033143"')) throw new Error("AdSense ownership meta tag is missing");
 
 const main = readFileSync(join(root, "site/src/main.js"), "utf8");
-for (const marker of ["phasebound", "ORBIT_ROUTE", "ORBIT_RL_ROUTE", "SHELF_ROUTE", "TOWER_DEFENSE_ROUTE", "COMET_ROUTE", "SPACE_WARS_ROUTE", "LEADERBOARD_GAMES", "id: \"2048\", label: \"2048\"", "leaderboard-game", "renderRLWriteup", "renderGameShelf", "renderComet", "renderSpaceWars", "startSpaceWars", "reinforcement learning writeup", "?game=${ORBIT_ROUTE}", "?game=${TOWER_DEFENSE_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "saved automatically", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Match your color", "All games.", "galleryGameCard", "Space Wars", "Space Tower Defense", "all-games", "SHELF_GAMES", "data-google-ad-slot", "mountGoogleAdSlots"]) {
+for (const marker of ["phasebound", "ORBIT_ROUTE", "ORBIT_RL_ROUTE", "SHELF_ROUTE", "TOWER_DEFENSE_ROUTE", "COMET_ROUTE", "SPACE_WARS_ROUTE", "LEADERBOARD_GAMES", "id: \"2048\", label: \"2048\"", "leaderboard-game", "renderRLWriteup", "renderGameShelf", "renderComet", "renderSpaceWars", "startSpaceWars", "reinforcement learning writeup", "?game=${ORBIT_ROUTE}", "?game=${TOWER_DEFENSE_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "saved automatically", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Match your color", "Games people stick with.", "rankFeaturedGames", "hidden-games", "getPlaytimeSharing", "galleryGameCard", "Space Wars", "Space Tower Defense", "SHELF_GAMES", "data-google-ad-slot", "mountGoogleAdSlots"]) {
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
 }
 const leaderboardClient = readFileSync(join(root, "site/public/leaderboard-client.js"), "utf8");
-for (const marker of ["HVNOnlineLeaderboard", "migrate", "submissionId", "unconfigured", "unavailable"]) {
+for (const marker of ["HVNOnlineLeaderboard", "migrate", "submissionId", "unconfigured", "unavailable", "getGameUsage", "reportPlaytime", "requestGameFeature"]) {
   if (!leaderboardClient.includes(marker)) throw new Error(`Online leaderboard client is missing marker: ${marker}`);
 }
 const leaderboardScript = readFileSync(join(root, "apps-script/Code.gs"), "utf8");
-for (const marker of ["doGet", "doPost", "SpreadsheetApp.create", "LockService", "submissionId", "MAX_ROWS"]) {
+for (const marker of ["doGet", "doPost", "SpreadsheetApp.create", "LockService", "submissionId", "MAX_ROWS", "game_usage", "playtimePost_", "featureRequestPost_"]) {
   if (!leaderboardScript.includes(marker)) throw new Error(`Leaderboard backend is missing marker: ${marker}`);
 }
 const gallerySource = main.slice(0, main.indexOf("async function renderRLWriteup"));

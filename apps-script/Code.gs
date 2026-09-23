@@ -1,5 +1,9 @@
 const MAX_ROWS = 5000;
 const SHEET_NAME = "Scores";
+const USAGE_TOTALS_SHEET = "Playtime totals";
+const USAGE_EVENTS_SHEET = "Playtime receipts";
+const FEATURE_REQUESTS_SHEET = "Feature requests";
+const MAX_PLAYTIME_EVENT = 300;
 
 function json_(value) {
   return ContentService.createTextOutput(JSON.stringify(value)).setMimeType(ContentService.MimeType.JSON);
@@ -19,7 +23,7 @@ function number_(value, max) {
   return Number.isFinite(number) && number >= 0 && number <= max ? Math.round(number) : null;
 }
 
-function sheet_() {
+function spreadsheet_() {
   const properties = PropertiesService.getScriptProperties();
   let spreadsheetId = properties.getProperty("LEADERBOARD_SHEET_ID");
   if (!spreadsheetId) {
@@ -30,7 +34,21 @@ function sheet_() {
     properties.setProperty("LEADERBOARD_SHEET_ID", spreadsheet.getId());
     spreadsheetId = spreadsheet.getId();
   }
-  const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+  return SpreadsheetApp.openById(spreadsheetId);
+}
+
+function namedSheet_(name, headers) {
+  const spreadsheet = spreadsheet_();
+  let sheet = spreadsheet.getSheetByName(name);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(name);
+    sheet.appendRow(headers);
+  }
+  return sheet;
+}
+
+function sheet_() {
+  const spreadsheet = spreadsheet_();
   return spreadsheet.getSheetByName(SHEET_NAME) || spreadsheet.getSheets()[0];
 }
 
@@ -43,8 +61,39 @@ function rows_() {
   }));
 }
 
+function gameUsage_() {
+  const spreadsheet = spreadsheet_();
+  const sheet = spreadsheet.getSheetByName(USAGE_TOTALS_SHEET);
+  const values = sheet ? sheet.getDataRange().getValues() : [];
+  const games = values.slice(1).filter(row => row[0]).map(row => ({
+    gameId: String(row[0]), seconds: Number(row[1]) || 0,
+  })).sort((a, b) => b.seconds - a.seconds || a.gameId.localeCompare(b.gameId));
+  const requestSheet = spreadsheet.getSheetByName(FEATURE_REQUESTS_SHEET);
+  const requestCounts = {};
+  (requestSheet ? requestSheet.getDataRange().getValues().slice(1) : []).forEach(row => {
+    if (row[0]) {
+      const gameId = String(row[0]);
+      const createdAt = row[2] instanceof Date ? row[2].toISOString() : String(row[2] || "");
+      requestCounts[gameId] ||= { gameId, count: 0, lastRequestedAt: "" };
+      requestCounts[gameId].count += 1;
+      if (createdAt > requestCounts[gameId].lastRequestedAt) requestCounts[gameId].lastRequestedAt = createdAt;
+    }
+  });
+  const requests = Object.values(requestCounts).sort((a, b) => b.lastRequestedAt.localeCompare(a.lastRequestedAt));
+  return { games, requests };
+}
+
+function eventExists_(sheet, id, column) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return false;
+  return sheet.getRange(2, column, lastRow - 1, 1).getValues().some(row => String(row[0]) === id);
+}
+
 function doGet(event) {
   try {
+    if (event && event.parameter && event.parameter.action === "game_usage") {
+      return json_({ ok: true, ...gameUsage_() });
+    }
     const gameId = cleanGame_(event && event.parameter && event.parameter.game_id);
     if (!gameId) return json_({ ok: false, error: "game_id is required" });
     const order = event.parameter.order === "asc" ? "asc" : "desc";
@@ -59,11 +108,45 @@ function doGet(event) {
   }
 }
 
+function playtimePost_(body) {
+  const gameId = cleanGame_(body.gameId);
+  const seconds = number_(body.seconds, MAX_PLAYTIME_EVENT);
+  const submissionId = String(body.submissionId || "").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80);
+  if (!gameId || seconds === null || seconds < 1 || submissionId.length < 8) return json_({ ok: false, error: "invalid playtime" });
+  const receipts = namedSheet_(USAGE_EVENTS_SHEET, ["submissionId", "gameId", "seconds", "createdAt"]);
+  if (eventExists_(receipts, submissionId, 1)) return json_({ ok: true, duplicate: true });
+  receipts.appendRow([submissionId, gameId, seconds, new Date()]);
+  const totals = namedSheet_(USAGE_TOTALS_SHEET, ["gameId", "seconds", "updatedAt"]);
+  const rows = totals.getDataRange().getValues();
+  const rowIndex = rows.findIndex((row, index) => index > 0 && String(row[0]) === gameId);
+  if (rowIndex < 0) totals.appendRow([gameId, seconds, new Date()]);
+  else {
+    const totalCell = totals.getRange(rowIndex + 1, 2);
+    totalCell.setValue((Number(totalCell.getValue()) || 0) + seconds);
+    totals.getRange(rowIndex + 1, 3).setValue(new Date());
+  }
+  if (receipts.getLastRow() > MAX_ROWS + 1) receipts.deleteRows(2, receipts.getLastRow() - MAX_ROWS - 1);
+  return json_({ ok: true, duplicate: false });
+}
+
+function featureRequestPost_(body) {
+  const gameId = cleanGame_(body.gameId);
+  const requestId = String(body.submissionId || "").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80);
+  if (!gameId || requestId.length < 8) return json_({ ok: false, error: "invalid feature request" });
+  const requests = namedSheet_(FEATURE_REQUESTS_SHEET, ["gameId", "requestId", "createdAt"]);
+  if (eventExists_(requests, requestId, 2)) return json_({ ok: true, duplicate: true });
+  requests.appendRow([gameId, requestId, new Date()]);
+  if (requests.getLastRow() > MAX_ROWS + 1) requests.deleteRows(2, requests.getLastRow() - MAX_ROWS - 1);
+  return json_({ ok: true, duplicate: false });
+}
+
 function doPost(event) {
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
     const body = JSON.parse(event && event.postData && event.postData.contents || "{}");
+    if (body.action === "playtime") return playtimePost_(body);
+    if (body.action === "feature_request") return featureRequestPost_(body);
     const gameId = cleanGame_(body.gameId);
     const name = cleanName_(body.name);
     const score = number_(body.score, 1000000000);

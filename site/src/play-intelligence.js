@@ -1,5 +1,7 @@
 const STORAGE_KEY = "hvn-games:play-intelligence:v1";
 const MAX_FEEDBACK = 60;
+const PLAYTIME_SHARING_KEY = "hvn-games:share-playtime:v1";
+const PLAYTIME_QUEUE_KEY = "hvn-games:playtime-pending:v1";
 
 function blankData() {
   return { games: {}, experiments: {}, feedback: [], leaderboards: {}, playerName: "" };
@@ -128,6 +130,93 @@ export function resetPlayReport() {
   } catch {
     // Nothing to do when storage is unavailable.
   }
+}
+
+export function getPlaytimeSharing() {
+  try { return window.localStorage.getItem(PLAYTIME_SHARING_KEY); } catch { return ""; }
+}
+
+export function setPlaytimeSharing(enabled) {
+  try {
+    window.localStorage.setItem(PLAYTIME_SHARING_KEY, enabled ? "yes" : "no");
+    if (!enabled) window.localStorage.removeItem(PLAYTIME_QUEUE_KEY);
+  } catch { return false; }
+  window.dispatchEvent(new CustomEvent("hvn-playtime-consent-changed", { detail: { enabled: Boolean(enabled) } }));
+  return true;
+}
+
+function readPendingPlaytime() {
+  try {
+    const items = JSON.parse(window.localStorage.getItem(PLAYTIME_QUEUE_KEY) || "[]");
+    return Array.isArray(items) ? items : [];
+  } catch { return []; }
+}
+
+function writePendingPlaytime(items) {
+  try { window.localStorage.setItem(PLAYTIME_QUEUE_KEY, JSON.stringify(items.slice(-200))); } catch { /* Play continues without storage. */ }
+}
+
+function randomReceipt() { return `${Date.now()}-${Math.random().toString(16).slice(2)}`; }
+
+async function flushPlaytimeQueue() {
+  if (getPlaytimeSharing() !== "yes") return;
+  const online = window.HVNOnlineLeaderboard;
+  if (!online?.configured || !online.reportPlaytime) return;
+  const remaining = readPendingPlaytime();
+  for (let index = 0; index < remaining.length; index += 1) {
+    const result = await online.reportPlaytime(remaining[index]);
+    if (result.status === "online") remaining[index] = null;
+    else break;
+  }
+  writePendingPlaytime(remaining.filter(Boolean));
+}
+
+export function createGamePlaytimeTracker(gameId) {
+  if (getPlaytimeSharing() !== "yes") return () => {};
+  let active = document.visibilityState === "visible";
+  let lastTick = Date.now();
+  let pendingMs = 0;
+  const tick = () => {
+    const now = Date.now();
+    if (active) pendingMs += Math.min(Math.max(now - lastTick, 0), 10000);
+    lastTick = now;
+  };
+  const enqueue = () => {
+    const seconds = Math.min(300, Math.floor(pendingMs / 1000));
+    if (seconds < 1) return;
+    pendingMs -= seconds * 1000;
+    const items = readPendingPlaytime();
+    items.push({ gameId, seconds, submissionId: randomReceipt() });
+    writePendingPlaytime(items);
+    void flushPlaytimeQueue();
+  };
+  let scheduleId = 0;
+  let stopped = false;
+  const schedule = () => {
+    if (stopped) return;
+    scheduleId = window.setTimeout(() => {
+      tick();
+      if (pendingMs >= 15000) enqueue();
+      schedule();
+    }, 5000);
+  };
+  const onVisibility = () => {
+    tick();
+    active = document.visibilityState === "visible";
+    if (!active) enqueue();
+  };
+  const onPageHide = () => { tick(); enqueue(); };
+  document.addEventListener("visibilitychange", onVisibility);
+  window.addEventListener("pagehide", onPageHide);
+  window.addEventListener("online", flushPlaytimeQueue);
+  void flushPlaytimeQueue();
+  schedule();
+  return () => {
+    tick(); if (getPlaytimeSharing() === "yes") enqueue(); stopped = true; window.clearTimeout(scheduleId);
+    document.removeEventListener("visibilitychange", onVisibility);
+    window.removeEventListener("pagehide", onPageHide);
+    window.removeEventListener("online", flushPlaytimeQueue);
+  };
 }
 
 function leaderboardEntries(data, gameId) {

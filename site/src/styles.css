@@ -1325,3 +1325,48 @@ body.shelf-native-mode.shelf-native-driftlock .shelf-game-heading .game-blurb { 
   body.shelf-native-mode.shelf-native-driftlock .shelf-game-label,
   body.shelf-native-mode.shelf-native-driftlock .shelf-game-heading .game-blurb { color: #666962; }
 }
+
+.playtime-sharing {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-block: 22px;
+  padding-block: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .78rem;
+}
+.playtime-sharing > div:first-child { max-width: 62ch; }
+.playtime-sharing strong { display: block; margin-bottom: 4px; color: var(--ink); font-size: .86rem; }
+.playtime-sharing p { margin: 0; }
+.playtime-sharing a { text-decoration: underline; text-underline-offset: 3px; }
+.playtime-sharing > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
+.playtime-sharing button {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.playtime-sharing button:first-child { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+.playtime-sharing button:focus-visible, .hidden-games-link:focus-visible { outline: 3px solid var(--accent-strong); outline-offset: 3px; }
+.hidden-games-link { display: inline-flex; margin-top: 22px; padding-bottom: 4px; border-bottom: 1px solid var(--ink); font-size: .86rem; font-weight: 650; }
+.hidden-games-main { min-height: 58vh; padding-block: 60px 76px; }
+.hidden-games-main .game-heading { display: flex; align-items: end; justify-content: space-between; gap: 28px; margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.hidden-games-main .game-index { color: var(--accent-strong); font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.hidden-games-main h1 { margin: 0; font-size: clamp(3rem, 7vw, 5.6rem); }
+.hidden-games-main .game-blurb { max-width: 32ch; margin: 0; color: var(--muted); }
+.shelf-card-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.hidden-game-request { padding: 3px 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--muted); font: inherit; font-size: .78rem; text-align: left; cursor: pointer; }
+.hidden-game-request:hover { color: var(--ink); border-color: var(--ink); }
+.hidden-game-request:focus-visible { outline: 3px solid var(--accent-strong); outline-offset: 3px; }
+.hidden-game-request:disabled { opacity: .6; cursor: wait; }
+@media (max-width: 640px) {
+  .playtime-sharing { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .playtime-sharing > div:last-child { width: 100%; }
+  .playtime-sharing button { flex: 1; }
+  .hidden-games-main { padding-block: 38px 56px; }
+  .hidden-games-main .game-heading { align-items: flex-start; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+}

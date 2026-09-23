@@ -44,6 +44,11 @@ const required = [
   "games/invaders/simulation.test.mjs",
   "games/invaders/invaders.css",
   "games/invaders/README.md",
+  "games/hex-stack/runtime.mjs",
+  "games/hex-stack/simulation.js",
+  "games/hex-stack/simulation.test.mjs",
+  "games/hex-stack/hex-stack.css",
+  "games/hex-stack/README.md",
   "games/phasebound/orbit-policy.js",
   "games/phasebound/orbit-policy.json",
   "tools/orbit_rl/orbit_env.py",
@@ -61,7 +66,7 @@ if (!html.includes("src/main.js")) throw new Error("Gallery entry point is not w
 if (!html.includes('name="google-adsense-account" content="ca-pub-1123012671033143"')) throw new Error("AdSense ownership meta tag is missing");
 
 const main = readFileSync(join(root, "site/src/main.js"), "utf8");
-for (const marker of ["phasebound", "ORBIT_ROUTE", "ORBIT_RL_ROUTE", "SHELF_ROUTE", "TOWER_DEFENSE_ROUTE", "COMET_ROUTE", "SPACE_WARS_ROUTE", "LEADERBOARD_GAMES", "id: \"2048\", label: \"2048\"", "leaderboard-game", "renderRLWriteup", "renderGameShelf", "renderComet", "renderSpaceWars", "startSpaceWars", "reinforcement learning writeup", "?game=${ORBIT_ROUTE}", "?game=${TOWER_DEFENSE_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "saved automatically", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Match your color", "id=\"gallery-title\">Games.", "hiddenGamesLabel", "rankFeaturedGames", "hidden-games", "getPlaytimeSharing", "galleryGameCard", "Space Wars", "Space Tower Defense", "SHELF_GAMES", "data-google-ad-slot", "mountGoogleAdSlots"]) {
+for (const marker of ["phasebound", "ORBIT_ROUTE", "ORBIT_RL_ROUTE", "SHELF_ROUTE", "TOWER_DEFENSE_ROUTE", "COMET_ROUTE", "SPACE_WARS_ROUTE", "LEADERBOARD_GAMES", "id: \"2048\", label: \"2048\"", "id: \"hex-stack\", label: \"Hex Stack\"", "leaderboard-game", "renderRLWriteup", "renderGameShelf", "renderComet", "renderSpaceWars", "startSpaceWars", "reinforcement learning writeup", "?game=${ORBIT_ROUTE}", "?game=${TOWER_DEFENSE_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "saved automatically", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Match your color", "id=\"gallery-title\">Games.", "hiddenGamesLabel", "rankFeaturedGames", "hidden-games", "getPlaytimeSharing", "galleryGameCard", "Space Wars", "Space Tower Defense", "SHELF_GAMES", "data-google-ad-slot", "mountGoogleAdSlots"]) {
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
 }
 const leaderboardClient = readFileSync(join(root, "site/public/leaderboard-client.js"), "utf8");
@@ -105,19 +110,20 @@ for (const marker of ["startComet", "Comet", "setDirection", "spawnFood", "maybe
 }
 
 const shelf = readFileSync(join(root, "site/src/shelf.js"), "utf8");
-for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "driftlock", "2048", "invaders", "shelf-native-host", "mountNativeShelfGame", "loadNativeShelfRuntime", "renderNativeShelfRewards", "view=rewards", "Achievements", "Other HVN games"]) {
+for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "driftlock", "2048", "invaders", "hex-stack", "shelf-native-host", "mountNativeShelfGame", "loadNativeShelfRuntime", "renderNativeShelfRewards", "view=rewards", "Achievements", "Other HVN games"]) {
   if (!shelf.includes(marker)) throw new Error(`Shelf is missing game or route marker: ${marker}`);
 }
 if (!shelf.includes('import("../../games/driftlock/driftlock.js")')) throw new Error("Driftlock is not connected to the native shelf runtime");
 if (!shelf.includes('import("../../games/twentyfortyeight/game.js")')) throw new Error("2048 is not connected to the native shelf runtime");
 if (!shelf.includes('import("../../games/dockside/dockside.js")')) throw new Error("Dockside is not connected to the native shelf runtime");
 if (!shelf.includes('import("../../games/invaders/invaders.js")')) throw new Error("Invaders is not connected to the native shelf runtime");
-if (!shelf.includes('id: "dockside", number: "14"') || !shelf.includes('id: "invaders", number: "15"')) throw new Error("The latest shelf games are missing from the collection");
+if (!shelf.includes('import("../../games/hex-stack/runtime.mjs")')) throw new Error("Hex Stack is not connected to the native shelf runtime");
+if (!shelf.includes('id: "dockside", number: "14"') || !shelf.includes('id: "invaders", number: "15"') || !shelf.includes('id: "hex-stack", number: "16"')) throw new Error("The latest shelf games are missing from the collection");
 if (!shelf.includes('await loadShelfRewards(base)')) throw new Error("Native games do not load the shared achievements store");
 if (shelf.includes('name: "Garden Snake"')) throw new Error("Shelf still uses the old Snake name");
 if (shelf.includes("<iframe")) throw new Error("Game Shelf still uses a nested iframe");
 const rewards = readFileSync(join(root, "site/public/shelf/rewards.js"), "utf8");
-for (const marker of ["'driftlock'", "'2048'", "'dockside'", "'invaders'", "Try all ${GAME_IDS.length} games.", "dockside_run", "invaders_wave"]) {
+for (const marker of ["'driftlock'", "'2048'", "'dockside'", "'invaders'", "'hex-stack'", "Try all ${GAME_IDS.length} games.", "dockside_run", "invaders_wave"]) {
   if (!rewards.includes(marker)) throw new Error(`Achievements are missing active shelf game: ${marker}`);
 }
 

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { blankBoard, canMove, moveBoard, newGame, slideLine, spawnTile, stepGame } from "./game.js";
 import { SHELF_GAMES } from "../../site/src/shelf.js";
 
-assert.equal(SHELF_GAMES.length, 13);
+assert.equal(SHELF_GAMES.length, 14);
 assert.ok(SHELF_GAMES.some((game) => game.id === "2048"), "2048 is reachable from the shared shelf");
 assert.equal(new Set(SHELF_GAMES.map((game) => game.id)).size, SHELF_GAMES.length, "shelf routes are unique");
 

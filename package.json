@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "test": "node scripts/smoke.mjs && node games/driftlock/simulation.test.mjs && node games/twentyfortyeight/game.test.mjs && node site/src/featured-games.test.mjs && node apps-script/Code.test.mjs"
+    "test": "node scripts/smoke.mjs && node games/driftlock/simulation.test.mjs && node games/twentyfortyeight/game.test.mjs && node games/dockside/simulation.test.mjs && node site/src/featured-games.test.mjs && node apps-script/Code.test.mjs"
   },
   "dependencies": {
     "phaser": "^3.90.0",

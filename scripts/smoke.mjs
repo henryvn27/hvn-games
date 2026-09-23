@@ -33,6 +33,11 @@ const required = [
   "games/twentyfortyeight/game.js",
   "games/twentyfortyeight/game.test.mjs",
   "games/twentyfortyeight/README.md",
+  "games/dockside/dockside.js",
+  "games/dockside/dockside.css",
+  "games/dockside/simulation.js",
+  "games/dockside/simulation.test.mjs",
+  "games/dockside/README.md",
   "games/phasebound/orbit-policy.js",
   "games/phasebound/orbit-policy.json",
   "tools/orbit_rl/orbit_env.py",
@@ -99,11 +104,13 @@ for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "
 }
 if (!shelf.includes('import("../../games/driftlock/driftlock.js")')) throw new Error("Driftlock is not connected to the native shelf runtime");
 if (!shelf.includes('import("../../games/twentyfortyeight/game.js")')) throw new Error("2048 is not connected to the native shelf runtime");
+if (!shelf.includes('import("../../games/dockside/dockside.js")')) throw new Error("Dockside is not connected to the native shelf runtime");
+if (!shelf.includes('id: "dockside", number: "14"')) throw new Error("Dockside is missing from the shelf collection");
 if (!shelf.includes('await loadShelfRewards(base)')) throw new Error("Native games do not load the shared achievements store");
 if (shelf.includes('name: "Garden Snake"')) throw new Error("Shelf still uses the old Snake name");
 if (shelf.includes("<iframe")) throw new Error("Game Shelf still uses a nested iframe");
 const rewards = readFileSync(join(root, "site/public/shelf/rewards.js"), "utf8");
-for (const marker of ["'driftlock'", "'2048'", "Try all 13 games."]) {
+for (const marker of ["'driftlock'", "'2048'", "'dockside'", "Try all ${GAME_IDS.length} games.", "dockside_run"]) {
   if (!rewards.includes(marker)) throw new Error(`Achievements are missing active shelf game: ${marker}`);
 }
 

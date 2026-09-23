@@ -22,6 +22,7 @@ const LEADERBOARD_GAMES = [
   { id: "neon-bastion", label: "Space Tower Defense" },
   { id: "reaction", label: "Reaction Test" },
   { id: "2048", label: "2048" },
+  { id: "dockside", label: "Dockside" },
 ];
 
 if (params.get("game")) {

@@ -12,6 +12,7 @@ export const SHELF_GAMES = [
   { id: "trade", number: "11", name: "City Trader", kind: "board", description: "Buy streets, build them up, and outlast the other players." },
   { id: "driftlock", number: "12", name: "Driftlock", kind: "arcade", description: "Turn gravity, gather three signal cells, and reach the airlock." },
   { id: "2048", number: "13", name: "2048", kind: "puzzle", description: "Slide matching tiles together to make 2048." },
+  { id: "dockside", number: "14", name: "Dockside", kind: "arcade", description: "Time the crane. Stack freight as high as you can." },
 ];
 
 // Kept out of the collection, but still reachable for old bookmarks and saved runs.
@@ -495,7 +496,7 @@ function applyNativeShelfOverrides() {
 }
 
 async function mountNativeShelfGame({ base, gameId }) {
-  if (gameId === "2048" || gameId === "driftlock") {
+  if (["2048", "driftlock", "dockside"].includes(gameId)) {
     applyNativeShelfOverrides();
     await loadShelfRewards(base);
     window.Shelf?.record("game_play", { id: gameId });
@@ -507,6 +508,10 @@ async function mountNativeShelfGame({ base, gameId }) {
   if (gameId === "driftlock") {
     const { mountDriftlock } = await import("../../games/driftlock/driftlock.js");
     return mountDriftlock(document.querySelector("#shelf-native-host"));
+  }
+  if (gameId === "dockside") {
+    const { mountDockside } = await import("../../games/dockside/dockside.js");
+    return mountDockside(document.querySelector("#shelf-native-host"));
   }
   await loadNativeShelfRuntime({ base, gameId });
 

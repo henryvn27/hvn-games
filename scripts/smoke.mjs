@@ -66,6 +66,12 @@ const required = [
   "games/tidepool/tidepool.css",
   "games/tidepool/README.md",
   "games/tidepool/INTEGRATION.md",
+  "games/chess/runtime.js",
+  "games/chess/rules.js",
+  "games/chess/rules.test.mjs",
+  "games/chess/chess.css",
+  "games/chess/README.md",
+  "games/chess/LICENSE.chess.js.txt",
   "games/phasebound/orbit-policy.js",
   "games/phasebound/orbit-policy.json",
   "tools/orbit_rl/orbit_env.py",
@@ -83,7 +89,7 @@ if (!html.includes("src/main.js")) throw new Error("Gallery entry point is not w
 if (!html.includes('name="google-adsense-account" content="ca-pub-1123012671033143"')) throw new Error("AdSense ownership meta tag is missing");
 
 const main = readFileSync(join(root, "site/src/main.js"), "utf8");
-for (const marker of ["phasebound", "ORBIT_ROUTE", "ORBIT_RL_ROUTE", "SHELF_ROUTE", "TOWER_DEFENSE_ROUTE", "COMET_ROUTE", "SPACE_WARS_ROUTE", "LEADERBOARD_GAMES", "id: \"2048\", label: \"2048\"", "id: \"hex-stack\", label: \"Hex Stack\"", "id: \"tidepool\", label: \"Tidepool\"", "leaderboard-game", "renderRLWriteup", "renderGameShelf", "renderComet", "renderSpaceWars", "startSpaceWars", "reinforcement learning writeup", "?game=${ORBIT_ROUTE}", "?game=${TOWER_DEFENSE_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "saved automatically", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Match your color", "id=\"gallery-title\">Games.", "hiddenGamesLabel", "rankFeaturedGames", "hidden-games", "getPlaytimeSharing", "galleryGameCard", "Space Wars", "Space Tower Defense", "SHELF_GAMES", "data-google-ad-slot", "mountGoogleAdSlots"]) {
+for (const marker of ["phasebound", "ORBIT_ROUTE", "ORBIT_RL_ROUTE", "SHELF_ROUTE", "TOWER_DEFENSE_ROUTE", "COMET_ROUTE", "SPACE_WARS_ROUTE", "LEADERBOARD_GAMES", "id: \"2048\", label: \"2048\"", "id: \"hex-stack\", label: \"Hex Stack\"", "id: \"tidepool\", label: \"Tidepool\"", "id: \"chess\", label: \"Chess\"", "leaderboard-game", "renderRLWriteup", "renderGameShelf", "renderComet", "renderSpaceWars", "startSpaceWars", "reinforcement learning writeup", "?game=${ORBIT_ROUTE}", "?game=${TOWER_DEFENSE_ROUTE}", "copy", "play-intelligence", "overlay-detail", "score-save", "saved automatically", "first-play-tutorial", "tutorial-step", "tutorial-title", "tutorial-copy", "tutorial-status", "tutorial-swatch", "tutorial-start", "tutorialActive", "hud-phase", "hud-lives", "hud-streak", "streak", "leaderboard", "Match your color", "id=\"gallery-title\">Games.", "hiddenGamesLabel", "rankFeaturedGames", "hidden-games", "getPlaytimeSharing", "galleryGameCard", "Space Wars", "Space Tower Defense", "SHELF_GAMES", "data-google-ad-slot", "mountGoogleAdSlots"]) {
   if (!main.includes(marker)) throw new Error(`Gallery is missing marker: ${marker}`);
 }
 const leaderboardClient = readFileSync(join(root, "site/public/leaderboard-client.js"), "utf8");

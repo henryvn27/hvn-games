@@ -18,6 +18,7 @@ export const SHELF_GAMES = [
   { id: "minesweeper", number: "17", name: "Minesweeper", kind: "puzzle", description: "Read the numbers, mark the mines, and clear the board. A guess can cost the round if a safe square is certain." },
   { id: "block-drop", number: "18", name: "Block Drop", kind: "puzzle", description: "Place the falling pieces. Clear full rows before the stack reaches the top." },
   { id: "tidepool", number: "19", name: "Tidepool", kind: "arcade", description: "Shape a shore, plant kelp, and keep it wet through three tides." },
+  { id: "chess", number: "20", name: "Chess", kind: "board", description: "Win a match to face a sharper opponent. How long can you stay at the table?" },
 ];
 
 // Kept out of the collection, but still reachable for old bookmarks and saved runs.
@@ -70,7 +71,7 @@ export async function renderGameShelf({ app, base }) {
 
 const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
 const SHELF_SCRIPTS = ["word-list.js", "nyt-wordle-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
-const SHELF_ASSET_VERSION = "tidepool-native-1";
+const SHELF_ASSET_VERSION = "chess-native-1";
 const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode > #hvn-shell-app { width: 100%; }
@@ -503,7 +504,7 @@ function applyNativeShelfOverrides() {
 }
 
 async function mountNativeShelfGame({ base, gameId }) {
-  if (["2048", "driftlock", "dockside", "invaders", "hex-stack", "minesweeper", "block-drop", "tidepool"].includes(gameId)) {
+  if (["2048", "driftlock", "dockside", "invaders", "hex-stack", "minesweeper", "block-drop", "tidepool", "chess"].includes(gameId)) {
     applyNativeShelfOverrides();
     await loadShelfRewards(base);
     window.Shelf?.record("game_play", { id: gameId });
@@ -539,6 +540,10 @@ async function mountNativeShelfGame({ base, gameId }) {
   if (gameId === "tidepool") {
     const { mountTidepool } = await import("../../games/tidepool/runtime.js");
     return mountTidepool(document.querySelector("#shelf-native-host"));
+  }
+  if (gameId === "chess") {
+    const { mountChess } = await import("../../games/chess/runtime.js");
+    return mountChess(document.querySelector("#shelf-native-host"));
   }
   await loadNativeShelfRuntime({ base, gameId });
 

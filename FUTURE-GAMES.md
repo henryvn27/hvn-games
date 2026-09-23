@@ -8,6 +8,7 @@ The shared shelf is the product: every game has a native route, distinct rules, 
 - Source study: [Tetr.js](https://github.com/simonlc/tetr.js), MIT licensed. Only mechanics were used as reference; the HVN game is fresh code and art.
 - **Tidepool** — build a shoreline and keep kelp alive through three rising tides. It is an original local cellular simulation with its own score board.
 - Source study: [Sandspiel](https://github.com/MaxBittker/sandspiel), MIT licensed. Only the broad falling-material sandbox idea informed the design; no upstream code or assets are used.
+- **Chess** — play the quick ladder against a computer that gets stronger after each win, or pass the board for local two-player. The game uses the BSD-2-licensed [`chess.js`](https://github.com/jhlywa/chess.js) library for rules and legal moves; the board, opponent, ladder, and presentation are original.
 
 ## Next additions
 

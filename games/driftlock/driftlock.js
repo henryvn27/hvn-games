@@ -84,8 +84,11 @@ export function mountDriftlock(host) {
     state = createRun();
     finished = false;
     previousMode = "active";
+    keys.clear();
     overlay.hidden = true;
     pauseButton.disabled = false;
+    pauseButton.textContent = "Ⅱ";
+    pauseButton.setAttribute("aria-label", "Pause");
     status.textContent = "Dock: collect three cells, then steer into the amber hatch.";
   };
   action.addEventListener("click", () => nextAction());

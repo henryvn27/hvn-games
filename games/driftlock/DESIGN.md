@@ -29,3 +29,7 @@ Mechanic research: [frankstop/ThisIsTheOnlyLevel](https://github.com/frankstop/T
 HVN Games gallery Play → `?game=shelf&play=driftlock` → complete a sector → view the local-only result and replay or return home. Input is limited to keyboard/pointer game controls. Output is the visible result and an anonymous best time in this browser's local storage. No player name, account, telemetry, or online leaderboard is read or written. Manual fallback is the local gallery route. Rollback is a normal additive revert of Driftlock files and its one shelf entry; existing game routes stay intact.
 
 Acceptance evidence includes repository smoke/build checks and real browser runs through gallery Play: start, thrust, gravity pulse, pause/resume, core collision/restart, full win, and local-best persistence; desktop and narrow mobile; no overflow or console errors; light/dark preference and reduced-motion review; and three complete runs or five minutes before and after fixing the largest clarity/fun issue.
+
+## State-transition regression
+
+During browser play, restarting from the paused overlay reset the simulation but left the pause control labeled “Resume.” Keep UI state in sync with run state on every start or restart: hide the overlay, clear held inputs, enable pause, and restore the “Pause” label and accessible name. Verify pause → restart → pause again in the browser.

@@ -10,6 +10,7 @@ export const SHELF_GAMES = [
   { id: "tic", number: "09", name: "Tic-Tac-Toe", kind: "board", description: "You are X. The computer is paying attention." },
   { id: "checkers", number: "10", name: "Checkers", kind: "board", description: "Choose a bot, make a jump, and see if you can take the board." },
   { id: "trade", number: "11", name: "City Trader", kind: "board", description: "Buy streets, build them up, and outlast the other players." },
+  { id: "driftlock", number: "12", name: "Driftlock", kind: "arcade", description: "Turn gravity, gather three signal cells, and reach the airlock." },
 ];
 
 // Kept out of the collection, but still reachable for old bookmarks and saved runs.
@@ -37,6 +38,7 @@ export async function renderGameShelf({ app, base }) {
 
   if (selected) {
     document.body.className = "game-page shelf-page shelf-native-mode";
+    if (selected.id === "driftlock") document.body.classList.add("shelf-native-driftlock");
     app.id = "hvn-shell-app";
     app.innerHTML = `
       <header class="game-header page-width shelf-header">
@@ -487,6 +489,10 @@ async function loadNativeShelfRuntime({ base, gameId = null }) {
 }
 
 async function mountNativeShelfGame({ base, gameId }) {
+  if (gameId === "driftlock") {
+    const { mountDriftlock } = await import("../../games/driftlock/driftlock.js");
+    return mountDriftlock(document.querySelector("#shelf-native-host"));
+  }
   await loadNativeShelfRuntime({ base, gameId });
 
   if (typeof window.play !== "function") throw new Error("Shelf game engine did not expose play()");

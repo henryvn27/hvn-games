@@ -36,3 +36,14 @@ The gallery is a small game index: a sky-blue flyer, navy ink, one coral action 
 ## License
 
 MIT. See `LICENSE`.
+
+
+## Driftlock
+
+Turn gravity inside one orbital repair chamber. Gather three signal cells and steer into the airlock across six sectors. Your best time stays in this browser.
+
+Play from the gallery at `?game=shelf&play=driftlock`. Controls: arrows or WASD to thrust, Space to rotate gravity, P or Escape to pause, and R to restart. Touch controls appear on narrow screens.
+
+Mechanic research: [frankstop/ThisIsTheOnlyLevel](https://github.com/frankstop/ThisIsTheOnlyLevel), MIT. Driftlock uses the broad “same space, changed rules” idea; its game code, art, geometry, stages, and copy are original. See [games/driftlock/README.md](games/driftlock/README.md) and [games/driftlock/DESIGN.md](games/driftlock/DESIGN.md) for the implementation and design read.
+
+Launch post draft: “Driftlock is a six-sector flight through one orbital repair chamber. Turn gravity, collect the signal cells, and make the airlock before the loose core catches up. Play in the HVN Games gallery; your best time stays in your browser.”

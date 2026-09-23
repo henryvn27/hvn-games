@@ -1192,3 +1192,80 @@ body.game-page.game-space-wars .game-blurb {
   }
   .gallery-intro > p { margin: 0; }
 }
+
+.driftlock {
+  --drift-paper: #f1ead8;
+  --drift-ink: #16241f;
+  --drift-muted: #69766c;
+  --drift-green: #314c40;
+  --drift-red: #e0785d;
+  --drift-amber: #f0be66;
+  width: min(900px, 100%);
+  margin-inline: auto;
+  color: var(--drift-paper);
+  font-family: inherit;
+}
+.driftlock-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.driftlock-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); flex: 1; border: 1px solid rgba(105, 118, 108, .55); }
+.driftlock-stats > div { display: grid; gap: 3px; min-width: 0; padding: 9px 12px; border-right: 1px solid rgba(105, 118, 108, .4); }
+.driftlock-stats > div:last-child { border-right: 0; }
+.driftlock-stats span { color: #c0cbbb; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; }
+.driftlock-stats strong { color: var(--drift-paper); font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.driftlock button { min-height: 42px; border: 1px solid #91a99a; border-radius: 3px; background: #1b2d27; color: var(--drift-paper); font: inherit; font-weight: 650; cursor: pointer; }
+.driftlock button:focus-visible { outline: 3px solid var(--drift-amber); outline-offset: 3px; }
+.driftlock button:disabled { cursor: default; opacity: .55; }
+.driftlock-pause { width: 46px; font-size: 1rem !important; }
+.driftlock-status { min-height: 1.5em; margin: 8px 0; color: #c0cbbb; font-size: .88rem; }
+.driftlock-stage { position: relative; width: 100%; overflow: hidden; border: 1px solid #91a99a; background: #1e3934; aspect-ratio: 45 / 26; }
+.driftlock-stage canvas { display: block; width: 100% !important; height: 100% !important; }
+.driftlock-overlay { position: absolute; inset: 0; z-index: 2; display: grid; align-content: center; justify-items: center; gap: 10px; padding: clamp(18px, 5vw, 44px); background: rgba(13, 24, 22, .9); text-align: center; }
+.driftlock-overlay[hidden] { display: none; }
+.driftlock-overline { margin: 0; color: var(--drift-amber); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+.driftlock-overlay h2 { max-width: 13ch; margin: 0; color: var(--drift-paper); font-size: clamp(2rem, 5vw, 4rem); line-height: .98; letter-spacing: -.06em; }
+.driftlock-overlay > p:not(.driftlock-overline) { max-width: 38ch; margin: 0; color: #d0d8ca; line-height: 1.5; }
+.driftlock .driftlock-start { margin-top: 6px; padding: 0 18px; border-color: var(--drift-amber); background: var(--drift-amber); color: #24261e; }
+.driftlock-best { font-size: .8rem; }
+.driftlock-controls { display: none; }
+.driftlock-actions { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 10px; }
+.driftlock-actions p { margin: 0; color: #c0cbbb; font-size: .76rem; text-align: right; }
+.driftlock .driftlock-secondary { min-height: 34px; padding: 0 12px; background: transparent; font-size: .8rem; }
+@media (max-width: 600px) {
+  .driftlock-stats > div { padding: 8px 6px; }
+  .driftlock-stats span { font-size: .58rem; }
+  .driftlock-stats strong { font-size: .94rem; }
+  .driftlock-controls { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: 9px; }
+  .driftlock-controls button { min-width: 0; min-height: 42px; padding-inline: 4px; touch-action: none; }
+  .driftlock-controls .drift-pulse { color: #24261e; border-color: var(--drift-amber); background: var(--drift-amber); font-size: .76rem; }
+  .driftlock-actions { align-items: flex-start; }
+  .driftlock-actions p { max-width: 24ch; line-height: 1.4; }
+}
+@media (prefers-color-scheme: light) {
+  body.shelf-native-mode .driftlock { color: var(--drift-ink); }
+  body.shelf-native-mode .driftlock-stats { border-color: rgba(22, 36, 31, .35); }
+  body.shelf-native-mode .driftlock-stats > div { border-right-color: rgba(22, 36, 31, .24); }
+  body.shelf-native-mode .driftlock-stats span,
+  body.shelf-native-mode .driftlock-status,
+  body.shelf-native-mode .driftlock-actions p { color: #56665b; }
+  body.shelf-native-mode .driftlock-stats strong { color: var(--drift-ink); }
+  body.shelf-native-mode .driftlock button { border-color: #314c40; background: #f7f4e9; color: var(--drift-ink); }
+  body.shelf-native-mode .driftlock .driftlock-start,
+  body.shelf-native-mode .driftlock-controls .drift-pulse { border-color: #e4ae51; background: #f0be66; color: #24261e; }
+}
+
+/* Driftlock owns a readable console shell in either system color scheme. */
+body.shelf-native-mode.shelf-native-driftlock { background: #111211; color: #f3f5eb; }
+body.shelf-native-mode.shelf-native-driftlock .game-header { background: #111211; border-bottom-color: rgba(243, 245, 235, .2); }
+body.shelf-native-mode.shelf-native-driftlock .game-header .wordmark,
+body.shelf-native-mode.shelf-native-driftlock .game-header .site-nav a,
+body.shelf-native-mode.shelf-native-driftlock .shelf-game-heading h1 { color: #f3f5eb; }
+body.shelf-native-mode.shelf-native-driftlock .shelf-game-label,
+body.shelf-native-mode.shelf-native-driftlock .shelf-game-heading .game-blurb { color: #a5aa9c; }
+@media (prefers-color-scheme: light) {
+  body.shelf-native-mode.shelf-native-driftlock { background: #f7f7f2; color: #171817; }
+  body.shelf-native-mode.shelf-native-driftlock .game-header { background: #f7f7f2; border-bottom-color: rgba(23, 24, 23, .18); }
+  body.shelf-native-mode.shelf-native-driftlock .game-header .wordmark,
+  body.shelf-native-mode.shelf-native-driftlock .game-header .site-nav a,
+  body.shelf-native-mode.shelf-native-driftlock .shelf-game-heading h1 { color: #171817; }
+  body.shelf-native-mode.shelf-native-driftlock .shelf-game-label,
+  body.shelf-native-mode.shelf-native-driftlock .shelf-game-heading .game-blurb { color: #666962; }
+}

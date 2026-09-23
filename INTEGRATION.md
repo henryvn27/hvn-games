@@ -58,3 +58,16 @@ The proof run must build the site, boot it through the intended local or Pages r
 ## Manual fallback and rollback
 
 If the gallery route is unavailable, run the repo locally with `npm install` followed by `npm run dev`. A bad game can be disabled by removing its gallery entry and route while preserving Orbit. Never rewrite history; revert the scoped commit if a published change needs to be withdrawn.
+
+## Driftlock gallery Play contract
+
+- Trigger: choose **Driftlock** from the HVN Games gallery. The Play link opens `?game=shelf&play=driftlock`; the shelf dispatcher dynamically mounts `games/driftlock/driftlock.js`.
+- Input shape: anonymous keyboard or pointer input (arrows/WASD, Space, P/Escape, R; directional and pulse buttons on narrow touch screens). No user text, profile, or account is read.
+- Invocation: gallery Play → start run → steer through six sectors → collect three cells and dock at the amber hatch in each sector.
+- Output: visible result state plus best completion time saved under `hvn-games:driftlock:best` in localStorage. There is no leaderboard request or server write.
+- Next action: replay from the result panel or return to the gallery.
+- Owner/adoption point: HVN Games gallery, `site/src/shelf.js` shelf entry and mounted route; runtime and simulation live in `games/driftlock/`.
+- Manual fallback: open `?game=shelf&play=driftlock` on the local Vite route.
+- Rollback/disable: remove only the Driftlock shelf entry and scoped runtime/styles in a normal additive revert. The existing gallery and game routes remain available.
+- Privacy: local anonymous score only. No telemetry, advertising changes, player names, or upstream assets are added.
+- Proof run: local test/build plus live gallery route exercising start, thrust, gravity pulse, pause/resume, loss/restart, all six wins, local record, narrow viewport, reduced motion, and console. (Runtime evidence pending.)

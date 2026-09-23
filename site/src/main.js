@@ -3,7 +3,7 @@ import { mountGoogleAdSlots, mountScoutlyFallback } from "./ads.js";
 import { createGamePlaytimeTracker, createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, getPlaytimeSharing, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlaytimeSharing, setPlayerName } from "./play-intelligence.js";
 import orbitPolicyArtifact from "../../games/phasebound/orbit-policy.json";
 import { renderGameShelf, SHELF_GAMES } from "./shelf.js";
-import { hiddenGames, rankFeaturedGames } from "./featured-games.js";
+import { hiddenGames, hiddenGamesLabel, rankFeaturedGames } from "./featured-games.js";
 
 const app = document.querySelector("#app");
 const base = import.meta.env.BASE_URL;
@@ -106,7 +106,7 @@ function renderGallery() {
     </header>
     <main>
       <section class="gallery-intro page-width" aria-labelledby="gallery-title">
-        <div><p class="shelf-kicker">the collection</p><h1 id="gallery-title">Games people stick with.</h1></div>
+        <div><h1 id="gallery-title">Games.</h1></div>
         <p>Ten on the home page. The rest are still here if you want them.</p>
       </section>
       <div class="google-ad-slot page-width" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>
@@ -114,7 +114,7 @@ function renderGallery() {
       <section class="gallery-shelf page-width" id="featured-games" aria-labelledby="featured-games-title">
         <div class="gallery-shelf-heading"><h2 id="featured-games-title">Featured games</h2><p id="featured-games-note">A starter set while playtime totals build.</p></div>
         <div class="shelf-grid" id="featured-games-grid" aria-label="Ten featured games">${initial.games.map((game, index) => galleryGameCard({ ...game, number: String(index + 1).padStart(2, "0") })).join("")}</div>
-        <a class="hidden-games-link" href="${base}?view=hidden-games">Browse the other five games</a>
+        <a class="hidden-games-link" href="${base}?view=hidden-games">${hiddenGamesLabel(galleryGames.length - initial.games.length)}</a>
       </section>
       <div class="google-ad-slot page-width" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>
 

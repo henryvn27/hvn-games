@@ -24,3 +24,8 @@ export function hiddenGames(games, featured) {
   const featuredIds = new Set(featured.map((game) => game.id));
   return games.filter((game) => !featuredIds.has(game.id));
 }
+
+export function hiddenGamesLabel(count) {
+  const hiddenCount = Math.max(0, Math.trunc(Number(count) || 0));
+  return hiddenCount ? `Browse ${hiddenCount} more games` : "Browse all games";
+}

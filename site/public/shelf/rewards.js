@@ -10,7 +10,7 @@
 (function () {
   'use strict';
   const STORAGE_KEY = 'game-shelf-rewards-v1';
-  const GAME_IDS = ['snake', 'dodger', 'memory', 'reaction', 'word', 'flappy', 'platform', 'tic', 'checkers', 'trade', 'golf', 'driftlock', '2048', 'dockside', 'invaders', 'hex-stack', 'minesweeper', 'block-drop', 'tidepool'];
+  const GAME_IDS = ['snake', 'dodger', 'memory', 'reaction', 'word', 'flappy', 'platform', 'tic', 'checkers', 'trade', 'golf', 'driftlock', '2048', 'dockside', 'invaders', 'hex-stack', 'minesweeper', 'block-drop', 'tidepool', 'chess', 'handshake'];
   const categories = {theme: 'Shelf themes', snake: 'Snake colours', ship: 'Spaceship paint', plane: 'Plane paint', golf: 'Golf balls'};
   const icons = {theme: '▦', snake: '🐍', ship: '🚀', plane: '✈', golf: '⛳'};
   const definitions = [
@@ -33,6 +33,7 @@
     ['golf-ace', 'One and done', 'Get a hole in one in Mini Golf.', '🏌', 'golfBestHole', 1, 'atMost', 'strokes'],
     ['golf-round', 'Club member', 'Sink all six holes in one Mini Golf round.', '🏅', 'golfRounds', 1],
     ['golf-par', 'Under control', 'Sink all six holes and finish at par or better.', '🏆', 'golfBestDelta', 0, 'atMost', 'over par'],
+    ['handshake-table', 'Good neighbor', 'Win a table in Handshake.', '🤝', 'handshakeTablesWon', 1],
     ['dockside-ten', 'Dockhand', 'Stack 10 crates in one Dockside run.', '⚓', 'docksideCrates', 10],
     ['invaders-wave', 'Relay keeper', 'Reach wave 3 in Invaders.', '☄', 'invadersWave', 3],
     ['minesweeper-clear', 'Board clearer', 'Clear a Minesweeper board.', '▦', 'minesweeperWins', 1],
@@ -63,7 +64,7 @@
     ['golf', 'twilight', 'Twilight', 'daily-fourteen', '#c8b5fc', '#7050b2', 'An evening violet ball for a daily regular.']
   ];
   const cosmetics = cosmeticDefinitions.map(([category, id, name, achievement, main, accent, description]) => Object.freeze({category, id, name, achievement, main, accent, description}));
-  const baseline = () => ({version: 1, stats: {played: [], dailySets: 0, snakeScore: 0, bossWins: 0, memoryMoves: null, reactionMs: null, wordWins: 0, wordGuesses: null, clickerPower: 1, flyerScore: 0, platformWins: 0, ticWins: 0, checkersWins: 0, tradeProperties: 0, docksideCrates: 0, invadersWave: 1, minesweeperWins: 0, blockDropSweeps: 0, golfHoles: 0, golfBestHole: null, golfRounds: 0, golfBestDelta: null}, earned: {}, equipped: {theme: 'classic', snake: 'classic', ship: 'classic', plane: 'classic', golf: 'classic'}});
+  const baseline = () => ({version: 1, stats: {played: [], dailySets: 0, snakeScore: 0, bossWins: 0, memoryMoves: null, reactionMs: null, wordWins: 0, wordGuesses: null, clickerPower: 1, flyerScore: 0, platformWins: 0, ticWins: 0, checkersWins: 0, tradeProperties: 0, docksideCrates: 0, invadersWave: 1, minesweeperWins: 0, blockDropSweeps: 0, golfHoles: 0, golfBestHole: null, golfRounds: 0, golfBestDelta: null, handshakeTablesWon: 0}, earned: {}, equipped: {theme: 'classic', snake: 'classic', ship: 'classic', plane: 'classic', golf: 'classic'}});
   const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
   const integer = (value, min = 0, max = 1000000) => Number.isSafeInteger(value) && value >= min && value <= max;
   const decimal = (value, min, max) => typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max;
@@ -76,7 +77,7 @@
     if (!isObject(raw) || raw.version !== 1 || !isObject(raw.stats)) return;
     const source = raw.stats;
     state.stats.played = Array.isArray(source.played) ? [...new Set(source.played.filter(id => GAME_IDS.includes(id)))] : [];
-    for (const [metric, max] of [['dailySets', 10000], ['snakeScore', 400], ['bossWins', 1], ['wordWins', 1], ['flyerScore', 1000000], ['platformWins', 1], ['ticWins', 1], ['checkersWins', 1], ['tradeProperties', 100], ['docksideCrates', 1000], ['invadersWave', 10000], ['minesweeperWins', 1], ['blockDropSweeps', 1], ['golfHoles', 1], ['golfRounds', 1]]) {
+    for (const [metric, max] of [['dailySets', 10000], ['snakeScore', 400], ['bossWins', 1], ['wordWins', 1], ['flyerScore', 1000000], ['platformWins', 1], ['ticWins', 1], ['checkersWins', 1], ['tradeProperties', 100], ['docksideCrates', 1000], ['invadersWave', 10000], ['minesweeperWins', 1], ['blockDropSweeps', 1], ['golfHoles', 1], ['golfRounds', 1], ['handshakeTablesWon', 4]]) {
       if (integer(source[metric], 0, max)) state.stats[metric] = source[metric];
     }
     if (integer(source.clickerPower, 1)) state.stats.clickerPower = source.clickerPower;
@@ -147,6 +148,7 @@
       case 'invaders_wave': if (integer(data.wave, 1, 10000)) best('invadersWave', data.wave); break;
       case 'minesweeper_win': stats.minesweeperWins = 1; break;
       case 'block_drop_sweep': stats.blockDropSweeps = 1; break;
+      case 'handshake_table': if (integer(data.wins, 0, 4)) best('handshakeTablesWon', data.wins); break;
       case 'golf_hole': if (integer(data.strokes, 1, 100) && integer(data.par, 1, 10)) { stats.golfHoles = 1; least('golfBestHole', data.strokes); } break;
       case 'golf_round': if (data.holed === 6 && integer(data.total, 6, 600) && integer(data.par, 6, 60)) { stats.golfRounds = 1; least('golfBestDelta', data.total - data.par); } break;
       default: return [];

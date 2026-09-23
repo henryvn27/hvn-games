@@ -54,6 +54,12 @@ const required = [
   "games/minesweeper/minesweeper.css",
   "games/minesweeper/rules.test.mjs",
   "games/minesweeper/README.md",
+  "games/block-drop/runtime.js",
+  "games/block-drop/simulation.js",
+  "games/block-drop/simulation.test.mjs",
+  "games/block-drop/block-drop.css",
+  "games/block-drop/README.md",
+  "games/block-drop/INTEGRATION.md",
   "games/phasebound/orbit-policy.js",
   "games/phasebound/orbit-policy.json",
   "tools/orbit_rl/orbit_env.py",
@@ -115,7 +121,7 @@ for (const marker of ["startComet", "Comet", "setDirection", "spawnFood", "maybe
 }
 
 const shelf = readFileSync(join(root, "site/src/shelf.js"), "utf8");
-for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "driftlock", "2048", "invaders", "hex-stack", "minesweeper", "shelf-native-host", "mountNativeShelfGame", "loadNativeShelfRuntime", "renderNativeShelfRewards", "view=rewards", "Achievements", "Other HVN games"]) {
+for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "driftlock", "2048", "invaders", "hex-stack", "minesweeper", "block-drop", "shelf-native-host", "mountNativeShelfGame", "loadNativeShelfRuntime", "renderNativeShelfRewards", "view=rewards", "Achievements", "Other HVN games"]) {
   if (!shelf.includes(marker)) throw new Error(`Shelf is missing game or route marker: ${marker}`);
 }
 if (!shelf.includes('import("../../games/driftlock/driftlock.js")')) throw new Error("Driftlock is not connected to the native shelf runtime");
@@ -124,13 +130,14 @@ if (!shelf.includes('import("../../games/dockside/dockside.js")')) throw new Err
 if (!shelf.includes('import("../../games/invaders/invaders.js")')) throw new Error("Invaders is not connected to the native shelf runtime");
 if (!shelf.includes('import("../../games/hex-stack/runtime.mjs")')) throw new Error("Hex Stack is not connected to the native shelf runtime");
 if (!shelf.includes('import("../../games/minesweeper/runtime.js")')) throw new Error("Minesweeper is not connected to the native shelf runtime");
-if (!shelf.includes('id: "dockside", number: "14"') || !shelf.includes('id: "invaders", number: "15"') || !shelf.includes('id: "hex-stack", number: "16"') || !shelf.includes('id: "minesweeper", number: "17"')) throw new Error("The latest shelf games are missing from the collection");
+if (!shelf.includes('import("../../games/block-drop/runtime.js")')) throw new Error("Block Drop is not connected to the native shelf runtime");
+if (!shelf.includes('id: "dockside", number: "14"') || !shelf.includes('id: "invaders", number: "15"') || !shelf.includes('id: "hex-stack", number: "16"') || !shelf.includes('id: "minesweeper", number: "17"') || !shelf.includes('id: "block-drop", number: "18"')) throw new Error("The latest shelf games are missing from the collection");
 if (!shelf.includes('await loadShelfRewards(base)')) throw new Error("Native games do not load the shared achievements store");
 if (!shelf.includes('href = `${base}shelf/rewards.css`')) throw new Error("Native games do not load the shared achievement notification styles");
 if (shelf.includes('name: "Garden Snake"')) throw new Error("Shelf still uses the old Snake name");
 if (shelf.includes("<iframe")) throw new Error("Game Shelf still uses a nested iframe");
 const rewards = readFileSync(join(root, "site/public/shelf/rewards.js"), "utf8");
-for (const marker of ["'driftlock'", "'2048'", "'dockside'", "'invaders'", "'hex-stack'", "'minesweeper'", "Try all ${GAME_IDS.length} games.", "dockside_run", "invaders_wave", "minesweeper_win"]) {
+for (const marker of ["'driftlock'", "'2048'", "'dockside'", "'invaders'", "'hex-stack'", "'minesweeper'", "'block-drop'", "Try all ${GAME_IDS.length} games.", "dockside_run", "invaders_wave", "minesweeper_win", "block_drop_sweep"]) {
   if (!rewards.includes(marker)) throw new Error(`Achievements are missing active shelf game: ${marker}`);
 }
 

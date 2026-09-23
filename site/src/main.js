@@ -26,6 +26,7 @@ const LEADERBOARD_GAMES = [
   { id: "invaders", label: "Invaders" },
   { id: "hex-stack", label: "Hex Stack" },
   { id: "minesweeper", label: "Minesweeper" },
+  { id: "block-drop", label: "Block Drop" },
 ];
 
 if (params.get("game")) {

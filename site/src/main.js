@@ -24,6 +24,7 @@ const LEADERBOARD_GAMES = [
   { id: "2048", label: "2048" },
   { id: "dockside", label: "Dockside" },
   { id: "invaders", label: "Invaders" },
+  { id: "hex-stack", label: "Hex Stack" },
 ];
 
 if (params.get("game")) {

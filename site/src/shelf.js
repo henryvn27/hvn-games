@@ -14,6 +14,7 @@ export const SHELF_GAMES = [
   { id: "2048", number: "13", name: "2048", kind: "puzzle", description: "Slide matching tiles together to make 2048." },
   { id: "dockside", number: "14", name: "Dockside", kind: "arcade", description: "Time the crane. Stack freight as high as you can." },
   { id: "invaders", number: "15", name: "Invaders", kind: "arcade", description: "Keep the moon relay clear as the incoming waves come faster." },
+  { id: "hex-stack", number: "16", name: "Hex Stack", kind: "puzzle", description: "Turn the ring. Drop matching tiles before a spoke fills." },
 ];
 
 // Kept out of the collection, but still reachable for old bookmarks and saved runs.
@@ -65,7 +66,7 @@ export async function renderGameShelf({ app, base }) {
 
 const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
 const SHELF_SCRIPTS = ["word-list.js", "nyt-wordle-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
-const SHELF_ASSET_VERSION = "invaders-native-1";
+const SHELF_ASSET_VERSION = "hex-stack-native-1";
 const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode > #hvn-shell-app { width: 100%; }
@@ -497,7 +498,7 @@ function applyNativeShelfOverrides() {
 }
 
 async function mountNativeShelfGame({ base, gameId }) {
-  if (["2048", "driftlock", "dockside", "invaders"].includes(gameId)) {
+  if (["2048", "driftlock", "dockside", "invaders", "hex-stack"].includes(gameId)) {
     applyNativeShelfOverrides();
     await loadShelfRewards(base);
     window.Shelf?.record("game_play", { id: gameId });
@@ -517,6 +518,10 @@ async function mountNativeShelfGame({ base, gameId }) {
   if (gameId === "invaders") {
     const { mountInvaders } = await import("../../games/invaders/invaders.js");
     return mountInvaders(document.querySelector("#shelf-native-host"));
+  }
+  if (gameId === "hex-stack") {
+    const { mountHexStack } = await import("../../games/hex-stack/runtime.mjs");
+    return mountHexStack(document.querySelector("#shelf-native-host"));
   }
   await loadNativeShelfRuntime({ base, gameId });
 

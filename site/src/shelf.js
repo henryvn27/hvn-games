@@ -15,6 +15,7 @@ export const SHELF_GAMES = [
   { id: "dockside", number: "14", name: "Dockside", kind: "arcade", description: "Time the crane. Stack freight as high as you can." },
   { id: "invaders", number: "15", name: "Invaders", kind: "arcade", description: "Keep the moon relay clear as the incoming waves come faster." },
   { id: "hex-stack", number: "16", name: "Hex Stack", kind: "puzzle", description: "Turn the ring. Drop matching tiles before a spoke fills." },
+  { id: "minesweeper", number: "17", name: "Minesweeper", kind: "puzzle", description: "Read the numbers, mark the mines, and clear the board. A guess can cost the round if a safe square is certain." },
 ];
 
 // Kept out of the collection, but still reachable for old bookmarks and saved runs.
@@ -66,7 +67,7 @@ export async function renderGameShelf({ app, base }) {
 
 const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
 const SHELF_SCRIPTS = ["word-list.js", "nyt-wordle-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
-const SHELF_ASSET_VERSION = "hex-stack-native-1";
+const SHELF_ASSET_VERSION = "minesweeper-native-1";
 const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode > #hvn-shell-app { width: 100%; }
@@ -97,6 +98,7 @@ const NATIVE_SHELF_OVERRIDES = `
   @media (max-width: 520px) {
     body.shelf-native-mode .shelf-native-main { padding-block: 30px 58px; }
     body.shelf-native-mode .shelf-game-heading { align-items: start; flex-direction: column; gap: 10px; }
+    body.shelf-native-mode .shelf-game-heading h1 { font-size: clamp(2.2rem, 10vw, 3.4rem); line-height: 1; overflow-wrap: anywhere; }
     body.shelf-native-mode #shelf-native-host > #app { padding-inline: 0; }
   }
   @media (prefers-color-scheme: light) {
@@ -498,7 +500,7 @@ function applyNativeShelfOverrides() {
 }
 
 async function mountNativeShelfGame({ base, gameId }) {
-  if (["2048", "driftlock", "dockside", "invaders", "hex-stack"].includes(gameId)) {
+  if (["2048", "driftlock", "dockside", "invaders", "hex-stack", "minesweeper"].includes(gameId)) {
     applyNativeShelfOverrides();
     await loadShelfRewards(base);
     window.Shelf?.record("game_play", { id: gameId });
@@ -522,6 +524,10 @@ async function mountNativeShelfGame({ base, gameId }) {
   if (gameId === "hex-stack") {
     const { mountHexStack } = await import("../../games/hex-stack/runtime.mjs");
     return mountHexStack(document.querySelector("#shelf-native-host"));
+  }
+  if (gameId === "minesweeper") {
+    const { mountMinesweeper } = await import("../../games/minesweeper/runtime.js");
+    return mountMinesweeper(document.querySelector("#shelf-native-host"));
   }
   await loadNativeShelfRuntime({ base, gameId });
 
@@ -575,6 +581,17 @@ async function mountNativeShelfGame({ base, gameId }) {
 }
 
 async function loadShelfRewards(base) {
+  if (!document.querySelector('link[data-shelf-style="rewards.css"]')) {
+    await new Promise((resolve, reject) => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = `${base}shelf/rewards.css`;
+      link.dataset.shelfStyle = "rewards.css";
+      link.onload = resolve;
+      link.onerror = () => reject(new Error("Could not load game achievement styles"));
+      document.head.appendChild(link);
+    });
+  }
   if (window.Shelf) return;
   await new Promise((resolve, reject) => {
     const script = document.createElement("script");

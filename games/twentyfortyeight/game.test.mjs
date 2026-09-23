@@ -2,10 +2,11 @@ import assert from "node:assert/strict";
 import { blankBoard, canMove, moveBoard, newGame, slideLine, spawnTile, stepGame } from "./game.js";
 import { SHELF_GAMES } from "../../site/src/shelf.js";
 
-assert.equal(SHELF_GAMES.length, 16);
+assert.equal(SHELF_GAMES.length, 17);
 assert.ok(SHELF_GAMES.some((game) => game.id === "2048"), "2048 is reachable from the shared shelf");
 assert.ok(SHELF_GAMES.some((game) => game.id === "invaders"), "Invaders is reachable from the shared shelf");
 assert.ok(SHELF_GAMES.some((game) => game.id === "hex-stack"), "Hex Stack is reachable from the shared shelf");
+assert.ok(SHELF_GAMES.some((game) => game.id === "minesweeper"), "Minesweeper is reachable from the shared shelf");
 assert.equal(new Set(SHELF_GAMES.map((game) => game.id)).size, SHELF_GAMES.length, "shelf routes are unique");
 
 assert.deepEqual(slideLine([2, 2, 2, 2]), { line: [4, 4, 0, 0], score: 8 });

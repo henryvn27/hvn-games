@@ -17,6 +17,7 @@ export const SHELF_GAMES = [
   { id: "hex-stack", number: "16", name: "Hex Stack", kind: "puzzle", description: "Turn the ring. Drop matching tiles before a spoke fills." },
   { id: "minesweeper", number: "17", name: "Minesweeper", kind: "puzzle", description: "Read the numbers, mark the mines, and clear the board. A guess can cost the round if a safe square is certain." },
   { id: "block-drop", number: "18", name: "Block Drop", kind: "puzzle", description: "Place the falling pieces. Clear full rows before the stack reaches the top." },
+  { id: "tidepool", number: "19", name: "Tidepool", kind: "arcade", description: "Shape a shore, plant kelp, and keep it wet through three tides." },
 ];
 
 // Kept out of the collection, but still reachable for old bookmarks and saved runs.
@@ -44,6 +45,7 @@ export async function renderGameShelf({ app, base }) {
 
   if (selected) {
     document.body.className = "game-page shelf-page shelf-native-mode";
+    document.body.dataset.shelfGame = selected.id;
     if (selected.id === "driftlock") document.body.classList.add("shelf-native-driftlock");
     app.id = "hvn-shell-app";
     app.innerHTML = `
@@ -68,7 +70,7 @@ export async function renderGameShelf({ app, base }) {
 
 const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
 const SHELF_SCRIPTS = ["word-list.js", "nyt-wordle-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
-const SHELF_ASSET_VERSION = "block-drop-native-1";
+const SHELF_ASSET_VERSION = "tidepool-native-1";
 const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode > #hvn-shell-app { width: 100%; }
@@ -501,7 +503,7 @@ function applyNativeShelfOverrides() {
 }
 
 async function mountNativeShelfGame({ base, gameId }) {
-  if (["2048", "driftlock", "dockside", "invaders", "hex-stack", "minesweeper", "block-drop"].includes(gameId)) {
+  if (["2048", "driftlock", "dockside", "invaders", "hex-stack", "minesweeper", "block-drop", "tidepool"].includes(gameId)) {
     applyNativeShelfOverrides();
     await loadShelfRewards(base);
     window.Shelf?.record("game_play", { id: gameId });
@@ -533,6 +535,10 @@ async function mountNativeShelfGame({ base, gameId }) {
   if (gameId === "block-drop") {
     const { mountBlockDrop } = await import("../../games/block-drop/runtime.js");
     return mountBlockDrop(document.querySelector("#shelf-native-host"));
+  }
+  if (gameId === "tidepool") {
+    const { mountTidepool } = await import("../../games/tidepool/runtime.js");
+    return mountTidepool(document.querySelector("#shelf-native-host"));
   }
   await loadNativeShelfRuntime({ base, gameId });
 

@@ -6,6 +6,8 @@ The shared shelf is the product: every game has a native route, distinct rules, 
 
 - **Block Drop** — falling-piece placement and line clearing, with seven-piece bags, hold, ghost landing preview, levels, and a per-game high-score board.
 - Source study: [Tetr.js](https://github.com/simonlc/tetr.js), MIT licensed. Only mechanics were used as reference; the HVN game is fresh code and art.
+- **Tidepool** — build a shoreline and keep kelp alive through three rising tides. It is an original local cellular simulation with its own score board.
+- Source study: [Sandspiel](https://github.com/MaxBittker/sandspiel), MIT licensed. Only the broad falling-material sandbox idea informed the design; no upstream code or assets are used.
 
 ## Next additions
 

@@ -27,6 +27,7 @@ const LEADERBOARD_GAMES = [
   { id: "hex-stack", label: "Hex Stack" },
   { id: "minesweeper", label: "Minesweeper" },
   { id: "block-drop", label: "Block Drop" },
+  { id: "tidepool", label: "Tidepool" },
 ];
 
 if (params.get("game")) {

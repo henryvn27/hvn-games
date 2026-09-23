@@ -1,0 +1,31 @@
+.invaders { --moon-ink: #1b2421; --moon-muted: #53615a; --moon-line: #89968e; max-width: 960px; margin: 0 auto; color: var(--moon-ink); }
+.invaders * { box-sizing: border-box; }
+.invaders-head { display: grid; grid-template-columns: repeat(4, 1fr) auto; align-items: center; gap: 14px; margin-bottom: 12px; }
+.invaders-stat { display: grid; gap: 3px; }
+.invaders-stat span { color: var(--moon-muted); font-size: .76rem; }
+.invaders-stat strong { font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+.invaders-pause { min-height: 42px; padding: 0 14px; border: 1px solid var(--moon-line); border-radius: 3px; color: var(--moon-ink); background: transparent; font: inherit; cursor: pointer; }
+.invaders-stage { position: relative; overflow: hidden; border: 1px solid #485050; background: #11191b; }
+.invaders-canvas { display: block; width: 100%; aspect-ratio: 16 / 9; }
+.invaders-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
+.invaders-overlay { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; padding: 24px; color: #f4f0dc; text-align: center; background: rgb(11 17 18 / 82%); }
+.invaders-overlay[hidden] { display: none; }
+.invaders-overlay h2 { margin: 0; font-size: clamp(1.7rem, 5vw, 3rem); letter-spacing: -.045em; }
+.invaders-overlay p { max-width: 36ch; margin: 0; color: #aeb6b0; line-height: 1.55; }
+.invaders-action, .invaders-name button { min-height: 44px; padding: 0 20px; border: 0; border-radius: 3px; color: #17201d; background: #c4d77d; font: inherit; font-weight: 700; cursor: pointer; }
+.invaders-name { width: min(100%, 320px); display: grid; gap: 10px; text-align: left; }
+.invaders-name[hidden] { display: none; }
+.invaders-name label { display: grid; gap: 6px; color: var(--moon-muted); }
+.invaders-name input { min-height: 44px; padding: 0 10px; color: var(--moon-ink); background: #f4f0dc; border: 1px solid var(--moon-line); border-radius: 2px; font: inherit; }
+.invaders-name p { min-height: 1.5em; }
+.invaders-controls { display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 8px; margin-top: 10px; }
+.invaders-controls button { min-height: 48px; border: 1px solid var(--moon-line); border-radius: 3px; color: var(--moon-ink); background: #f0f0e7; font: inherit; font-size: 1.05rem; touch-action: none; cursor: pointer; }
+.invaders-controls button[data-fire] { color: #17201d; border-color: #c4d77d; background: #c4d77d; font-size: .9rem; font-weight: 700; }
+.invaders-help { margin: 8px 0 0; color: var(--moon-muted); font-size: .82rem; }
+@media (max-width: 560px) { .invaders-head { grid-template-columns: repeat(2, 1fr) auto; gap: 9px; } .invaders-stage { margin-inline: -4px; } .invaders-controls button { min-height: 52px; } }
+@media (prefers-color-scheme: dark) {
+  .invaders { --moon-ink: #f4f0dc; --moon-muted: #aeb6b0; --moon-line: #454d4c; }
+  .invaders-controls button { background: #192222; }
+  .invaders-name input { color: var(--moon-ink); background: #1b2526; }
+}
+@media (prefers-reduced-motion: reduce) { .invaders *, .invaders *::before, .invaders *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }

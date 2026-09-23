@@ -38,6 +38,12 @@ const required = [
   "games/dockside/simulation.js",
   "games/dockside/simulation.test.mjs",
   "games/dockside/README.md",
+  "games/invaders/invaders.js",
+  "games/invaders/runtime.mjs",
+  "games/invaders/simulation.js",
+  "games/invaders/simulation.test.mjs",
+  "games/invaders/invaders.css",
+  "games/invaders/README.md",
   "games/phasebound/orbit-policy.js",
   "games/phasebound/orbit-policy.json",
   "tools/orbit_rl/orbit_env.py",
@@ -99,18 +105,19 @@ for (const marker of ["startComet", "Comet", "setDirection", "spawnFood", "maybe
 }
 
 const shelf = readFileSync(join(root, "site/src/shelf.js"), "utf8");
-for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "driftlock", "2048", "shelf-native-host", "mountNativeShelfGame", "loadNativeShelfRuntime", "renderNativeShelfRewards", "view=rewards", "Achievements", "Other HVN games"]) {
+for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "driftlock", "2048", "invaders", "shelf-native-host", "mountNativeShelfGame", "loadNativeShelfRuntime", "renderNativeShelfRewards", "view=rewards", "Achievements", "Other HVN games"]) {
   if (!shelf.includes(marker)) throw new Error(`Shelf is missing game or route marker: ${marker}`);
 }
 if (!shelf.includes('import("../../games/driftlock/driftlock.js")')) throw new Error("Driftlock is not connected to the native shelf runtime");
 if (!shelf.includes('import("../../games/twentyfortyeight/game.js")')) throw new Error("2048 is not connected to the native shelf runtime");
 if (!shelf.includes('import("../../games/dockside/dockside.js")')) throw new Error("Dockside is not connected to the native shelf runtime");
-if (!shelf.includes('id: "dockside", number: "14"')) throw new Error("Dockside is missing from the shelf collection");
+if (!shelf.includes('import("../../games/invaders/invaders.js")')) throw new Error("Invaders is not connected to the native shelf runtime");
+if (!shelf.includes('id: "dockside", number: "14"') || !shelf.includes('id: "invaders", number: "15"')) throw new Error("The latest shelf games are missing from the collection");
 if (!shelf.includes('await loadShelfRewards(base)')) throw new Error("Native games do not load the shared achievements store");
 if (shelf.includes('name: "Garden Snake"')) throw new Error("Shelf still uses the old Snake name");
 if (shelf.includes("<iframe")) throw new Error("Game Shelf still uses a nested iframe");
 const rewards = readFileSync(join(root, "site/public/shelf/rewards.js"), "utf8");
-for (const marker of ["'driftlock'", "'2048'", "'dockside'", "Try all ${GAME_IDS.length} games.", "dockside_run"]) {
+for (const marker of ["'driftlock'", "'2048'", "'dockside'", "'invaders'", "Try all ${GAME_IDS.length} games.", "dockside_run", "invaders_wave"]) {
   if (!rewards.includes(marker)) throw new Error(`Achievements are missing active shelf game: ${marker}`);
 }
 

@@ -23,6 +23,7 @@ const LEADERBOARD_GAMES = [
   { id: "reaction", label: "Reaction Test" },
   { id: "2048", label: "2048" },
   { id: "dockside", label: "Dockside" },
+  { id: "invaders", label: "Invaders" },
 ];
 
 if (params.get("game")) {

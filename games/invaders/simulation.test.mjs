@@ -1,0 +1,25 @@
+import assert from "node:assert/strict";
+import { newRun, startRun, stepRun, togglePause } from "./simulation.js";
+
+const ready = newRun();
+assert.equal(ready.mode, "ready");
+assert.equal(ready.formation.aliens.filter((alien) => alien.alive).length, 40);
+const started = startRun();
+assert.equal(started.mode, "active");
+assert.equal(stepRun(togglePause(started), { fire: true }, 0.05).shots.length, 0, "paused rounds do not advance or fire");
+const moved = stepRun(started, { right: true, fire: true }, 0.05, () => 0);
+assert.ok(moved.playerX > started.playerX);
+assert.equal(moved.shots.length, 1);
+assert.ok(moved.formation.aliens[0].x > started.formation.aliens[0].x);
+let clearing = { ...started, shots: [], enemyShots: [], formation: { ...started.formation, fireClock: 10, aliens: started.formation.aliens.map((alien) => ({ ...alien, alive: false })) } };
+clearing.formation.aliens[0].alive = true;
+clearing.formation.aliens[0].x = clearing.playerX;
+clearing.formation.aliens[0].y = 450;
+clearing.shots = [{ x: clearing.playerX, y: 459 }];
+const wave = stepRun(clearing, {}, 0.01, () => 0);
+assert.equal(wave.wave, 2, "clearing a formation advances the wave");
+assert.equal(wave.score, 340, "last alien awards points and a wave bonus");
+let hit = { ...started, lives: 1, invulnerable: 0, enemyShots: [{ x: started.playerX, y: 460, speed: 200 }] };
+assert.equal(stepRun(hit, {}, 0.05).mode, "over", "last hit ends a run");
+assert.equal(stepRun(togglePause(started), {}, 1).elapsed, 0, "pause freezes simulation time");
+console.log("Invaders simulation tests passed.");

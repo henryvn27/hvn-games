@@ -10,13 +10,13 @@
 (function () {
   'use strict';
   const STORAGE_KEY = 'game-shelf-rewards-v1';
-  const GAME_IDS = ['snake', 'dodger', 'memory', 'reaction', 'word', 'clicker', 'flappy', 'platform', 'tic', 'checkers', 'trade', 'golf'];
+  const GAME_IDS = ['snake', 'dodger', 'memory', 'reaction', 'word', 'flappy', 'platform', 'tic', 'checkers', 'trade', 'golf', 'driftlock', '2048'];
   const categories = {theme: 'Shelf themes', snake: 'Snake colours', ship: 'Spaceship paint', plane: 'Plane paint', golf: 'Golf balls'};
   const icons = {theme: '▦', snake: '🐍', ship: '🚀', plane: '✈', golf: '⛳'};
   const definitions = [
     ['first-play', 'Make a moment', 'Open your first game.', '🎟', 'played', 1],
     ['six-games', 'Shelf explorer', 'Try six different games.', '🧭', 'played', 6],
-    ['all-games', 'Full shelf', 'Try all 12 games.', '🌟', 'played', 12],
+    ['all-games', 'Full shelf', 'Try all 13 games.', '🌟', 'played', 13],
     ['snake-ten', 'Apple collector', 'Collect 10 apples in one Snake round.', '🍎', 'snakeScore', 10],
     ['first-boss', 'Mars defender', 'Defeat a boss in Space Dodger.', '🚀', 'bossWins', 1],
     ['memory-master', 'Perfect memory', 'Finish Memory Match in 16 moves or fewer.', '🧰', 'memoryMoves', 16, 'atMost', 'moves'],

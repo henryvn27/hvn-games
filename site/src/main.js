@@ -20,6 +20,7 @@ const LEADERBOARD_GAMES = [
   { id: "phasebound", label: "Orbit" },
   { id: "neon-bastion", label: "Space Tower Defense" },
   { id: "reaction", label: "Reaction Test" },
+  { id: "2048", label: "2048" },
 ];
 
 if (params.get("game")) {

@@ -35,6 +35,62 @@
   }
 }
 
+.twenty48 {
+  --tile-ink: #20251e;
+  --tile-muted: #55604f;
+  --tile-board: #536b58;
+  --tile-empty: #3a5144;
+  --tile-paper: #e7e4d7;
+  --tile-mark: #e65c37;
+  width: min(100%, 620px);
+  margin-inline: auto;
+  padding: clamp(18px, 4vw, 32px);
+  color: var(--tile-ink);
+  background: var(--tile-paper);
+  border: 1px solid #20251e;
+  box-shadow: 8px 8px 0 rgba(23, 24, 23, .2);
+}
+.twenty48-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.twenty48-scores { display: flex; flex-wrap: wrap; gap: 8px; }
+.twenty48-scores > div { min-width: 82px; display: grid; gap: 1px; padding: 7px 12px; border: 1px solid rgba(32, 37, 30, .35); }
+.twenty48-scores span { color: var(--tile-muted); font-size: .68rem; }
+.twenty48-scores strong { font-size: 1.25rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.twenty48-new, .twenty48-undo, .twenty48-continue { min-height: 40px; padding: 0 13px; color: var(--tile-paper); background: #263c31; border: 1px solid #263c31; cursor: pointer; font-weight: 700; }
+.twenty48-new:hover, .twenty48-undo:not(:disabled):hover, .twenty48-continue:hover { background: #182a21; }
+.twenty48-rule { margin: 22px 0 10px; color: var(--tile-muted); font-size: .9rem; }
+.twenty48-board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(6px, 1.5vw, 10px); width: 100%; padding: clamp(7px, 2vw, 12px); background: var(--tile-board); border: 1px solid #243b2e; touch-action: none; user-select: none; outline-offset: 4px; }
+.twenty48-cell { display: grid; place-items: center; aspect-ratio: 1; min-width: 0; color: #20251e; background: var(--tile-empty); font-size: clamp(1.2rem, 5vw, 2.35rem); font-weight: 750; letter-spacing: -.06em; font-variant-numeric: tabular-nums; }
+.twenty48-cell[data-value="2"] { background: #f0ecdc; }
+.twenty48-cell[data-value="4"] { background: #e4ddbf; }
+.twenty48-cell[data-value="8"] { background: #e8bc74; }
+.twenty48-cell[data-value="16"] { background: #e89b61; }
+.twenty48-cell[data-value="32"] { background: #e47b55; }
+.twenty48-cell[data-value="64"] { color: #fff8e8; background: #d85d42; }
+.twenty48-cell[data-value="128"], .twenty48-cell[data-value="256"] { color: #fff8e8; background: #547f72; }
+.twenty48-cell[data-value="512"], .twenty48-cell[data-value="1024"] { color: #fff8e8; background: #3c675b; }
+.twenty48-cell[data-value="2048"] { color: #fff; background: var(--tile-mark); }
+.twenty48-bottom { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 48px; margin-top: 14px; }
+.twenty48-bottom p { margin: 0; color: var(--tile-muted); font-size: .86rem; }
+.twenty48-undo:disabled { color: #6e756b; background: transparent; border-color: #a8aa9d; cursor: default; }
+.twenty48-continue { min-height: 30px; padding-inline: 9px; font-size: .8rem; }
+.twenty48-bottom [data-won="true"] { color: #315344; font-weight: 700; }
+.twenty48-name { display: grid; gap: 7px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(32, 37, 30, .25); }
+.twenty48-name[hidden] { display: none; }
+.twenty48-name label { color: var(--tile-ink); font-size: .83rem; font-weight: 700; }
+.twenty48-name > div { display: flex; gap: 8px; }
+.twenty48-name input { width: 100%; min-width: 0; min-height: 42px; padding: 8px 10px; color: var(--tile-ink); background: #fffef7; border: 1px solid #667064; border-radius: 0; font: inherit; }
+.twenty48-name input:focus-visible { outline: 3px solid #b64427; outline-offset: 2px; }
+.twenty48-name p { margin: 0; color: var(--tile-muted); font-size: .82rem; }
+@media (max-width: 520px) {
+  .twenty48 { padding: 14px; box-shadow: 4px 4px 0 rgba(23, 24, 23, .2); }
+  .twenty48-top { align-items: start; flex-direction: column; }
+  .twenty48-new { align-self: stretch; }
+  .twenty48-scores { width: 100%; }
+  .twenty48-scores > div { flex: 1; }
+  .twenty48-cell { font-size: clamp(1.05rem, 7vw, 1.9rem); }
+  .twenty48-bottom { align-items: start; }
+}
+
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {

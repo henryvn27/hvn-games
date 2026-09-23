@@ -11,6 +11,7 @@ export const SHELF_GAMES = [
   { id: "checkers", number: "10", name: "Checkers", kind: "board", description: "Choose a bot, make a jump, and see if you can take the board." },
   { id: "trade", number: "11", name: "City Trader", kind: "board", description: "Buy streets, build them up, and outlast the other players." },
   { id: "driftlock", number: "12", name: "Driftlock", kind: "arcade", description: "Turn gravity, gather three signal cells, and reach the airlock." },
+  { id: "2048", number: "13", name: "2048", kind: "puzzle", description: "Slide matching tiles together to make 2048." },
 ];
 
 // Kept out of the collection, but still reachable for old bookmarks and saved runs.
@@ -62,7 +63,7 @@ export async function renderGameShelf({ app, base }) {
 
 const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
 const SHELF_SCRIPTS = ["word-list.js", "nyt-wordle-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
-const SHELF_ASSET_VERSION = "fullscreen-arcade-1";
+const SHELF_ASSET_VERSION = "2048-native-1";
 const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode > #hvn-shell-app { width: 100%; }
@@ -470,10 +471,7 @@ async function loadNativeShelfRuntime({ base, gameId = null }) {
     document.head.appendChild(link);
   }
 
-  const overrides = document.createElement("style");
-  overrides.dataset.shelfStyle = "native-overrides";
-  overrides.textContent = NATIVE_SHELF_OVERRIDES;
-  document.head.appendChild(overrides);
+  applyNativeShelfOverrides();
 
   for (const file of SHELF_SCRIPTS) {
     if (file === "nyt-wordle-list.js" && gameId !== "word") continue;
@@ -488,7 +486,24 @@ async function loadNativeShelfRuntime({ base, gameId = null }) {
   }
 }
 
+function applyNativeShelfOverrides() {
+  if (document.querySelector('style[data-shelf-style="native-overrides"]')) return;
+  const overrides = document.createElement("style");
+  overrides.dataset.shelfStyle = "native-overrides";
+  overrides.textContent = NATIVE_SHELF_OVERRIDES;
+  document.head.appendChild(overrides);
+}
+
 async function mountNativeShelfGame({ base, gameId }) {
+  if (gameId === "2048" || gameId === "driftlock") {
+    applyNativeShelfOverrides();
+    await loadShelfRewards(base);
+    window.Shelf?.record("game_play", { id: gameId });
+  }
+  if (gameId === "2048") {
+    const { mount2048 } = await import("../../games/twentyfortyeight/game.js");
+    return mount2048(document.querySelector("#shelf-native-host"));
+  }
   if (gameId === "driftlock") {
     const { mountDriftlock } = await import("../../games/driftlock/driftlock.js");
     return mountDriftlock(document.querySelector("#shelf-native-host"));
@@ -544,6 +559,18 @@ async function mountNativeShelfGame({ base, gameId }) {
   }
 }
 
+async function loadShelfRewards(base) {
+  if (window.Shelf) return;
+  await new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = `${base}shelf/rewards.js?v=${SHELF_ASSET_VERSION}`;
+    script.dataset.shelfScript = "rewards.js";
+    script.onload = resolve;
+    script.onerror = () => reject(new Error("Could not load game achievements"));
+    document.body.appendChild(script);
+  });
+}
+
 async function renderNativeShelfRewards({ app, base }) {
   document.body.className = "game-page shelf-page shelf-native-mode shelf-rewards-native";
   app.id = "hvn-shell-app";
@@ -574,6 +601,6 @@ function renderShelfHome({ app, base }) {
       <div class="shelf-intro-note"><p>Short games for a spare minute. Pick one and play.</p><span>no install</span></div>
     </section>
     <section class="shelf-grid" aria-label="Other HVN games">${SHELF_GAMES.map((game) => shelfCard(game, base)).join("")}</section>
-    <footer class="site-footer shelf-footer"><a href="${base}?game=shelf&amp;view=rewards">achievements</a><span>11 games</span></footer>
+    <footer class="site-footer shelf-footer"><a href="${base}?game=shelf&amp;view=rewards">achievements</a><span>${SHELF_GAMES.length} games</span></footer>
   </main>`;
 }

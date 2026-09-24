@@ -1,6 +1,6 @@
 import "./styles.css";
 import { mountGoogleAdSlots, mountScoutlyFallback } from "./ads.js";
-import { createGamePlaytimeTracker, createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, getPlaytimeSharing, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlaytimeSharing, setPlayerName } from "./play-intelligence.js";
+import { createGamePlaytimeTracker, createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, getPlaytimeSharing, hasPlaytimePrivacySignal, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlaytimeSharing, setPlayerName } from "./play-intelligence.js";
 import orbitPolicyArtifact from "../../games/phasebound/orbit-policy.json";
 import { renderGameShelf, SHELF_GAMES } from "./shelf.js";
 import { hiddenGames, hiddenGamesLabel, rankFeaturedGames } from "./featured-games.js";
@@ -68,12 +68,14 @@ function setupPlaytimePreferences() {
   };
   const render = () => {
     const choice = getPlaytimeSharing();
-    if (choice === "yes") {
-      root.innerHTML = `<p>Playtime sharing is on. Only the game and seconds in this visible tab are counted. <a href="${base}privacy.html">Details</a></p><button type="button" data-playtime="off">Turn off</button>`;
+    if (hasPlaytimePrivacySignal()) {
+      root.innerHTML = `<p>Playtime sharing is off because your browser sent a privacy signal. <a href="${base}privacy.html">Details</a></p>`;
+    } else if (choice === "yes") {
+      root.innerHTML = `<p>Playtime sharing is on. We count visible game time to help choose the home-page games. No name, score, or account is sent. <a href="${base}privacy.html">Details</a></p><button type="button" data-playtime="off">Turn off</button>`;
     } else if (choice === "no") {
       root.innerHTML = `<p>Playtime sharing is off. The home page uses shared totals and game requests to pick its ten. <a href="${base}privacy.html">Details</a></p><button type="button" data-playtime="on">Turn on</button>`;
     } else {
-      root.innerHTML = `<div><strong>Help choose the games on the home page.</strong><p>Share time spent with each game in this visible tab. No name, score, or account is sent; totals are grouped by game.</p><a href="${base}privacy.html">Details</a></div><div><button type="button" data-playtime="on">Share playtime</button><button type="button" data-playtime="off">No thanks</button></div>`;
+      root.innerHTML = `<div><strong>Playtime sharing is off.</strong><p>Turn it on to count visible time by game and help choose the home-page games.</p><a href="${base}privacy.html">Details</a></div><div><button type="button" data-playtime="on">Turn on</button><button type="button" data-playtime="off">Keep off</button></div>`;
     }
   };
   root.addEventListener("click", (event) => {

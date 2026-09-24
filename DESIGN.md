@@ -30,7 +30,9 @@ Sky-blue paper and navy ink in light mode, dark plum surfaces in dark mode, with
 
 ## Distinctness rule
 
-The collection felt interchangeable because the shared timed-run shell flattened the experience. Every future game must own its objective shape, primary metric, failure condition, HUD vocabulary, and result language. A future game needs a one-sentence player fantasy and one primary decision that is visibly different before implementation.
+The collection felt interchangeable because the shared timed-run shell flattened the experience. Every future game must own its objective shape, primary metric, failure condition, HUD vocabulary, and result language. A future game needs a one-sentence player fantasy and one primary decision that is visibly different before implementation. The gallery card must also name a concrete action, and visitors must be able to filter by a play style that matches the real controls and decisions. A generic genre word by itself is not enough to distinguish a game.
+
+The gallery uses a small plain-language play-style filter and a game-specific verb on each card. Filters only change which cards are shown; they never change the ten-game ranking or promotion requests.
 
 Applied here: Orbit is the public game. The old experiments are gone from the repo; a future game gets a separate visual language and runtime instead of inheriting Orbit's shell.
 

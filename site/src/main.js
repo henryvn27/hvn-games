@@ -4,7 +4,7 @@ import { createGamePlaytimeTracker, createGameTracker, getExperimentAssignment, 
 import { formatLeaderboardScore, getLeaderboardMetric, sortLeaderboardEntries } from "./leaderboard-metrics.js";
 import orbitPolicyArtifact from "../../games/phasebound/orbit-policy.json";
 import { renderGameShelf, SHELF_GAMES } from "./shelf.js";
-import { hiddenGames, hiddenGamesLabel, rankFeaturedGames } from "./featured-games.js";
+import { filterGamesByPlayStyle, hiddenGames, hiddenGamesLabel, PLAY_STYLES, rankFeaturedGames } from "./featured-games.js";
 
 const app = document.querySelector("#app");
 const base = import.meta.env.BASE_URL;
@@ -129,6 +129,7 @@ function renderGallery() {
 
       <section class="gallery-shelf page-width" id="featured-games" aria-labelledby="featured-games-title">
         <div class="gallery-shelf-heading"><h2 id="featured-games-title">Featured games</h2><p id="featured-games-note">A starter set while playtime totals build.</p></div>
+        ${playStyleFiltersMarkup("featured")}
         <div class="shelf-grid" id="featured-games-grid" aria-label="Ten featured games">${initial.games.map((game, index) => galleryGameCard({ ...game, number: String(index + 1).padStart(2, "0") })).join("")}</div>
         <a class="hidden-games-link" href="${base}?view=hidden-games">${hiddenGamesLabel(galleryGames.length - initial.games.length)}</a>
       </section>
@@ -154,18 +155,20 @@ function renderGallery() {
   `;
   setupCopyButtons();
   setupLeaderboard();
-  void refreshFeaturedGames(galleryGames);
+  const featuredFilters = installPlayStyleFilters("featured", document.querySelector("#featured-games-grid"));
+  featuredFilters.setGames(initial.games.map((game, index) => ({ ...game, number: String(index + 1).padStart(2, "0") })));
+  void refreshFeaturedGames(galleryGames, featuredFilters);
 }
 
 function getGalleryGames() {
   return [
-    { id: "phasebound", number: "01", name: "Orbit", kind: "arcade", description: "Match your color. Dodge the red planets.", href: `${base}?game=${ORBIT_ROUTE}`, action: "play Orbit" },
-    { id: "neon-bastion", number: "02", name: "Space Tower Defense", kind: "strategy", description: "Build a lunar relay defense, then stop the crawlers before they reach it.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
+    { id: "phasebound", number: "01", name: "Orbit", kind: "arcade", playStyle: "action", playCue: "Match your color, dodge the planets", description: "Match your color. Dodge the red planets.", href: `${base}?game=${ORBIT_ROUTE}`, action: "play Orbit" },
+    { id: "neon-bastion", number: "02", name: "Space Tower Defense", kind: "strategy", playStyle: "strategy", playCue: "Place towers along the lunar route", description: "Build a lunar relay defense, then stop the crawlers before they reach it.", href: `${base}?game=${TOWER_DEFENSE_ROUTE}`, action: "play" },
     ...SHELF_GAMES.map((game) => ({ ...game, number: String(Number(game.number) + 2).padStart(2, "0"), href: `${base}?game=${SHELF_ROUTE}&play=${game.id}`, action: `play ${game.name}` })),
   ];
 }
 
-async function refreshFeaturedGames(catalog) {
+async function refreshFeaturedGames(catalog, filters) {
   const grid = document.querySelector("#featured-games-grid");
   const note = document.querySelector("#featured-games-note");
   if (!grid || !note) return;
@@ -180,7 +183,7 @@ async function refreshFeaturedGames(catalog) {
     return;
   }
   const ranking = rankFeaturedGames(catalog, result.games, 10, result.requests);
-  grid.innerHTML = ranking.games.map((game, index) => galleryGameCard({ ...game, number: String(index + 1).padStart(2, "0") })).join("");
+  filters.setGames(ranking.games.map((game, index) => ({ ...game, number: String(index + 1).padStart(2, "0") })));
   note.textContent = ranking.ranked
     ? "Sorted by playtime. A recent request can move a game onto the home page."
     : "No shared playtime yet. This starter set stays up while totals build.";
@@ -194,6 +197,7 @@ function renderHiddenGameCatalog(catalog) {
     <header class="site-header page-width"><a class="wordmark" href="${base}">HVN games</a><nav class="site-nav" aria-label="Game navigation"><a href="${base}">home</a></nav></header>
     <main class="hidden-games-main page-width">
       <div class="game-heading"><div><p class="game-index">${hidden.length} games</p><h1>Hidden games.</h1></div><p class="game-blurb">They’re off the home page, but the games still work. Pick one to play.</p></div>
+      ${playStyleFiltersMarkup("hidden")}
       <div class="shelf-grid" id="hidden-games-grid" aria-label="Hidden games">${hidden.map((game) => galleryGameCard(game, { requestFeature: true })).join("")}</div>
       <p id="hidden-games-note" role="status" aria-live="polite"></p>
     </main>
@@ -201,6 +205,8 @@ function renderHiddenGameCatalog(catalog) {
   `;
   const grid = document.querySelector("#hidden-games-grid");
   const status = document.querySelector("#hidden-games-note");
+  const filters = installPlayStyleFilters("hidden", grid, { requestFeature: true });
+  filters.setGames(hidden);
   grid?.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-feature-request]");
     if (!button) return;
@@ -226,7 +232,7 @@ function renderHiddenGameCatalog(catalog) {
     }
     const next = rankFeaturedGames(catalog, updated.games, 10, updated.requests);
     const isFeatured = next.games.some((game) => game.id === gameId);
-    grid.innerHTML = hiddenGames(catalog, next.games).map((game) => galleryGameCard(game, { requestFeature: true })).join("");
+    filters.setGames(hiddenGames(catalog, next.games));
     status.textContent = isFeatured ? "Added to the featured games on the home page." : "Request counted. It’ll move up as more players request it.";
   });
   const online = window.HVNOnlineLeaderboard;
@@ -237,17 +243,50 @@ function renderHiddenGameCatalog(catalog) {
     const other = hiddenGames(catalog, ranking.games);
     const grid = document.querySelector("#hidden-games-grid");
     const note = document.querySelector("#hidden-games-note");
-    if (grid) grid.innerHTML = other.map((game) => galleryGameCard(game, { requestFeature: true })).join("");
+    if (grid) filters.setGames(other);
     if (note) note.textContent = ranking.ranked ? "The home-page set updates as shared playtime changes." : "The home page will sort these after playtime totals build.";
   });
 }
 
 function galleryGameCard(game, options = {}) {
   return `<article class="shelf-card shelf-card-${game.kind}">
-    <div class="shelf-card-top"><span>${game.number}</span><span>${game.kind}</span></div>
+    <div class="shelf-card-top"><span>${game.number}</span><span class="shelf-card-cue">${game.playCue || "Choose your move"}</span></div>
     <div><h2>${game.name}</h2><p>${game.description}</p></div>
     <div class="shelf-card-actions"><a class="button button-secondary" href="${game.href}">${game.action}</a>${options.requestFeature ? `<button class="hidden-game-request" type="button" data-feature-request="${game.id}">Request a spot on the home page</button>` : ""}</div>
   </article>`;
+}
+
+function playStyleFiltersMarkup(id) {
+  return `<div class="play-style-filter" id="${id}-play-style-filter">
+    <p class="play-style-label">What sounds fun?</p>
+    <div class="play-style-buttons" role="group" aria-label="Filter games by play style" data-play-style-buttons="${id}"></div>
+    <p class="play-style-status" role="status" aria-live="polite" data-play-style-status="${id}"></p>
+  </div>`;
+}
+
+function installPlayStyleFilters(id, grid, options = {}) {
+  const buttons = document.querySelector(`[data-play-style-buttons="${id}"]`);
+  const status = document.querySelector(`[data-play-style-status="${id}"]`);
+  let games = [];
+  let selected = "all";
+  const render = () => {
+    const counts = new Map(PLAY_STYLES.slice(1).map(({ id: style }) => [style, games.filter((game) => game.playStyle === style).length]));
+    if (!counts.get(selected) && selected !== "all") selected = "all";
+    buttons.innerHTML = PLAY_STYLES.filter(({ id: style }) => style === "all" || counts.get(style) > 0).map(({ id: style, label }) => {
+      const count = style === "all" ? games.length : counts.get(style);
+      return `<button type="button" data-play-style="${style}" aria-pressed="${selected === style}">${label} <span>${count}</span></button>`;
+    }).join("");
+    const visible = filterGamesByPlayStyle(games, selected);
+    grid.innerHTML = visible.map((game) => galleryGameCard(game, options)).join("");
+    status.textContent = selected === "all" ? `Showing all ${visible.length} games.` : `${PLAY_STYLES.find((style) => style.id === selected)?.label}: ${visible.length} ${visible.length === 1 ? "game" : "games"}.`;
+  };
+  buttons.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-play-style]");
+    if (!button) return;
+    selected = button.dataset.playStyle;
+    render();
+  });
+  return { setGames(nextGames) { games = [...nextGames]; render(); } };
 }
 
 async function renderSpaceWars() {

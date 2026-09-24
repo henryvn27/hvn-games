@@ -27,6 +27,18 @@ The host flow is the public `HVN games` page. A visitor opens the gallery and a 
 
 The gallery now features Orbit and the other visible game routes. Comet remains archived in source but is not presented as a playable gallery choice. New games should add a new verb or decision, not another skin for the same loop.
 
+## Gallery play-style discovery
+
+- Trigger: open the home page or hidden-games catalog and choose a play-style filter.
+- Input: existing game catalog metadata only (`playStyle`, `playCue`, and the current ranked game list); no player data or external request is added.
+- Invocation: the gallery renders the top ten as usual, then filters those visible cards in place. The hidden catalog uses the same controls without changing request buttons.
+- Output: a smaller, clearly labeled set of game cards with game-specific first verbs and existing Play links.
+- Next action: choose a game and follow its existing local route.
+- Owner/adoption point: `site/src/main.js` and the `SHELF_GAMES` metadata in `site/src/shelf.js`.
+- Manual fallback: select “All games”; ranking and routes remain unchanged.
+- Rollback/disable: remove the play-style controls and filter helper from the gallery; no stored state needs migration.
+- Proof run: featured-list ranking and filter unit checks, build, and browser clicks on each visible filter at desktop and narrow widths, including the hidden catalog and its promotion request control.
+
 ## Comet source boundary
 
 - Source selected: https://github.com/adrianov/snake

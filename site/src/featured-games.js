@@ -2,6 +2,20 @@ export const INITIAL_FEATURED_IDS = [
   "phasebound", "2048", "snake", "golf", "reaction", "dodger", "memory", "word", "flappy", "tic",
 ];
 
+export const PLAY_STYLES = [
+  { id: "all", label: "All games" },
+  { id: "action", label: "Move & react" },
+  { id: "puzzle", label: "Solve & match" },
+  { id: "strategy", label: "Plan ahead" },
+  { id: "board", label: "Board & cards" },
+  { id: "timing", label: "Aim & timing" },
+];
+
+export function filterGamesByPlayStyle(games, style = "all") {
+  if (style === "all") return [...games];
+  return games.filter((game) => game.playStyle === style);
+}
+
 export function rankFeaturedGames(games, usage, limit = 10, requests = []) {
   const seconds = new Map((Array.isArray(usage) ? usage : []).map((item) => [item.gameId, Math.max(0, Number(item.seconds) || 0)]));
   const requestCounts = new Map((Array.isArray(requests) ? requests : []).map((item) => [item.gameId, Math.max(0, Number(item.count) || 0)]));

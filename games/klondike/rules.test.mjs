@@ -1,0 +1,21 @@
+import assert from "node:assert/strict";
+import { canPlaceTableau, createKlondikeRun, drawKlondikeStock, moveKlondike } from "./rules.js";
+
+const dealt = createKlondikeRun(42);
+assert.equal(dealt.stock.length, 24);
+assert.equal(dealt.tableau.length, 7);
+assert.equal(new Set([...dealt.stock, ...dealt.waste, ...Object.values(dealt.foundations).flat(), ...dealt.tableau.flat()].map((card) => card.id)).size, 52);
+assert.equal(dealt.tableau[0].at(-1).faceUp, true);
+const state = createKlondikeRun(4);
+state.stock = [];
+state.waste = [{ id: "H12", suit: "H", rank: 12, faceUp: true }];
+state.tableau[0] = [{ id: "S13", suit: "S", rank: 13, faceUp: true }];
+assert.equal(canPlaceTableau(state.waste.at(-1), state.tableau[0]), true);
+assert.equal(moveKlondike(state, { type: "waste" }, { type: "tableau", pile: 0 }), true);
+assert.equal(state.tableau[0].length, 2);
+state.waste = [{ id: "D1", suit: "D", rank: 1, faceUp: true }];
+assert.equal(moveKlondike(state, { type: "waste" }, { type: "foundation", suit: "D" }), true);
+assert.equal(state.foundations.D.length, 1);
+state.stock = [{ id: "C2", suit: "C", rank: 2, faceUp: false }];
+assert.equal(drawKlondikeStock(state).id, "C2");
+console.log("Klondike rules tests passed");

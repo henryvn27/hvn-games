@@ -79,6 +79,31 @@ const required = [
   "games/handshake/README.md",
   "games/handshake/DESIGN.md",
   "games/handshake/INTEGRATION.md",
+  "games/maze-chase/runtime.js",
+  "games/maze-chase/simulation.mjs",
+  "games/maze-chase/simulation.test.mjs",
+  "games/maze-chase/style.css",
+  "games/maze-chase/README.md",
+  "games/asteroids/runtime.js",
+  "games/asteroids/simulation.mjs",
+  "games/asteroids/simulation.test.mjs",
+  "games/asteroids/style.css",
+  "games/asteroids/README.md",
+  "games/mahjong/runtime.js",
+  "games/mahjong/rules.js",
+  "games/mahjong/rules.test.mjs",
+  "games/mahjong/style.css",
+  "games/mahjong/README.md",
+  "games/klondike/runtime.js",
+  "games/klondike/rules.js",
+  "games/klondike/rules.test.mjs",
+  "games/klondike/style.css",
+  "games/klondike/README.md",
+  "games/breakout/runtime.js",
+  "games/breakout/simulation.js",
+  "games/breakout/simulation.test.mjs",
+  "games/breakout/style.css",
+  "games/breakout/README.md",
   "games/phasebound/orbit-policy.js",
   "games/phasebound/orbit-policy.json",
   "tools/orbit_rl/orbit_env.py",
@@ -140,7 +165,7 @@ for (const marker of ["startComet", "Comet", "setDirection", "spawnFood", "maybe
 }
 
 const shelf = readFileSync(join(root, "site/src/shelf.js"), "utf8");
-for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "driftlock", "2048", "invaders", "hex-stack", "minesweeper", "block-drop", "tidepool", "handshake", "shelf-native-host", "mountNativeShelfGame", "loadNativeShelfRuntime", "renderNativeShelfRewards", "view=rewards", "Achievements", "Other HVN games"]) {
+for (const marker of ["golf", "snake", "dodger", "memory", "reaction", "word", "clicker", "flappy", "platform", "tic", "checkers", "trade", "driftlock", "2048", "invaders", "hex-stack", "minesweeper", "block-drop", "tidepool", "handshake", "maze-chase", "asteroids", "mahjong", "klondike", "spookyball", "shelf-native-host", "mountNativeShelfGame", "loadNativeShelfRuntime", "renderNativeShelfRewards", "view=rewards", "Achievements", "Other HVN games"]) {
   if (!shelf.includes(marker)) throw new Error(`Shelf is missing game or route marker: ${marker}`);
 }
 if (!shelf.includes('import("../../games/driftlock/driftlock.js")')) throw new Error("Driftlock is not connected to the native shelf runtime");
@@ -151,8 +176,10 @@ if (!shelf.includes('import("../../games/hex-stack/runtime.mjs")')) throw new Er
 if (!shelf.includes('import("../../games/minesweeper/runtime.js")')) throw new Error("Minesweeper is not connected to the native shelf runtime");
 if (!shelf.includes('import("../../games/block-drop/runtime.js")')) throw new Error("Block Drop is not connected to the native shelf runtime");
 if (!shelf.includes('import("../../games/handshake/runtime.js")')) throw new Error("Handshake is not connected to the native shelf runtime");
+if (!shelf.includes('import("../../games/maze-chase/runtime.js")') || !shelf.includes('import("../../games/asteroids/runtime.js")') || !shelf.includes('import("../../games/mahjong/runtime.js")') || !shelf.includes('import("../../games/klondike/runtime.js")') || !shelf.includes('import("../../games/breakout/runtime.js")')) throw new Error("All five native additions must have a shelf runtime");
 if (!shelf.includes('import("../../games/tidepool/runtime.js")')) throw new Error("Tidepool is not connected to the native shelf runtime");
 if (!shelf.includes('id: "dockside", number: "14"') || !shelf.includes('id: "invaders", number: "15"') || !shelf.includes('id: "hex-stack", number: "16"') || !shelf.includes('id: "minesweeper", number: "17"') || !shelf.includes('id: "block-drop", number: "18"') || !shelf.includes('id: "tidepool", number: "19"') || !shelf.includes('id: "handshake", number: "21"')) throw new Error("The latest shelf games are missing from the collection");
+if (!shelf.includes('id: "maze-chase", number: "22"') || !shelf.includes('id: "asteroids", number: "23"') || !shelf.includes('id: "mahjong", number: "24"') || !shelf.includes('id: "klondike", number: "25"') || !shelf.includes('id: "spookyball", number: "26"')) throw new Error("The five native additions are missing from their shelf slots");
 if (!shelf.includes('await loadShelfRewards(base)')) throw new Error("Native games do not load the shared achievements store");
 if (!shelf.includes('href = `${base}shelf/rewards.css`')) throw new Error("Native games do not load the shared achievement notification styles");
 if (shelf.includes('name: "Garden Snake"')) throw new Error("Shelf still uses the old Snake name");
@@ -160,6 +187,14 @@ if (shelf.includes("<iframe")) throw new Error("Game Shelf still uses a nested i
 const rewards = readFileSync(join(root, "site/public/shelf/rewards.js"), "utf8");
 for (const marker of ["'driftlock'", "'2048'", "'dockside'", "'invaders'", "'hex-stack'", "'minesweeper'", "'block-drop'", "'tidepool'", "'handshake'", "Try all ${GAME_IDS.length} games.", "dockside_run", "invaders_wave", "minesweeper_win", "block_drop_sweep", "handshake_table"]) {
   if (!rewards.includes(marker)) throw new Error(`Achievements are missing active shelf game: ${marker}`);
+}
+
+for (const marker of ["'maze-chase'", "'asteroids'", "'mahjong'", "'klondike'", "'spookyball'"]) {
+  if (!rewards.includes(marker)) throw new Error("Achievements are missing a native shelf game: " + marker);
+}
+const leaderboardMain = readFileSync(join(root, "site/src/main.js"), "utf8");
+for (const marker of ['id: "maze-chase"', 'id: "asteroids"', 'id: "mahjong"', 'id: "klondike"', 'id: "spookyball"']) {
+  if (!leaderboardMain.includes(marker)) throw new Error("Leaderboard picker is missing a native shelf game: " + marker);
 }
 
 const workflow = readFileSync(join(root, ".github/workflows/pages.yml"), "utf8");

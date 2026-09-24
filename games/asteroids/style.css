@@ -1,0 +1,38 @@
+.asteroids-game {
+  --paper: #f0f2ec;
+  --ink: #202d31;
+  --muted: #4c6062;
+  --line: #8b9b98;
+  display: grid;
+  gap: 14px;
+  padding: clamp(12px, 3vw, 22px);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+}
+.asteroids-hud { display: grid; grid-template-columns: repeat(auto-fit, minmax(86px, 1fr)); align-items: center; gap: 12px; }
+.asteroids-hud > div { display: grid; gap: 3px; }
+.asteroids-hud span { color: var(--muted); font-size: .74rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.asteroids-hud strong { font-size: 1.18rem; font-variant-numeric: tabular-nums; }
+.asteroids-game button { min-height: 42px; padding: 8px 13px; border: 1px solid #263f44; border-radius: 2px; background: #263f44; color: #f5f6ef; font: 700 1rem/1.1 sans-serif; cursor: pointer; }
+.asteroids-game button:disabled { opacity: .58; cursor: not-allowed; }
+.asteroids-game button:focus-visible { outline: 3px solid #b36616; outline-offset: 3px; }
+.asteroids-stage { position: relative; width: 100%; overflow: hidden; background: #111b23; }
+.asteroids-stage canvas { display: block; width: 100%; height: auto; touch-action: none; }
+.asteroids-overlay { position: absolute; inset: 0; display: grid; align-content: center; justify-items: center; gap: 13px; padding: 22px; background: rgb(17 27 35 / 91%); color: #f5f6ef; text-align: center; }
+.asteroids-overlay[hidden] { display: none; }
+.asteroids-overlay h2 { margin: 0; font-size: clamp(1.8rem, 5vw, 3rem); }
+.asteroids-overlay p { max-width: 42ch; margin: 0; color: #d7e0dc; line-height: 1.5; }
+.asteroids-overlay button { min-width: 124px; border-color: #c1f0d9; background: #c1f0d9; color: #183b36; }
+.asteroids-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.asteroids-controls [data-control] { min-width: 68px; min-height: 48px; touch-action: none; user-select: none; }
+.asteroids-help { min-height: 1.5em; margin: 0; color: var(--muted); text-align: center; }
+.asteroids-score-form { display: flex; flex-wrap: wrap; align-items: end; justify-content: center; gap: 9px; }
+.asteroids-score-form[hidden] { display: none; }
+.asteroids-score-form label { display: grid; gap: 5px; }
+.asteroids-score-form input { min-height: 42px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 2px; font: inherit; }
+.asteroids-score-form [role="status"] { flex-basis: 100%; text-align: center; }
+@media (prefers-color-scheme: dark) {
+  .asteroids-game { --paper: #202a2c; --ink: #f1f3ec; --muted: #c2d0cc; --line: #869691; }
+  .asteroids-score-form input { background: #172124; color: #f1f3ec; }
+}

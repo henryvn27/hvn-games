@@ -32,13 +32,18 @@
     return safeName;
   }
 
+  function sortEntries(entries, order = 'asc') {
+    const direction = order === 'asc' ? 1 : -1;
+    return (Array.isArray(entries) ? entries : [])
+      .filter(entry => entry && typeof entry.name === 'string' && Number.isFinite(entry.score))
+      .sort((a, b) => direction * (a.score - b.score)
+        || String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
+  }
+
   function get(gameId = 'reaction') {
     const data = read();
     const entries = Array.isArray(data[gameId]) ? data[gameId] : [];
-    return entries
-      .filter(entry => entry && typeof entry.name === 'string' && Number.isFinite(entry.score))
-      .sort((a, b) => a.score - b.score || a.createdAt.localeCompare(b.createdAt))
-      .slice(0, 10);
+    return sortEntries(entries, 'asc').slice(0, 10);
   }
 
   function record(gameId, score) {
@@ -50,12 +55,12 @@
     const duplicate = entries.some(entry => entry.name === name && entry.score === Math.round(score)
       && Math.abs(Date.parse(entry.createdAt) - Date.parse(now)) < 2000);
     if (!duplicate) entries.push({name, score: Math.round(score), createdAt: now});
-    data[gameId] = entries.sort((a, b) => a.score - b.score || a.createdAt.localeCompare(b.createdAt)).slice(0, 25);
+    data[gameId] = sortEntries(entries, 'asc').slice(0, 25);
     write(data);
     return get(gameId);
   }
 
   function cachedScores(gameId = 'reaction') { return get(gameId); }
 
-  window.ShelfLeaderboard = Object.freeze({get, record, getName, setName, cachedScores});
+  window.ShelfLeaderboard = Object.freeze({get, record, getName, setName, cachedScores, sortEntries});
 })();

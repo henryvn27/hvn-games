@@ -10,7 +10,7 @@
 (function () {
   'use strict';
   const STORAGE_KEY = 'game-shelf-rewards-v1';
-  const GAME_IDS = ['snake', 'dodger', 'memory', 'reaction', 'word', 'flappy', 'platform', 'tic', 'checkers', 'trade', 'golf', 'driftlock', '2048', 'dockside', 'invaders', 'hex-stack', 'minesweeper', 'block-drop', 'tidepool', 'chess', 'handshake'];
+  const GAME_IDS = ['snake', 'dodger', 'memory', 'reaction', 'word', 'flappy', 'platform', 'tic', 'checkers', 'trade', 'golf', 'driftlock', '2048', 'dockside', 'invaders', 'hex-stack', 'minesweeper', 'block-drop', 'tidepool', 'chess', 'handshake', 'maze-chase', 'asteroids', 'mahjong', 'klondike', 'spookyball'];
   const categories = {theme: 'Shelf themes', snake: 'Snake colours', ship: 'Spaceship paint', plane: 'Plane paint', golf: 'Golf balls'};
   const icons = {theme: '▦', snake: '🐍', ship: '🚀', plane: '✈', golf: '⛳'};
   const definitions = [

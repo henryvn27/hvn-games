@@ -7,6 +7,7 @@ const MIGRATION_KEY = "hvn-games:leaderboard-migration:v1";
 const FEATURE_REQUEST_KEY = "hvn-games:feature-requests:v1";
 const REQUEST_TIMEOUT_MS = 10000;
 const PLACEHOLDER_NAMES = new Set(["YOU"]);
+const playtimeRequests = new Set();
 function cleanName(value) {
   const raw = String(value || "").trim().replace(/\s+/g, " ").slice(0, 16);
   return /^[a-zA-Z]{3}$/.test(raw) ? raw.toUpperCase() : raw;
@@ -23,6 +24,12 @@ function normalize(row) {
 }
 function request(path, options) {
   const controller = new AbortController();
+  const externalSignal = options && options.signal;
+  const abortFromExternal = () => controller.abort();
+  if (externalSignal) {
+    if (externalSignal.aborted) controller.abort();
+    else externalSignal.addEventListener("abort", abortFromExternal, { once: true });
+  }
   const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   const init = Object.assign({}, options || {}, {
     signal: controller.signal,
@@ -31,7 +38,10 @@ function request(path, options) {
   });
   return fetch(baseUrl + path, init)
     .then((response) => { if (!response.ok) throw new Error("leaderboard request failed (" + response.status + ")"); return response; })
-    .finally(() => window.clearTimeout(timeout));
+    .finally(() => {
+      window.clearTimeout(timeout);
+      externalSignal?.removeEventListener("abort", abortFromExternal);
+    });
 }
 function wait(milliseconds) {
   return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
@@ -57,14 +67,22 @@ function getGameUsage() {
 }
 function reportPlaytime(payload) {
   if (!configured) return Promise.resolve({ status: "unconfigured", ok: false });
+  if (window.HVNPlaytimePreferences?.getPlaytimeSharing?.() !== "yes") return Promise.resolve({ status: "disabled", ok: false });
   const gameId = String(payload && payload.gameId || "").slice(0, 40);
   const seconds = Math.max(0, Math.round(Number(payload && payload.seconds) || 0));
-  const id = String(payload && payload.submissionId || submissionId()).slice(0, 80);
-  if (!gameId || seconds < 1 || seconds > 300 || id.length < 8) return Promise.resolve({ status: "invalid", ok: false });
-  return request("", { method: "POST", body: JSON.stringify({ action: "playtime", gameId, seconds, submissionId: id }), keepalive: Boolean(payload.keepalive) })
+  if (!gameId || seconds < 1 || seconds > 300) return Promise.resolve({ status: "invalid", ok: false });
+  const controller = new AbortController();
+  playtimeRequests.add(controller);
+  return request("", { method: "POST", body: JSON.stringify({ action: "playtime", gameId, seconds, submissionId: submissionId() }), keepalive: Boolean(payload.keepalive), signal: controller.signal })
     .then((response) => response.json())
     .then((result) => result && result.ok ? ({ status: "online", ok: true, duplicate: Boolean(result.duplicate) }) : ({ status: "unavailable", ok: false }))
-    .catch((error) => ({ status: "unavailable", ok: false, error }));
+    .catch((error) => ({ status: "unavailable", ok: false, error }))
+    .finally(() => playtimeRequests.delete(controller));
+}
+
+function cancelPlaytimeReports() {
+  for (const controller of playtimeRequests) controller.abort();
+  playtimeRequests.clear();
 }
 function requestGameFeature(gameId, requestId) {
   if (!configured) return Promise.resolve({ status: "unconfigured", ok: false });
@@ -136,5 +154,5 @@ async function migrate(entriesByGame) {
   try { window.localStorage.setItem(MIGRATION_KEY, JSON.stringify(state)); } catch { /* retry later */ }
   return { status: pending ? "partial" : "online", migrated, pending };
 }
-window.HVNOnlineLeaderboard = Object.freeze({ configured, get, getGameUsage, reportPlaytime, requestGameFeature, submit, migrate, submissionId: migrationId, usableName });
+window.HVNOnlineLeaderboard = Object.freeze({ configured, get, getGameUsage, reportPlaytime, cancelPlaytimeReports, requestGameFeature, submit, migrate, submissionId: migrationId, usableName });
 })();

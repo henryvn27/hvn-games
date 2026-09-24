@@ -1,3 +1,5 @@
+import { getPlayerName, recordLeaderboardScore, setPlayerName } from "./play-intelligence.js";
+
 export const SHELF_GAMES = [
   { id: "golf", number: "01", name: "Mini Golf", kind: "arcade", description: "Six small greens. Banks, bunkers, and a clean line to the cup." },
   { id: "snake", number: "02", name: "Snake", kind: "arcade", description: "Eat apples, grow longer, and don’t hit the wall." },
@@ -20,6 +22,11 @@ export const SHELF_GAMES = [
   { id: "tidepool", number: "19", name: "Tidepool", kind: "arcade", description: "Shape a shore, plant kelp, and keep it wet through three tides." },
   { id: "chess", number: "20", name: "Chess", kind: "board", description: "Win a match to face a sharper opponent. How long can you stay at the table?" },
   { id: "handshake", number: "21", name: "Handshake", kind: "board", description: "Four neighbors. Five deals each. Decide when to share and when to keep." },
+  { id: "maze-chase", number: "22", name: "Maze Chase", kind: "arcade", description: "Clear the lanes, read the corners, and turn on the pursuer with a power orb." },
+  { id: "asteroids", number: "23", name: "Asteroids", kind: "arcade", description: "Turn, thrust, and break up the rocks before your last ship is gone." },
+  { id: "mahjong", number: "24", name: "Mahjong Solitaire", kind: "puzzle", description: "Match open tiles and clear the layered garden." },
+  { id: "klondike", number: "25", name: "Klondike", kind: "card", description: "Build the foundations, manage the stock, and uncover the tableau." },
+  { id: "spookyball", number: "26", name: "Spookyball", kind: "arcade", description: "Angle the paddle, keep the ball alive, and clear the haunted wall." },
 ];
 
 // Kept out of the collection, but still reachable for old bookmarks and saved runs.
@@ -71,8 +78,8 @@ export async function renderGameShelf({ app, base }) {
 }
 
 const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
-const SHELF_SCRIPTS = ["word-list.js", "nyt-wordle-list.js", "rewards.js", "leaderboards.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
-const SHELF_ASSET_VERSION = "handshake-native-1";
+const SHELF_SCRIPTS = ["word-list.js", "nyt-wordle-list.js", "rewards.js", "leaderboards.js", "reaction-countdown.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
+const SHELF_ASSET_VERSION = "reaction-countdown-1";
 const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode > #hvn-shell-app { width: 100%; }
@@ -96,9 +103,9 @@ const NATIVE_SHELF_OVERRIDES = `
   body.shelf-rewards-native #shelf-native-host .game-wrap > .game-head,
   body.shelf-rewards-native #shelf-native-host .game-wrap > p { display: none; }
   body.shelf-native-mode #shelf-native-host .game-wrap > .panel { margin: 0; border-radius: 0; box-shadow: none; }
-  body.shelf-native-mode #shelf-native-host footer,
-  body.shelf-native-mode #shelf-native-host header,
-  body.shelf-native-mode #shelf-native-host nav { display: none; }
+  body.shelf-native-mode #shelf-native-host > footer,
+  body.shelf-native-mode #shelf-native-host > header,
+  body.shelf-native-mode #shelf-native-host > nav { display: none; }
   body.shelf-native-mode #shelf-native-host main { min-height: 0; padding: 0; }
   @media (max-width: 520px) {
     body.shelf-native-mode .shelf-native-main { padding-block: 30px 58px; }
@@ -505,7 +512,7 @@ function applyNativeShelfOverrides() {
 }
 
 async function mountNativeShelfGame({ base, gameId }) {
-  if (["2048", "driftlock", "dockside", "invaders", "hex-stack", "minesweeper", "block-drop", "tidepool", "chess", "handshake"].includes(gameId)) {
+  if (["2048", "driftlock", "dockside", "invaders", "hex-stack", "minesweeper", "block-drop", "tidepool", "chess", "handshake", "maze-chase", "asteroids", "mahjong", "klondike", "spookyball"].includes(gameId)) {
     applyNativeShelfOverrides();
     await loadShelfRewards(base);
     window.Shelf?.record("game_play", { id: gameId });
@@ -549,6 +556,31 @@ async function mountNativeShelfGame({ base, gameId }) {
   if (gameId === "handshake") {
     const { mountHandshake } = await import("../../games/handshake/runtime.js");
     return mountHandshake(document.querySelector("#shelf-native-host"));
+  }
+  if (gameId === "maze-chase") {
+    const { mountMazeChase } = await import("../../games/maze-chase/runtime.js");
+    return mountMazeChase(document.querySelector("#shelf-native-host"));
+  }
+  if (gameId === "spookyball") {
+    const { mountSpookyball } = await import("../../games/breakout/runtime.js");
+    return mountSpookyball(document.querySelector("#shelf-native-host"));
+  }
+  if (gameId === "asteroids") {
+    const { mountAsteroids } = await import("../../games/asteroids/runtime.js");
+    return mountAsteroids(document.querySelector("#shelf-native-host"), {
+      getPlayerName,
+      setPlayerName,
+      recordLeaderboardScore,
+      online: () => window.HVNOnlineLeaderboard,
+    });
+  }
+  if (gameId === "mahjong") {
+    const { mountMahjong } = await import("../../games/mahjong/runtime.js");
+    return mountMahjong(document.querySelector("#shelf-native-host"));
+  }
+  if (gameId === "klondike") {
+    const { mountKlondike } = await import("../../games/klondike/runtime.js");
+    return mountKlondike(document.querySelector("#shelf-native-host"));
   }
   await loadNativeShelfRuntime({ base, gameId });
 

@@ -51,6 +51,11 @@ post({ action: "playtime", gameId: "snake", seconds: 30, submissionId: "receipt-
 const usageEvent = { parameter: { action: "game_usage" } };
 const usage = JSON.parse(vm.runInContext(`doGet(${JSON.stringify(usageEvent)}).getContent()`, context));
 assert.deepEqual(usage.games.map((item) => [item.gameId, item.seconds]), [["snake", 30], ["2048", 15]]);
+const playtimeReceipt = spreadsheet.getSheetByName("Playtime receipts").values[1];
+assert.equal(playtimeReceipt[0], "receipt-0001");
+assert.equal(playtimeReceipt[1], "2048");
+assert.equal(playtimeReceipt[2], 15);
+assert.deepEqual(spreadsheet.getSheetByName("Playtime totals").values[0], ["gameId", "seconds", "updatedAt"]);
 
 const requested = post({ action: "feature_request", gameId: "golf", submissionId: "request-0001" });
 assert.equal(requested.ok, true);

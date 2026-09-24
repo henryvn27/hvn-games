@@ -1,0 +1,8 @@
+.breakout-game { display:block; width:min(100%,640px); margin:auto; background:#14262a; border:1px solid #263f43; }
+.breakout-game canvas { display:block; width:100%; height:auto; touch-action:none; }
+.breakout-controls { display:flex; justify-content:center; align-items:center; gap:10px; margin:12px 0; }
+.breakout-controls button { min-width:54px; min-height:42px; border:1px solid #183236; background:#183236; color:#f1f3e8; font:700 1rem sans-serif; cursor:pointer; }
+[data-status] { min-height:1.5em; color:#314943; text-align:center; }
+.breakout-controls + .breakout-status { color:inherit; }
+.breakout-controls button:focus-visible { outline:3px solid #b83f3f; outline-offset:3px; }
+@media (max-width:520px) { .breakout-game { width:100%; } .breakout-controls button { min-height:48px; } }

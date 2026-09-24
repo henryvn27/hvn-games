@@ -1,6 +1,7 @@
 import "./styles.css";
 import { mountGoogleAdSlots, mountScoutlyFallback } from "./ads.js";
 import { createGamePlaytimeTracker, createGameTracker, getExperimentAssignment, getLeaderboard, getPlayReport, getPlayerName, getPlaytimeSharing, hasPlaytimePrivacySignal, recordGalleryView, recordLeaderboardScore, resetPlayReport, setPlaytimeSharing, setPlayerName } from "./play-intelligence.js";
+import { formatLeaderboardScore, getLeaderboardMetric, sortLeaderboardEntries } from "./leaderboard-metrics.js";
 import orbitPolicyArtifact from "../../games/phasebound/orbit-policy.json";
 import { renderGameShelf, SHELF_GAMES } from "./shelf.js";
 import { hiddenGames, hiddenGamesLabel, rankFeaturedGames } from "./featured-games.js";
@@ -30,6 +31,11 @@ const LEADERBOARD_GAMES = [
   { id: "tidepool", label: "Tidepool" },
   { id: "chess", label: "Chess" },
   { id: "handshake", label: "Handshake" },
+  { id: "maze-chase", label: "Maze Chase" },
+  { id: "asteroids", label: "Asteroids" },
+  { id: "mahjong", label: "Mahjong Solitaire" },
+  { id: "klondike", label: "Klondike" },
+  { id: "spookyball", label: "Spookyball" },
 ];
 
 if (params.get("game")) {
@@ -70,12 +76,14 @@ function setupPlaytimePreferences() {
     const choice = getPlaytimeSharing();
     if (hasPlaytimePrivacySignal()) {
       root.innerHTML = `<p>Playtime sharing is off because your browser sent a privacy signal. <a href="${base}privacy.html">Details</a></p>`;
-    } else if (choice === "yes") {
-      root.innerHTML = `<p>Playtime sharing is on. We count visible game time to help choose the home-page games. No name, score, or account is sent. <a href="${base}privacy.html">Details</a></p><button type="button" data-playtime="off">Turn off</button>`;
+      return;
+    }
+    if (choice === "yes") {
+      root.innerHTML = `<p>Playtime sharing is on. The game, visible seconds, and a one-time receipt for duplicate prevention are sent; no name, score, account, or persistent browser id is included. Google may process connection data. <a href="${base}privacy.html">Details</a></p><button type="button" data-playtime="off">Turn off</button>`;
     } else if (choice === "no") {
-      root.innerHTML = `<p>Playtime sharing is off. The home page uses shared totals and game requests to pick its ten. <a href="${base}privacy.html">Details</a></p><button type="button" data-playtime="on">Turn on</button>`;
+      root.innerHTML = `<p>Playtime sharing is off. Turn it on to share total visible time by game. <a href="${base}privacy.html">Details</a></p><button type="button" data-playtime="on">Turn on</button>`;
     } else {
-      root.innerHTML = `<div><strong>Playtime sharing is off.</strong><p>Turn it on to count visible time by game and help choose the home-page games.</p><a href="${base}privacy.html">Details</a></div><div><button type="button" data-playtime="on">Turn on</button><button type="button" data-playtime="off">Keep off</button></div>`;
+      root.innerHTML = `<div><strong>Help choose the games on the home page.</strong><p>Share time spent with each game in this visible tab. The game, seconds, and a one-time receipt for duplicate prevention are sent; no name, score, or account is included.</p><a href="${base}privacy.html">Details</a></div><div><button type="button" data-playtime="on">Share playtime</button><button type="button" data-playtime="off">No thanks</button></div>`;
     }
   };
   root.addEventListener("click", (event) => {
@@ -395,8 +403,9 @@ function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME, statusNode =
   const localEntries = getLeaderboard(gameId);
   const online = window.HVNOnlineLeaderboard;
   const renderEntries = (entries) => {
+    const orderedEntries = sortLeaderboardEntries(entries, gameId).slice(0, 10);
     node.replaceChildren();
-    if (!entries.length) {
+    if (!orderedEntries.length) {
       const empty = document.createElement("p");
       empty.className = "leaderboard-empty";
       empty.textContent = `No ${game?.label || "game"} scores yet.`;
@@ -405,7 +414,7 @@ function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME, statusNode =
     }
     const list = document.createElement("ol");
     list.className = "leaderboard-list";
-    entries.forEach((entry, index) => {
+    orderedEntries.forEach((entry, index) => {
       const row = document.createElement("li");
       const rank = document.createElement("span");
       rank.className = "leaderboard-rank";
@@ -413,7 +422,7 @@ function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME, statusNode =
       const name = document.createElement("strong");
       name.textContent = entry.name;
       const score = document.createElement("b");
-      score.textContent = String(entry.score);
+      score.textContent = formatLeaderboardScore(entry.score, gameId);
       row.append(rank, name, score);
       list.append(row);
     });
@@ -433,7 +442,7 @@ function renderLeaderboard(node, gameId = DEFAULT_LEADERBOARD_GAME, statusNode =
     return Promise.resolve({ status: "pending-refresh", entries: localEntries });
   }
   if (statusNode) statusNode.textContent = "Loading shared scores…";
-  return online.get(gameId).then((result) => {
+  return online.get(gameId, { order: getLeaderboardMetric(gameId).order }).then((result) => {
     if (result.status === "online") {
       renderEntries(result.entries);
       if (statusNode) statusNode.textContent = "Shared board · top 10 scores";

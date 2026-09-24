@@ -1,3 +1,5 @@
+import { sortLeaderboardEntries } from "./leaderboard-metrics.js";
+
 const STORAGE_KEY = "hvn-games:play-intelligence:v1";
 const MAX_FEEDBACK = 60;
 const PLAYTIME_SHARING_KEY = "hvn-games:share-playtime:v1";
@@ -134,12 +136,15 @@ export function resetPlayReport() {
 }
 
 export function getPlaytimeSharing() {
-  if (hasPlaytimePrivacySignal() || playtimeForcedOff) return "no";
+  if (hasPlaytimePrivacySignal()) return "no";
+  if (playtimeForcedOff) return "no";
   let saved;
   try { saved = window.localStorage.getItem(PLAYTIME_SHARING_KEY); } catch { return "no"; }
-  if (saved === "no" || saved === "yes") return saved;
+  saved ||= "";
+  if (saved === "no") return "no";
+  if (saved === "yes") return "yes";
   const policy = window.HVN_PLAYTIME_POLICY || {};
-  return policy.defaultSharingAllowed === true && policy.requiresPriorConsent !== true ? "yes" : "";
+  return policy.defaultSharingAllowed === true && policy.requiresPriorConsent !== true ? "yes" : "no";
 }
 
 export function setPlaytimeSharing(enabled) {
@@ -148,10 +153,13 @@ export function setPlaytimeSharing(enabled) {
   try {
     window.localStorage.setItem(PLAYTIME_SHARING_KEY, enabled ? "yes" : "no");
     if (enabled) playtimeForcedOff = false;
-    if (!enabled) window.localStorage.removeItem(PLAYTIME_QUEUE_KEY);
   } catch {
     // An opt-out still takes effect in this page when storage is unavailable.
     if (enabled) return false;
+  }
+  if (!enabled) {
+    try { window.localStorage.removeItem(PLAYTIME_QUEUE_KEY); } catch { /* The in-memory opt-out still applies. */ }
+    window.HVNOnlineLeaderboard?.cancelPlaytimeReports?.();
   }
   window.dispatchEvent(new CustomEvent("hvn-playtime-consent-changed", { detail: { enabled: Boolean(enabled) } }));
   return true;
@@ -162,30 +170,8 @@ export function hasPlaytimePrivacySignal() {
   return navigator.globalPrivacyControl === true || String(navigator.doNotTrack || "") === "1";
 }
 
-function readPendingPlaytime() {
-  try {
-    const items = JSON.parse(window.localStorage.getItem(PLAYTIME_QUEUE_KEY) || "[]");
-    return Array.isArray(items) ? items : [];
-  } catch { return []; }
-}
-
-function writePendingPlaytime(items) {
-  try { window.localStorage.setItem(PLAYTIME_QUEUE_KEY, JSON.stringify(items.slice(-200))); } catch { /* Play continues without storage. */ }
-}
-
-function randomReceipt() { return `${Date.now()}-${Math.random().toString(16).slice(2)}`; }
-
-async function flushPlaytimeQueue() {
-  if (getPlaytimeSharing() !== "yes") return;
-  const online = window.HVNOnlineLeaderboard;
-  if (!online?.configured || !online.reportPlaytime) return;
-  const remaining = readPendingPlaytime();
-  for (let index = 0; index < remaining.length; index += 1) {
-    const result = await online.reportPlaytime(remaining[index]);
-    if (result.status === "online") remaining[index] = null;
-    else break;
-  }
-  writePendingPlaytime(remaining.filter(Boolean));
+if (typeof window !== "undefined") {
+  window.HVNPlaytimePreferences = Object.freeze({ getPlaytimeSharing, hasPlaytimePrivacySignal });
 }
 
 export function createGamePlaytimeTracker(gameId) {
@@ -193,47 +179,59 @@ export function createGamePlaytimeTracker(gameId) {
   let active = document.visibilityState === "visible";
   let lastTick = Date.now();
   let pendingMs = 0;
+  let sending = false;
+  let scheduleId = 0;
+  let stopped = false;
+  const online = window.HVNOnlineLeaderboard;
   const tick = () => {
     const now = Date.now();
     if (active) pendingMs += Math.min(Math.max(now - lastTick, 0), 10000);
     lastTick = now;
   };
-  const enqueue = () => {
+  const send = async (keepalive = false) => {
+    if (stopped || getPlaytimeSharing() !== "yes" || hasPlaytimePrivacySignal()) { pendingMs = 0; return; }
+    if (sending || !online?.configured || !online.reportPlaytime) return;
     const seconds = Math.min(300, Math.floor(pendingMs / 1000));
     if (seconds < 1) return;
     pendingMs -= seconds * 1000;
-    const items = readPendingPlaytime();
-    items.push({ gameId, seconds, submissionId: randomReceipt() });
-    writePendingPlaytime(items);
-    void flushPlaytimeQueue();
+    sending = true;
+    try { await online.reportPlaytime({ gameId, seconds, keepalive }); }
+    catch { /* Do not persist reports or their one-time receipt IDs when a request fails. */ }
+    finally { sending = false; }
   };
-  let scheduleId = 0;
-  let stopped = false;
   const schedule = () => {
     if (stopped) return;
     scheduleId = window.setTimeout(() => {
       tick();
-      if (pendingMs >= 15000) enqueue();
+      if (pendingMs >= 15000) void send();
       schedule();
     }, 5000);
   };
   const onVisibility = () => {
     tick();
     active = document.visibilityState === "visible";
-    if (!active) enqueue();
+    if (!active) void send();
   };
-  const onPageHide = () => { tick(); enqueue(); };
-  document.addEventListener("visibilitychange", onVisibility);
-  window.addEventListener("pagehide", onPageHide);
-  window.addEventListener("online", flushPlaytimeQueue);
-  void flushPlaytimeQueue();
-  schedule();
-  return () => {
-    tick(); if (getPlaytimeSharing() === "yes") enqueue(); stopped = true; window.clearTimeout(scheduleId);
+  const onPageHide = () => { tick(); void send(true); };
+  const onPreferenceChange = () => { if (getPlaytimeSharing() !== "yes") stop(); };
+  const stop = () => {
+    if (stopped) return;
+    tick();
+    stopped = true;
+    pendingMs = 0;
+    window.clearTimeout(scheduleId);
+    online?.cancelPlaytimeReports?.();
     document.removeEventListener("visibilitychange", onVisibility);
     window.removeEventListener("pagehide", onPageHide);
-    window.removeEventListener("online", flushPlaytimeQueue);
+    window.removeEventListener("hvn-playtime-consent-changed", onPreferenceChange);
+    window.removeEventListener("storage", onPreferenceChange);
   };
+  document.addEventListener("visibilitychange", onVisibility);
+  window.addEventListener("pagehide", onPageHide);
+  window.addEventListener("hvn-playtime-consent-changed", onPreferenceChange);
+  window.addEventListener("storage", onPreferenceChange);
+  schedule();
+  return stop;
 }
 
 function leaderboardEntries(data, gameId) {
@@ -293,10 +291,7 @@ export function getLeaderboard(gameId = "phasebound") {
     data.leaderboards[gameId] = cleaned;
     writeData(data);
   }
-  return cleaned
-    .slice()
-    .sort((left, right) => right.score - left.score || right.packets - left.packets || left.createdAt.localeCompare(right.createdAt))
-    .slice(0, 10);
+  return sortLeaderboardEntries(cleaned, gameId).slice(0, 10);
 }
 
 export function recordLeaderboardScore(gameId, score, packets, seconds) {
@@ -312,9 +307,7 @@ export function recordLeaderboardScore(gameId, score, packets, seconds) {
     createdAt: new Date().toISOString(),
   };
   entries.push(next);
-  data.leaderboards[gameId] = removeRapidDuplicates(entries)
-    .sort((left, right) => right.score - left.score || right.packets - left.packets || left.createdAt.localeCompare(right.createdAt))
-    .slice(0, 25);
+  data.leaderboards[gameId] = sortLeaderboardEntries(removeRapidDuplicates(entries), gameId).slice(0, 25);
   writeData(data);
   return next;
 }

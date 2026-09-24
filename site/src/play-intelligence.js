@@ -2,6 +2,7 @@ const STORAGE_KEY = "hvn-games:play-intelligence:v1";
 const MAX_FEEDBACK = 60;
 const PLAYTIME_SHARING_KEY = "hvn-games:share-playtime:v1";
 const PLAYTIME_QUEUE_KEY = "hvn-games:playtime-pending:v1";
+let playtimeForcedOff = false;
 
 function blankData() {
   return { games: {}, experiments: {}, feedback: [], leaderboards: {}, playerName: "" };
@@ -133,16 +134,32 @@ export function resetPlayReport() {
 }
 
 export function getPlaytimeSharing() {
-  try { return window.localStorage.getItem(PLAYTIME_SHARING_KEY); } catch { return ""; }
+  if (hasPlaytimePrivacySignal() || playtimeForcedOff) return "no";
+  let saved;
+  try { saved = window.localStorage.getItem(PLAYTIME_SHARING_KEY); } catch { return "no"; }
+  if (saved === "no" || saved === "yes") return saved;
+  const policy = window.HVN_PLAYTIME_POLICY || {};
+  return policy.defaultSharingAllowed === true && policy.requiresPriorConsent !== true ? "yes" : "";
 }
 
 export function setPlaytimeSharing(enabled) {
+  if (enabled && hasPlaytimePrivacySignal()) return false;
+  if (!enabled) playtimeForcedOff = true;
   try {
     window.localStorage.setItem(PLAYTIME_SHARING_KEY, enabled ? "yes" : "no");
+    if (enabled) playtimeForcedOff = false;
     if (!enabled) window.localStorage.removeItem(PLAYTIME_QUEUE_KEY);
-  } catch { return false; }
+  } catch {
+    // An opt-out still takes effect in this page when storage is unavailable.
+    if (enabled) return false;
+  }
   window.dispatchEvent(new CustomEvent("hvn-playtime-consent-changed", { detail: { enabled: Boolean(enabled) } }));
   return true;
+}
+
+export function hasPlaytimePrivacySignal() {
+  const navigator = window.navigator || {};
+  return navigator.globalPrivacyControl === true || String(navigator.doNotTrack || "") === "1";
 }
 
 function readPendingPlaytime() {

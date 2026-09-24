@@ -30,7 +30,7 @@ The gallery route is `http://localhost:5173/?game=shelf&play=driftlock`.
 
 The playfield is rendered with Phaser 3 and original vector shapes. `simulation.js` owns fixed-step movement, gravity, cells, hazard contact, docking, and run state. `driftlock.js` adapts keyboard and touch controls and renders the state. No external assets, network calls, accounts, analytics, or leaderboard writes are used.
 
-Mechanic research: [frankstop/ThisIsTheOnlyLevel](https://github.com/frankstop/ThisIsTheOnlyLevel), MIT licensed. Its six-stage live prototype reuses one small platform layout while changing rules. Driftlock carries forward only that broad rule-remix idea and uses original code, art, geometry, and copy.
+Mechanic research: [frankstop/ThisIsTheOnlyLevel](https://github.com/frankstop/ThisIsTheOnlyLevel). GitHub reports no declared license for that repository, so it was used only to study the broad idea of changing rules around one shared space. Driftlock uses original code, art, geometry, level design, and copy; no upstream code or assets are included.
 
 ## Launch post draft
 

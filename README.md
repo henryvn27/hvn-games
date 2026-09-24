@@ -44,6 +44,6 @@ Turn gravity inside one orbital repair chamber. Gather three signal cells and st
 
 Play from the gallery at `?game=shelf&play=driftlock`. Controls: arrows or WASD to thrust, Space to rotate gravity, P or Escape to pause, and R to restart. Touch controls appear on narrow screens.
 
-Mechanic research: [frankstop/ThisIsTheOnlyLevel](https://github.com/frankstop/ThisIsTheOnlyLevel), MIT. Driftlock uses the broad “same space, changed rules” idea; its game code, art, geometry, stages, and copy are original. See [games/driftlock/README.md](games/driftlock/README.md) and [games/driftlock/DESIGN.md](games/driftlock/DESIGN.md) for the implementation and design read.
+Mechanic research: [frankstop/ThisIsTheOnlyLevel](https://github.com/frankstop/ThisIsTheOnlyLevel). GitHub reports no declared license for that repository, so it was used only to study the broad idea of changing rules around one shared space. Driftlock uses original code, art, geometry, stage design, and copy; no upstream code or assets are included. See [games/driftlock/README.md](games/driftlock/README.md) and [games/driftlock/DESIGN.md](games/driftlock/DESIGN.md) for the implementation and design read.
 
 Launch post draft: “Driftlock is a six-sector flight through one orbital repair chamber. Turn gravity, collect the signal cells, and make the airlock before the loose core catches up. Play in the HVN Games gallery; your best time stays in your browser.”

@@ -1,0 +1,285 @@
+{
+  "name": "market-trail-cem-v1",
+  "version": 1,
+  "weights": {
+    "progress": 2.279677,
+    "star": 5.812703,
+    "safety": 4.026096,
+    "stable": 1.884847,
+    "spring": 0.589573,
+    "checkpoint": 2.037709,
+    "gap": 0.482878,
+    "height": 0.513612,
+    "lookAhead": 358.312263,
+    "jumpLead": 65.847524,
+    "jumpHold": 0.203724,
+    "brakeLead": 16.435638
+  },
+  "training": {
+    "algorithm": "cross-entropy method policy search over interpretable route and movement coefficients",
+    "seed": 20260925,
+    "iterations": 14,
+    "population": 20,
+    "eliteCandidatesPerGeneration": 4,
+    "episodesPerCandidate": 8,
+    "candidateCourseEpisodes": 2240,
+    "maxEpisodeSeconds": 32,
+    "decisionFrequencyHz": 10,
+    "trainingLevels": [
+      1,
+      2,
+      4,
+      5,
+      7,
+      8,
+      10,
+      11
+    ],
+    "heldOutLevels": [
+      3,
+      6,
+      9,
+      12
+    ],
+    "trainingBaseline": {
+      "levels": 8,
+      "completionRate": 1,
+      "meanSeconds": 10.288,
+      "meanStars": 2.5,
+      "meanDeaths": 0.5,
+      "meanFalls": 0,
+      "meanEnemyHits": 0.5,
+      "meanProgress": 1,
+      "meanReturn": 146.486
+    },
+    "trainingSelected": {
+      "levels": 8,
+      "completionRate": 1,
+      "meanSeconds": 7.594,
+      "meanStars": 2.625,
+      "meanDeaths": 0,
+      "meanFalls": 0,
+      "meanEnemyHits": 0,
+      "meanProgress": 1,
+      "meanReturn": 160.12
+    },
+    "heldOutBaseline": {
+      "levels": 4,
+      "completionRate": 1,
+      "meanSeconds": 12.777,
+      "meanStars": 2.75,
+      "meanDeaths": 0.75,
+      "meanFalls": 0,
+      "meanEnemyHits": 0.75,
+      "meanProgress": 1,
+      "meanReturn": 140.861
+    },
+    "heldOutSelected": {
+      "levels": 4,
+      "completionRate": 1,
+      "meanSeconds": 10.235,
+      "meanStars": 3,
+      "meanDeaths": 0.5,
+      "meanFalls": 0,
+      "meanEnemyHits": 0.5,
+      "meanProgress": 1,
+      "meanReturn": 148.488
+    },
+    "heldOutByLevel": [
+      {
+        "level": 3,
+        "course": "Canal shortcut",
+        "baseline": {
+          "level": 3,
+          "course": "Canal shortcut",
+          "completed": true,
+          "seconds": 8.54,
+          "stars": 3,
+          "deaths": 0,
+          "falls": 0,
+          "enemyHits": 0,
+          "progress": 1,
+          "routeScore": 161.57291666666666,
+          "finalAction": "D"
+        },
+        "selected": {
+          "level": 3,
+          "course": "Canal shortcut",
+          "completed": true,
+          "seconds": 7.6,
+          "stars": 3,
+          "deaths": 0,
+          "falls": 0,
+          "enemyHits": 0,
+          "progress": 1,
+          "routeScore": 161.62,
+          "finalAction": "D"
+        }
+      },
+      {
+        "level": 6,
+        "course": "Moving cargo",
+        "baseline": {
+          "level": 6,
+          "course": "Moving cargo",
+          "completed": true,
+          "seconds": 14.1,
+          "stars": 3,
+          "deaths": 1,
+          "falls": 0,
+          "enemyHits": 1,
+          "progress": 1,
+          "routeScore": 135.295,
+          "finalAction": "D"
+        },
+        "selected": {
+          "level": 6,
+          "course": "Moving cargo",
+          "completed": true,
+          "seconds": 8.1,
+          "stars": 3,
+          "deaths": 0,
+          "falls": 0,
+          "enemyHits": 0,
+          "progress": 1,
+          "routeScore": 161.595,
+          "finalAction": "D"
+        }
+      },
+      {
+        "level": 9,
+        "course": "Garden roof",
+        "baseline": {
+          "level": 9,
+          "course": "Garden roof",
+          "completed": true,
+          "seconds": 8.65,
+          "stars": 3,
+          "deaths": 0,
+          "falls": 0,
+          "enemyHits": 0,
+          "progress": 1,
+          "routeScore": 161.5675,
+          "finalAction": "D"
+        },
+        "selected": {
+          "level": 9,
+          "course": "Garden roof",
+          "completed": true,
+          "seconds": 8.02,
+          "stars": 3,
+          "deaths": 0,
+          "falls": 0,
+          "enemyHits": 0,
+          "progress": 1,
+          "routeScore": 161.59916666666666,
+          "finalAction": "D"
+        }
+      },
+      {
+        "level": 12,
+        "course": "The final climb",
+        "baseline": {
+          "level": 12,
+          "course": "The final climb",
+          "completed": true,
+          "seconds": 19.82,
+          "stars": 2,
+          "deaths": 2,
+          "falls": 0,
+          "enemyHits": 2,
+          "progress": 1,
+          "routeScore": 105.00874999999999,
+          "finalAction": "D"
+        },
+        "selected": {
+          "level": 12,
+          "course": "The final climb",
+          "completed": true,
+          "seconds": 17.22,
+          "stars": 3,
+          "deaths": 2,
+          "falls": 0,
+          "enemyHits": 2,
+          "progress": 1,
+          "routeScore": 109.13916666666665,
+          "finalAction": "D"
+        }
+      }
+    ],
+    "history": [
+      {
+        "iteration": 1,
+        "bestReturn": 157.063,
+        "eliteMeanReturn": 152.558
+      },
+      {
+        "iteration": 2,
+        "bestReturn": 158.631,
+        "eliteMeanReturn": 157.49
+      },
+      {
+        "iteration": 3,
+        "bestReturn": 159.608,
+        "eliteMeanReturn": 156.664
+      },
+      {
+        "iteration": 4,
+        "bestReturn": 158.633,
+        "eliteMeanReturn": 157.371
+      },
+      {
+        "iteration": 5,
+        "bestReturn": 158.63,
+        "eliteMeanReturn": 157.246
+      },
+      {
+        "iteration": 6,
+        "bestReturn": 160.12,
+        "eliteMeanReturn": 159.129
+      },
+      {
+        "iteration": 7,
+        "bestReturn": 159.132,
+        "eliteMeanReturn": 158.88
+      },
+      {
+        "iteration": 8,
+        "bestReturn": 159.129,
+        "eliteMeanReturn": 158.88
+      },
+      {
+        "iteration": 9,
+        "bestReturn": 159.132,
+        "eliteMeanReturn": 159.006
+      },
+      {
+        "iteration": 10,
+        "bestReturn": 159.132,
+        "eliteMeanReturn": 158.882
+      },
+      {
+        "iteration": 11,
+        "bestReturn": 159.132,
+        "eliteMeanReturn": 159.131
+      },
+      {
+        "iteration": 12,
+        "bestReturn": 159.133,
+        "eliteMeanReturn": 159.131
+      },
+      {
+        "iteration": 13,
+        "bestReturn": 159.132,
+        "eliteMeanReturn": 159.007
+      },
+      {
+        "iteration": 14,
+        "bestReturn": 159.631,
+        "eliteMeanReturn": 159.007
+      }
+    ],
+    "initialBestReturn": 160.1204,
+    "reproduction": "node tools/mini_platformer_rl/train.mjs"
+  }
+}

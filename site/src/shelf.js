@@ -67,6 +67,11 @@ export async function renderGameShelf({ app, base }) {
           <div><p class="game-index">${selected.number} / ${selected.kind}</p><h1>${selected.name}</h1></div>
           <p class="game-blurb">${selected.description}</p>
         </div>
+        ${selected.id === "dodger" ? `<nav class="shelf-game-tools" aria-label="Space Dodger options"><a href="${params.get("agent") === "1" ? `${base}?game=shelf&amp;play=dodger` : `${base}?game=shelf&amp;play=dodger&amp;agent=1`}">${params.get("agent") === "1" ? "Fly it yourself →" : "Watch the trained pilot →"}</a><a href="${base}?game=space-dodger-rl">Read the policy paper</a></nav>` : ""}
+        ${selected.id === "platform" ? `<nav class="shelf-game-tools" aria-label="Mini Platformer options"><a href="${base}?game=shelf&amp;play=platform&amp;agent=1">Watch the trained pilot →</a><a href="${base}?game=mini-platformer-rl">Read the policy paper</a></nav>` : ""}
+        ${selected.id === "snake" ? `<nav class="shelf-game-tools" aria-label="Snake research options"><a href="${base}?game=snake-rl">Watch the trained pilot and read the paper</a></nav>` : ""}
+        ${selected.id === "asteroids" ? `<nav class="shelf-game-tools" aria-label="Asteroids research options"><a href="${base}?game=asteroids-rl">Watch the trained pilot and read the paper</a></nav>` : ""}
+        ${selected.id === "golf" ? `<nav class="shelf-game-tools" aria-label="Mini Golf research options"><a href="${base}?game=mini-golf-rl">Watch the trained pilot and read the paper</a></nav>` : ""}
         <div id="shelf-native-host" aria-label="${selected.name} game"><div id="app"></div></div>
       </main>
     `;
@@ -77,9 +82,9 @@ export async function renderGameShelf({ app, base }) {
   renderShelfHome({ app, base });
 }
 
-const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
+const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css", "dodger-rl.css"];
 const SHELF_SCRIPTS = ["word-list.js", "nyt-wordle-list.js", "rewards.js", "leaderboards.js", "reaction-countdown.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
-const SHELF_ASSET_VERSION = "reaction-countdown-1";
+const SHELF_ASSET_VERSION = "rl-suite-3";
 const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode > #hvn-shell-app { width: 100%; }
@@ -90,7 +95,7 @@ const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode .game-header .site-nav { display: flex; }
   body.shelf-native-mode .shelf-native-main { max-width: 1180px; padding-block: 44px 78px; }
   body.shelf-native-mode .shelf-game-heading { align-items: end; margin-bottom: 26px; }
-  body.shelf-native-mode .shelf-game-heading .game-index { color: #dfff73; }
+  body.shelf-native-mode .shelf-game-heading .game-index { color: var(--shell-muted, var(--native-muted)); }
   body.shelf-native-mode .shelf-game-heading h1 { color: var(--native-ink); }
   body.shelf-native-mode .shelf-game-heading .game-blurb { color: var(--native-muted); }
   body.shelf-native-mode #shelf-native-host { min-height: 0; overflow: visible; border: 0; background: transparent; box-shadow: none; }
@@ -297,7 +302,7 @@ const NATIVE_SHELF_OVERRIDES = `
   }
 
   /* Each game gets its own material, palette, and control language. */
-  body.shelf-native-mode { --game-paper: #f1f0e9; --game-ink: #1c201d; --game-muted: #6a6d65; --game-line: rgba(28, 32, 29, .2); }
+  body.shelf-native-mode { --shell-ink: var(--native-ink); --shell-muted: var(--native-muted); --shell-line: var(--native-line); --game-paper: #f1f0e9; --game-ink: #1c201d; --game-muted: #6a6d65; --game-line: rgba(28, 32, 29, .2); }
   body.shelf-native-mode[data-shelf-game] .shelf-native-main { max-width: 1120px; }
   body.shelf-native-mode[data-shelf-game] .shelf-game-heading { border-left: 4px solid var(--game-accent, #b8d94b); padding-left: 17px; }
   body.shelf-native-mode[data-shelf-game] #shelf-native-host .panel,
@@ -375,6 +380,24 @@ const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode[data-shelf-game="trade"] .trade-board { border: 8px solid #273438; border-radius: 2px; background: #d1c49d; }
   body.shelf-native-mode[data-shelf-game="trade"] .side-panel { border: 1px solid var(--game-line); border-radius: 3px; background: #f0ece3; }
 
+  /* Shell text follows the page frame; board text follows each game's surface. */
+  body.shelf-native-mode[data-shelf-game="golf"],
+  body.shelf-native-mode[data-shelf-game="snake"],
+  body.shelf-native-mode[data-shelf-game="dodger"],
+  body.shelf-native-mode[data-shelf-game="memory"],
+  body.shelf-native-mode[data-shelf-game="reaction"],
+  body.shelf-native-mode[data-shelf-game="word"],
+  body.shelf-native-mode[data-shelf-game="clicker"],
+  body.shelf-native-mode[data-shelf-game="flappy"],
+  body.shelf-native-mode[data-shelf-game="platform"],
+  body.shelf-native-mode[data-shelf-game="tic"],
+  body.shelf-native-mode[data-shelf-game="checkers"],
+  body.shelf-native-mode[data-shelf-game="trade"] {
+    --shell-ink: var(--game-ink);
+    --shell-muted: var(--game-muted, #6a6d65);
+    --shell-line: var(--game-line, rgba(28, 32, 29, .2));
+  }
+
   @media (max-width: 680px) {
     body.shelf-native-mode[data-shelf-game] .shelf-game-heading { padding-left: 12px; }
     body.shelf-native-mode[data-shelf-game] #shelf-native-host .game-wrap { width: 100%; }
@@ -400,20 +423,20 @@ const NATIVE_SHELF_OVERRIDES = `
   }
   body.shelf-native-mode[data-shelf-game] .game-header {
     background: transparent;
-    border-bottom-color: var(--game-line, var(--native-line));
+    border-bottom-color: var(--shell-line, var(--native-line));
   }
   body.shelf-native-mode[data-shelf-game] .game-header .wordmark,
   body.shelf-native-mode[data-shelf-game] .game-header .site-nav a {
-    color: var(--game-ink, var(--native-ink));
+    color: var(--shell-ink, var(--native-ink));
   }
   body.shelf-native-mode[data-shelf-game] .shelf-game-label {
-    color: var(--game-muted, var(--native-muted));
+    color: var(--shell-muted, var(--native-muted));
   }
   body.shelf-native-mode[data-shelf-game] .shelf-game-heading h1 {
-    color: var(--game-ink, var(--native-ink));
+    color: var(--shell-ink, var(--native-ink));
   }
   body.shelf-native-mode[data-shelf-game] .shelf-game-heading .game-blurb {
-    color: var(--game-muted, var(--native-muted));
+    color: var(--shell-muted, var(--native-muted));
   }
   body.shelf-native-mode[data-shelf-game] #shelf-native-host .game-wrap {
     width: 100%;
@@ -480,15 +503,7 @@ const NATIVE_SHELF_OVERRIDES = `
 `;
 
 async function loadNativeShelfRuntime({ base, gameId = null }) {
-  for (const file of SHELF_STYLES) {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = `${base}shelf/${file}`;
-    link.dataset.shelfStyle = file;
-    document.head.appendChild(link);
-  }
-
-  applyNativeShelfOverrides();
+  await loadNativeShelfStyles(base);
 
   for (const file of SHELF_SCRIPTS) {
     if (file === "nyt-wordle-list.js" && gameId !== "word") continue;
@@ -503,6 +518,18 @@ async function loadNativeShelfRuntime({ base, gameId = null }) {
   }
 }
 
+async function loadNativeShelfStyles(base) {
+  for (const file of SHELF_STYLES) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `${base}shelf/${file}${file === "dodger-rl.css" ? `?v=${SHELF_ASSET_VERSION}` : ""}`;
+    link.dataset.shelfStyle = file;
+    document.head.appendChild(link);
+  }
+
+  applyNativeShelfOverrides();
+}
+
 function applyNativeShelfOverrides() {
   if (document.querySelector('style[data-shelf-style="native-overrides"]')) return;
   const overrides = document.createElement("style");
@@ -512,6 +539,17 @@ function applyNativeShelfOverrides() {
 }
 
 async function mountNativeShelfGame({ base, gameId }) {
+  if (gameId === "platform") {
+    window.MiniPlatformerRL = await import("../../games/mini-platformer/browser.mjs");
+  }
+  const query = new URLSearchParams(window.location.search);
+  const agentMode = gameId === "dodger" && query.get("agent") === "1";
+  if (agentMode) {
+    await loadNativeShelfStyles(base);
+    const { mountSpaceDodgerAgent } = await import("../../games/space-dodger/browser.mjs");
+    const requestedSeed = Number(query.get("seed"));
+    return mountSpaceDodgerAgent(document.querySelector("#shelf-native-host"), { seed: requestedSeed, base });
+  }
   if (["2048", "driftlock", "dockside", "invaders", "hex-stack", "minesweeper", "block-drop", "tidepool", "chess", "handshake", "maze-chase", "asteroids", "mahjong", "klondike", "spookyball"].includes(gameId)) {
     applyNativeShelfOverrides();
     await loadShelfRewards(base);
@@ -586,7 +624,7 @@ async function mountNativeShelfGame({ base, gameId }) {
 
   if (typeof window.play !== "function") throw new Error("Shelf game engine did not expose play()");
   if (gameId === "word" && window.wordleListPromise) await window.wordleListPromise;
-  window.play(gameId);
+  window.play(agentMode ? "dodger-agent" : gameId);
   const plainCopy = {
     checkers: [["Capture every opposing piece. Pick how tactical the computer should be.", "Take all of the other pieces. Choose a bot."]],
     trade: [["You'll play as ", "You are "], [" set to ", " · "]],

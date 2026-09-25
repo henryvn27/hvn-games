@@ -12,6 +12,11 @@ const params = new URLSearchParams(window.location.search);
 const ORBIT_ROUTE = "orbit";
 const LEGACY_ORBIT_ROUTE = "phasebound";
 const ORBIT_RL_ROUTE = "orbit-rl";
+const MINI_PLATFORMER_RL_ROUTE = "mini-platformer-rl";
+const SPACE_DODGER_RL_ROUTE = "space-dodger-rl";
+const SNAKE_RL_ROUTE = "snake-rl";
+const ASTEROIDS_RL_ROUTE = "asteroids-rl";
+const MINI_GOLF_RL_ROUTE = "mini-golf-rl";
 const SHELF_ROUTE = "shelf";
 const TOWER_DEFENSE_ROUTE = "neon-bastion";
 const COMET_ROUTE = "comet";
@@ -53,6 +58,7 @@ if (params.get("game")) {
 
 function currentPlaytimeGameId() {
   const route = params.get("game");
+  if (route === SHELF_ROUTE && params.get("agent") === "1" && ["platform", "dodger"].includes(params.get("play"))) return "";
   if (route === "orbit" || route === "phasebound") return "phasebound";
   if ([TOWER_DEFENSE_ROUTE, COMET_ROUTE, SPACE_WARS_ROUTE].includes(route)) return route;
   if (route === SHELF_ROUTE) return params.get("play") || "";
@@ -130,7 +136,7 @@ function renderGallery() {
       <section class="gallery-shelf page-width" id="featured-games" aria-labelledby="featured-games-title">
         <div class="gallery-shelf-heading"><h2 id="featured-games-title">Featured games</h2><p id="featured-games-note">A starter set while playtime totals build.</p></div>
         ${playStyleFiltersMarkup("featured")}
-        <div class="shelf-grid" id="featured-games-grid" aria-label="Ten featured games">${initial.games.map((game, index) => galleryGameCard({ ...game, number: String(index + 1).padStart(2, "0") })).join("")}</div>
+        <div class="shelf-grid" id="featured-games-grid" aria-label="Ten featured games">${initial.games.map((game, index) => galleryGameCard({ ...game, number: String(index + 1).padStart(2, "0"), playtimeState: "loading" }, { showPlaytime: true })).join("")}</div>
         <a class="hidden-games-link" href="${base}?view=hidden-games">${hiddenGamesLabel(galleryGames.length - initial.games.length)}</a>
       </section>
       <div class="google-ad-slot page-width" data-google-ad-slot="3947449400" aria-label="Advertisement"></div>
@@ -155,8 +161,8 @@ function renderGallery() {
   `;
   setupCopyButtons();
   setupLeaderboard();
-  const featuredFilters = installPlayStyleFilters("featured", document.querySelector("#featured-games-grid"));
-  featuredFilters.setGames(initial.games.map((game, index) => ({ ...game, number: String(index + 1).padStart(2, "0") })));
+  const featuredFilters = installPlayStyleFilters("featured", document.querySelector("#featured-games-grid"), { showPlaytime: true });
+  featuredFilters.setGames(initial.games.map((game, index) => ({ ...game, number: String(index + 1).padStart(2, "0"), playtimeState: "loading" })));
   void refreshFeaturedGames(galleryGames, featuredFilters);
 }
 
@@ -175,15 +181,25 @@ async function refreshFeaturedGames(catalog, filters) {
   const online = window.HVNOnlineLeaderboard;
   if (!online?.configured || !online.getGameUsage) {
     note.textContent = "Waiting for shared playtime totals; this starter set stays available for now.";
+    const starter = rankFeaturedGames(catalog, []).games;
+    filters.setGames(starter.map((game, index) => ({ ...game, number: String(index + 1).padStart(2, "0"), playtimeState: "unavailable" })));
     return;
   }
   const result = await online.getGameUsage();
   if (result.status !== "online") {
     note.textContent = "Couldn’t load shared playtime. Showing the starter set.";
+    const starter = rankFeaturedGames(catalog, []).games;
+    filters.setGames(starter.map((game, index) => ({ ...game, number: String(index + 1).padStart(2, "0"), playtimeState: "unavailable" })));
     return;
   }
   const ranking = rankFeaturedGames(catalog, result.games, 10, result.requests);
-  filters.setGames(ranking.games.map((game, index) => ({ ...game, number: String(index + 1).padStart(2, "0") })));
+  const secondsByGame = new Map(result.games.map((entry) => [entry.gameId, Math.max(0, Number(entry.seconds) || 0)]));
+  filters.setGames(ranking.games.map((game, index) => ({
+    ...game,
+    number: String(index + 1).padStart(2, "0"),
+    sharedPlaytimeSeconds: secondsByGame.get(game.id) || 0,
+    playtimeState: "ready",
+  })));
   note.textContent = ranking.ranked
     ? "Sorted by playtime. A recent request can move a game onto the home page."
     : "No shared playtime yet. This starter set stays up while totals build.";
@@ -249,11 +265,25 @@ function renderHiddenGameCatalog(catalog) {
 }
 
 function galleryGameCard(game, options = {}) {
+  const playtime = game.playtimeState === "unavailable"
+    ? "Shared playtime unavailable"
+    : game.playtimeState === "ready"
+      ? game.sharedPlaytimeSeconds > 0 ? `${formatSharedPlaytime(game.sharedPlaytimeSeconds)} shared` : "No shared time yet"
+      : "Loading shared playtime…";
   return `<article class="shelf-card shelf-card-${game.kind}">
     <div class="shelf-card-top"><span>${game.number}</span><span class="shelf-card-cue">${game.playCue || "Choose your move"}</span></div>
-    <div><h2>${game.name}</h2><p>${game.description}</p></div>
+    <div><h2>${game.name}</h2><p>${game.description}</p>${options.showPlaytime ? `<p class="shelf-card-playtime" data-state="${game.playtimeState || "loading"}">${playtime}</p>` : ""}</div>
     <div class="shelf-card-actions"><a class="button button-secondary" href="${game.href}">${game.action}</a>${options.requestFeature ? `<button class="hidden-game-request" type="button" data-feature-request="${game.id}">Request a spot on the home page</button>` : ""}</div>
   </article>`;
+}
+
+function formatSharedPlaytime(seconds) {
+  const minutes = Math.floor(Math.max(0, Number(seconds) || 0) / 60);
+  if (minutes < 1) return "<1 min";
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  return remainder ? `${hours}h ${remainder}m` : `${hours}h`;
 }
 
 function playStyleFiltersMarkup(id) {
@@ -562,48 +592,80 @@ function beginCountdown({ overlay, title, copy, detail, actionButton, message = 
 
 async function renderRLWriteup() {
   document.body.className = "rl-page";
+  const results = orbitPolicyArtifact.training;
+  const baseline = results.evaluation?.baseline || {};
+  const trained = results.evaluation?.trained || {};
+  const fmt = (value, digits = 2) => Number(value || 0).toFixed(digits);
+  const signed = (value, digits = 2) => `${Number(value || 0) > 0 ? "+" : ""}${fmt(value, digits)}`;
+  const resultRows = [
+    ["Mean score", baseline.score, trained.score, "", 1],
+    ["Matching pickups", baseline.matching_pickups, trained.matching_pickups, "", 2],
+    ["Extra lives collected", baseline.extra_lives, trained.extra_lives, "", 2],
+    ["Survival", baseline.survival_seconds, trained.survival_seconds, " s", 2],
+    ["Wrong-color pickups", baseline.wrong_color_hits, trained.wrong_color_hits, "", 2],
+    ["Collision deaths", baseline.collision_deaths, trained.collision_deaths, "", 2],
+    ["Energy deaths", baseline.energy_deaths, trained.energy_deaths, "", 2],
+  ];
+  const resultTable = resultRows.map(([label, before, after, unit, digits]) => `<tr><th scope="row">${label}</th><td>${fmt(before, digits)}${unit}</td><td>${fmt(after, digits)}${unit}</td><td>${signed(Number(after || 0) - Number(before || 0), digits)}${unit}</td></tr>`).join("");
+  const weightRows = Object.entries(orbitPolicyArtifact.weights).map(([name, value]) => `<tr><th scope="row">${name}</th><td>${fmt(value, 6)}</td></tr>`).join("");
   app.innerHTML = `
     <header class="site-header page-width">
       <a class="wordmark" href="${base}" aria-label="HVN games home">HVN games</a>
-      <nav class="site-nav" aria-label="Page navigation"><a href="${base}?game=${ORBIT_ROUTE}">back to Orbit</a></nav>
+      <nav class="site-nav" aria-label="Page navigation"><a href="${base}?game=${ORBIT_ROUTE}">play Orbit</a><a href="${base}">home</a></nav>
     </header>
-    <main class="rl-main page-width">
+    <main class="rl-main page-width orbit-paper-main">
       <section class="rl-hero" aria-labelledby="rl-title">
-        <p class="rl-kicker">Orbit / technical note 01</p>
-        <h1 id="rl-title">Teaching Orbit<br><em>to keep going.</em></h1>
-        <p class="rl-dek">A small policy trained in Python, then moved into the browser. It watches the same playfield you do and chooses where to steer next.</p>
+        <p class="rl-kicker">HVN Games / Orbit / research paper 01</p>
+        <h1 id="rl-title">A survival policy<br><em>for Orbit.</em></h1>
+        <p class="rl-dek">An interpretable policy-search agent for phase-matched collection, hazard avoidance, energy management, and extra-life recovery.</p>
+        <p class="rl-byline">HVN Games · Version ${orbitPolicyArtifact.version} · 25 September 2026 · Artifact ${orbitPolicyArtifact.name}</p>
+        <div class="rl-paper-actions"><a class="button button-primary" href="#orbit-live-demo">Watch the live agent →</a><a class="button button-secondary" href="${base}?game=${ORBIT_ROUTE}">Play Orbit</a></div>
       </section>
 
-      <section class="rl-demo-layout" aria-labelledby="rl-demo-title">
+      <section class="rl-demo-layout orbit-live-layout" id="orbit-live-demo" aria-labelledby="rl-demo-title">
         <div class="rl-demo-panel">
-          <div class="rl-demo-heading"><div><p class="rl-label">live demo</p><h2 id="rl-demo-title">The model is playing.</h2></div><span id="rl-status" class="rl-status">running</span></div>
-          <div class="rl-demo-frame" aria-label="Orbit reinforcement learning autoplay demo">
+          <div class="rl-demo-heading"><div><p class="rl-label">live browser run</p><h2 id="rl-demo-title">The policy is playing.</h2></div><span id="rl-status" class="rl-status">AUTOPILOT</span></div>
+          <div class="rl-demo-frame orbit-agent-frame" aria-label="Live Orbit reinforcement learning run">
             <div id="rl-game-root"></div>
-            <div class="rl-demo-hud"><span>score <b id="rl-score">0000</b></span><span id="rl-phase">phase 1</span></div>
+            <div class="rl-demo-hud"><span>score <b id="rl-score">0000</b></span><span id="rl-phase">phase 1</span><span id="rl-lives">0 lives</span></div>
           </div>
-          <div class="rl-demo-footer"><p id="rl-demo-note">This is a live run, not a recorded video.</p><button id="rl-restart" class="button button-secondary" type="button">restart model</button></div>
+          <div class="rl-demo-footer"><p id="rl-demo-note">The browser game owns movement, collision, scoring, and run termination.</p><div class="rl-agent-controls"><button id="rl-take-control" class="button button-secondary" type="button">Take control</button><button id="rl-restart" class="button button-secondary" type="button">Restart run</button></div></div>
         </div>
-        <aside class="rl-facts" aria-label="Model facts">
-          <p class="rl-label">model facts</p>
+        <aside class="rl-facts orbit-decision-panel" aria-label="Current policy decision">
+          <p class="rl-label">current decision</p>
           <dl>
-            <div><dt>policy</dt><dd>${orbitPolicyArtifact.name}</dd></div>
+            <div><dt>action</dt><dd id="orbit-decision-action">Choosing</dd></div>
+            <div><dt>target</dt><dd id="orbit-decision-target">Reading the board</dd></div>
+            <div><dt>reason</dt><dd id="orbit-decision-reason">Scoring pickup routes and nearby hazards.</dd></div>
+          </dl>
+          <p class="rl-label orbit-facts-label">policy interface</p>
+          <dl>
+            <div><dt>input</dt><dd>position, colors, hazards, energy, lives, cooldowns</dd></div>
+            <div><dt>output</dt><dd>WASD · Space · Shift</dd></div>
             <div><dt>training</dt><dd>${orbitPolicyArtifact.training.algorithm}</dd></div>
-            <div><dt>input</dt><dd>player, dots, planets, energy</dd></div>
-            <div><dt>output</dt><dd>steer, switch, dash</dd></div>
-            <div><dt>inference</dt><dd>20 times / second</dd></div>
+            <div><dt>holdout</dt><dd>${results.holdout_episode_count} seeded episodes</dd></div>
           </dl>
         </aside>
       </section>
 
-      <article class="rl-paper" aria-label="Orbit reinforcement learning writeup">
-        <section class="rl-paper-section rl-paper-intro"><p class="rl-label">abstract</p><p>The goal is simple: collect dots that match the triangle, stay away from the red planets, and keep the run alive. The agent gets the game state as numbers, turns those numbers into a short steering command, and repeats the loop many times per second.</p></section>
+      <article class="rl-paper" aria-label="Orbit reinforcement learning whitepaper">
+        <section class="rl-paper-section rl-paper-intro"><p class="rl-label">abstract</p><p>This paper presents ${orbitPolicyArtifact.name}, a structured controller trained with cross-entropy policy search. It selects matching packets, avoids wrong-color routes, prioritizes extra lives when their value justifies the detour, and uses WASD movement with Space phase switching and Shift dash. In ${results.holdout_episode_count} held-out simulator episodes, the selected policy averaged ${fmt(trained.score, 1)} points, ${fmt(trained.matching_pickups, 2)} matching pickups, ${fmt(trained.extra_lives, 2)} extra lives, and ${fmt(trained.survival_seconds, 2)} seconds of survival. The initial controller averaged ${fmt(baseline.score, 1)} points, ${fmt(baseline.matching_pickups, 2)} matching pickups, ${fmt(baseline.extra_lives, 2)} extra lives, and ${fmt(baseline.survival_seconds, 2)} seconds. These are simulator results, not a human benchmark.</p></section>
         <div class="rl-paper-grid">
-          <section class="rl-paper-section"><p class="rl-label">01 / the problem</p><h2>Find a good dot before the orbit catches up.</h2><p>Orbit is awkward for a bot because the best path changes while the bot is moving. A dot can be close but unsafe. A planet can be far away but moving into the same space. The policy has to value progress and room to escape at the same time.</p></section>
-          <section class="rl-paper-section"><p class="rl-label">02 / what it sees</p><h2>A small view of the board.</h2><p>Each observation contains the triangle position, every dot's position and color, every planet's position, the current color, energy, lives, score, and elapsed time. It does not read pixels or click the page.</p></section>
-          <section class="rl-paper-section"><p class="rl-label">03 / what it can do</p><h2>Continuous steering, two useful buttons.</h2><p>The policy outputs a direction between left/right and up/down. It can also switch color or spend energy on a dash. A light safety filter adds space around nearby planets so the movement stays fluid instead of snapping between waypoints.</p></section>
-          <section class="rl-paper-section"><p class="rl-label">04 / training</p><h2>Reward the run, not the pose.</h2><p>Python runs short episodes in a dependency-free simulator. Matching dots earn reward, a longer streak helps, and collisions cost reward. A cross-entropy search keeps the better policies and samples the next group around them. The resulting coefficients are exported as a small JSON artifact for the browser.</p></section>
-          <section class="rl-paper-section"><p class="rl-label">05 / browser handoff</p><h2>The demo uses the real game loop.</h2><p>Once loaded, the model is given the same authoritative state that drives the human game. Phaser still owns collisions, score, phases, lives, and rendering. The policy only chooses the next action, so the demo remains a real run rather than a precomputed animation.</p></section>
-          <section class="rl-paper-section"><p class="rl-label">06 / limits</p><h2>Good at this board. Not magic.</h2><p>The training simulator is intentionally smaller than the full game, so this is a research demo, not a claim that the agent has solved every possible Orbit layout. The score above is measured live in this browser session. Refreshing the page starts a new run.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">01 / task</p><h2>Collect safely and extend the run.</h2><p>Packets have one of two phases. Matching a packet increases score, streak, and energy; taking the wrong color breaks the streak and drains energy. Planets cause a life loss, and the final collision ends the run. Score thresholds create extra-life pickups. The objective is to increase score and survival while reducing wrong-color hits and avoidable deaths.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">02 / observation</p><h2>Use state, not screenshots.</h2><p>Each policy observation contains player coordinates, current phase, phase number, packet coordinates and colors, hazard coordinates and sizes, energy, lives, elapsed time, phase-toggle recency, dash cooldown, and any active life pickup. No pixels, DOM queries, or user records enter the policy.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">03 / action space</p><h2>WASD movement, Space, and Shift.</h2><p>The controller emits a normalized movement direction quantized to W, A, S, and D. Space switches phase when the selected packet requires it. Shift dashes when a nearby moving planet presents immediate danger and energy and cooldown permit. The browser samples a new action at 20 Hz; Phaser applies movement inertia and game rules.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">04 / route and reward</p><h2>Score the destination and the route.</h2><p>Candidate packets receive value for phase match, proximity, and target clearance. A segment-risk test penalizes routes crossing wrong-color packets. The policy will not steer toward an opposite-color packet during the 450 ms phase-switch cooldown, preventing contact before Space can take effect. A shallow detour selects the safer side of an obstruction; a repulsion term moves away from nearby planets and an edge correction keeps space to steer. Life pickups compete with packet targets using value, distance, hazard clearance, and current lives. The simulator rewards matching pickups and streaks, penalizes wrong colors and deaths, and includes score in episode return.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">05 / policy search</p><h2>Optimize six interpretable coefficients.</h2><p>The dependency-free Python trainer applies the cross-entropy method (CEM) to match, proximity, hazard risk, life value, avoidance, and wrong-color-route penalties. Each generation evaluates a shared seed set, ranks candidates by episode return, keeps the top 20%, then refits the sampling distribution. The selected coefficients are exported to <code>games/phasebound/orbit-policy.json</code> and loaded by the browser policy.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">06 / evaluation</p><h2>Compare paired unseen seeds.</h2><p>Training used seed ${results.seed}, ${results.iterations} generations, population ${results.population}, ${results.episodes_per_candidate} episodes per candidate, and ${results.steps_per_episode} steps per episode. Evaluation used ${results.holdout_episode_count} held-out seeds beginning at ${results.holdout_seed_start}. Both initial and selected coefficients saw every same holdout seed. Wrong-color hits changed from ${fmt(baseline.wrong_color_hits, 2)} to ${fmt(trained.wrong_color_hits, 2)} per episode; collision deaths changed from ${fmt(baseline.collision_deaths, 2)} to ${fmt(trained.collision_deaths, 2)}; energy deaths changed from ${fmt(baseline.energy_deaths, 2)}.</p></section>
+        </div>
+        <section class="rl-paper-section orbit-results-section"><p class="rl-label">07 / results</p><h2>Held-out performance</h2><p>Means are per episode. The reference is the initial hand-set coefficient vector; it is not a human-play benchmark.</p><div class="rl-agent-table-wrap"><table class="rl-agent-table orbit-results-table"><thead><tr><th scope="col">Metric</th><th scope="col">Initial policy</th><th scope="col">Trained policy</th><th scope="col">Change</th></tr></thead><tbody>${resultTable}</tbody></table></div></section>
+        <section class="rl-paper-section orbit-results-section"><p class="rl-label">selected policy</p><h2>Shipped coefficients</h2><div class="rl-agent-table-wrap"><table class="rl-agent-table"><thead><tr><th scope="col">Coefficient</th><th scope="col">Value</th></tr></thead><tbody>${weightRows}</tbody></table></div></section>
+        <div class="rl-paper-grid orbit-paper-notes">
+          <section class="rl-paper-section"><p class="rl-label">08 / stopping conditions</p><h2>Why an Orbit run ends.</h2><p>There are two modeled loss conditions. Energy depletion ends the run after the energy meter reaches zero, commonly following repeated wrong-color pickups or energy spent on dashes. A planet collision consumes a life; a collision after the final life ends the run. The live status reports which condition fired, instead of describing every result as a random stop.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">09 / browser execution</p><h2>Watch real play, inspect each choice.</h2><p>The demo starts a fresh run in the browser game loop. It visualizes the selected WASD keys, Space and Shift decisions, target packet or life pickup, nearest hazard, and the controller’s reason. Keyboard input takes over immediately. Restart returns control to the policy.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">10 / limitations</p><h2>Structured state and approximate dynamics.</h2><p>Training uses a compact simulator with seeded packet placement and a fixed five-hazard layout. It approximates some visual-game details, including Phaser spawn placement, hazard growth, score-warning delays, and frame scheduling. The browser game remains authoritative for the live demo. The results do not establish pixel-based control, robust performance under altered rules, or human-level play.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">11 / reproducibility</p><h2>Rebuild the shipped policy.</h2><p>From the repository root, run <code>python3 tools/orbit_rl/train.py</code>. The trainer records its seed, search budget, observation/action contract, rules summary, and held-out metrics in the JSON artifact.</p></section>
+          <section class="rl-paper-section"><p class="rl-label">references</p><h2>Search method</h2><p>R. Y. Rubinstein and D. P. Kroese, <em>The Cross-Entropy Method: A Unified Approach to Combinatorial Optimization, Monte-Carlo Simulation and Machine Learning</em>, Springer, 2004. <a href="https://doi.org/10.1007/978-1-4757-4321-0" rel="noreferrer">doi:10.1007/978-1-4757-4321-0</a>.</p></section>
         </div>
       </article>
     </main>
@@ -615,7 +677,12 @@ async function renderRLWriteup() {
   const statusNode = document.querySelector("#rl-status");
   const demoTitle = document.querySelector("#rl-demo-title");
   const noteNode = document.querySelector("#rl-demo-note");
+  const livesNode = document.querySelector("#rl-lives");
+  const decisionActionNode = document.querySelector("#orbit-decision-action");
+  const decisionTargetNode = document.querySelector("#orbit-decision-target");
+  const decisionReasonNode = document.querySelector("#orbit-decision-reason");
   const restartButton = document.querySelector("#rl-restart");
+  const takeControlButton = document.querySelector("#rl-take-control");
   let bestScore = 0;
   let api;
   api = startPhasebound({
@@ -625,15 +692,32 @@ async function renderRLWriteup() {
     onState: (state) => {
       scoreNode.textContent = String(state.score).padStart(4, "0");
       phaseNode.textContent = state.phaseTurning ? "turning" : `phase ${state.phaseNumber}`;
+      livesNode.textContent = `${state.lives} ${state.lives === 1 ? "life" : "lives"} · ${Math.round(state.energy)} energy`;
       const isResult = state.mode === "result";
       const isPaused = state.mode === "pause";
-      statusNode.textContent = isResult ? "run over" : isPaused ? "paused" : "running";
-      demoTitle.textContent = isResult ? "Run over." : isPaused ? "Model paused." : "The model is playing.";
+      statusNode.textContent = isResult ? "RUN OVER" : isPaused ? "PAUSED" : state.autoplay ? "AUTOPILOT" : "HUMAN CONTROL";
+      demoTitle.textContent = isResult ? "Run over." : isPaused ? "Run paused." : state.autoplay ? "The policy is playing." : "You have control.";
+      takeControlButton.textContent = state.autoplay ? "Take control" : "Return to policy";
+      const action = state.decision;
+      if (action) {
+        const controls = [...(action.keys || []), ...(action.space ? ["SPACE"] : []), ...(action.shift ? ["SHIFT"] : [])];
+        decisionActionNode.textContent = controls.join(" + ") || "HOLD";
+        decisionTargetNode.textContent = action.target?.label || action.target || "No active target";
+        decisionReasonNode.textContent = action.reason || "Re-evaluating the board.";
+      }
       if (state.score > bestScore) bestScore = state.score;
-      noteNode.textContent = state.mode === "result" ? `Run ended at ${state.score}. Start another live run whenever you want.` : `live score ${state.score} · best this visit ${bestScore}`;
+      const ending = state.endReason === "energy" ? "Energy depleted after color mistakes or dash use." : state.endReason === "collision" ? "The final life was lost to a planet collision." : "";
+      noteNode.textContent = isResult ? `${ending} Final score ${state.score}. Restart for another live run.` : `live score ${state.score} · best this visit ${bestScore}`;
     },
   });
   restartButton.addEventListener("click", () => api.start());
+  takeControlButton.addEventListener("click", () => {
+    if (api) {
+      const state = document.querySelector("#rl-status").textContent;
+      if (state === "AUTOPILOT") api.takeControl();
+      else api.start();
+    }
+  });
 }
 
 async function renderComet() {
@@ -743,6 +827,20 @@ async function renderComet() {
 
 async function renderGame() {
   if (params.get("game") === SHELF_ROUTE) return renderGameShelf({ app, base });
+  if (params.get("game") === MINI_PLATFORMER_RL_ROUTE) {
+    const { renderMiniPlatformerWhitepaper } = await import("./mini-platformer-rl-page.js");
+    return renderMiniPlatformerWhitepaper({ app, base });
+  }
+  if (params.get("game") === SPACE_DODGER_RL_ROUTE) {
+    const { renderSpaceDodgerWhitepaper } = await import("./space-dodger-rl-page.js");
+    return renderSpaceDodgerWhitepaper({ app, base });
+  }
+  if ([SNAKE_RL_ROUTE, ASTEROIDS_RL_ROUTE, MINI_GOLF_RL_ROUTE].includes(params.get("game"))) {
+    const { renderSnakeWhitepaper, renderAsteroidsWhitepaper, renderGolfWhitepaper } = await import("./game-rl-pages.js");
+    if (params.get("game") === SNAKE_RL_ROUTE) return renderSnakeWhitepaper({ app, base });
+    if (params.get("game") === ASTEROIDS_RL_ROUTE) return renderAsteroidsWhitepaper({ app, base });
+    return renderGolfWhitepaper({ app, base });
+  }
   if (params.get("game") === TOWER_DEFENSE_ROUTE) return renderTowerDefense();
   if (params.get("game") === ORBIT_RL_ROUTE) return renderRLWriteup();
   if (params.get("game") === COMET_ROUTE) return renderComet();

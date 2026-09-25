@@ -1,0 +1,145 @@
+{
+  "name": "asteroids-intercept-cem-v1",
+  "version": 1,
+  "weights": {
+    "aim": 1.574916,
+    "avoid": 2.218797,
+    "cruise": 96.093924,
+    "turnDeadband": 0.059054,
+    "panic": 0.745819,
+    "lead": 1.055321
+  },
+  "training": {
+    "algorithm": "cross-entropy method search over an interpretable pursuit-and-evasion controller",
+    "seed": 20260925,
+    "iterations": 16,
+    "population": 20,
+    "episodesPerCandidate": 8,
+    "maxTicks": 3600,
+    "actionHoldTicks": 6,
+    "heldOutEpisodes": 48,
+    "observation": "ship pose and velocity, asteroid positions, sizes and velocities, current wave, bullets, and remaining lives",
+    "action": "left/right turn, thrust, and continuous Space fire",
+    "objective": "score, wave progress, survival, and remaining ships",
+    "baseline": {
+      "episodes": 48,
+      "meanScore": 2803.75,
+      "meanWaveReached": 1.854,
+      "meanWavesCleared": 0.854,
+      "meanSurvivalSeconds": 58.34,
+      "meanLivesRemaining": 1.896,
+      "collisionEndRate": 0.125,
+      "threeWaveClearRate": 0,
+      "timeLimitRate": 0.875,
+      "meanReturn": 425.299
+    },
+    "trained": {
+      "episodes": 48,
+      "meanScore": 3083.75,
+      "meanWaveReached": 1.938,
+      "meanWavesCleared": 0.938,
+      "meanSurvivalSeconds": 57.7,
+      "meanLivesRemaining": 1.833,
+      "collisionEndRate": 0.1458,
+      "threeWaveClearRate": 0,
+      "timeLimitRate": 0.8542,
+      "meanReturn": 453.243
+    },
+    "pairedSurvival": {
+      "meanDifference": -0.637,
+      "confidence95": [
+        -3.165,
+        2.061
+      ]
+    },
+    "pairedScore": {
+      "meanDifference": 280,
+      "confidence95": [
+        -22.708,
+        587.5
+      ]
+    },
+    "history": [
+      {
+        "generation": 1,
+        "bestReturn": 427.875,
+        "generationBest": 427.875
+      },
+      {
+        "generation": 2,
+        "bestReturn": 481.897,
+        "generationBest": 481.897
+      },
+      {
+        "generation": 3,
+        "bestReturn": 481.897,
+        "generationBest": 479.5
+      },
+      {
+        "generation": 4,
+        "bestReturn": 481.897,
+        "generationBest": 479.3
+      },
+      {
+        "generation": 5,
+        "bestReturn": 499.875,
+        "generationBest": 499.875
+      },
+      {
+        "generation": 6,
+        "bestReturn": 499.875,
+        "generationBest": 499.125
+      },
+      {
+        "generation": 7,
+        "bestReturn": 501.375,
+        "generationBest": 501.375
+      },
+      {
+        "generation": 8,
+        "bestReturn": 508.625,
+        "generationBest": 508.625
+      },
+      {
+        "generation": 9,
+        "bestReturn": 508.625,
+        "generationBest": 497.98
+      },
+      {
+        "generation": 10,
+        "bestReturn": 508.625,
+        "generationBest": 493
+      },
+      {
+        "generation": 11,
+        "bestReturn": 511.595,
+        "generationBest": 511.595
+      },
+      {
+        "generation": 12,
+        "bestReturn": 511.595,
+        "generationBest": 484.625
+      },
+      {
+        "generation": 13,
+        "bestReturn": 511.595,
+        "generationBest": 483.875
+      },
+      {
+        "generation": 14,
+        "bestReturn": 511.595,
+        "generationBest": 503.75
+      },
+      {
+        "generation": 15,
+        "bestReturn": 511.595,
+        "generationBest": 483.12
+      },
+      {
+        "generation": 16,
+        "bestReturn": 515.622,
+        "generationBest": 515.622
+      }
+    ]
+  }
+}

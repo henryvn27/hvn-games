@@ -5,3 +5,5 @@ playwright-report/
 test-results/
 .playwright-cli/
 output/
+__pycache__/
+*.py[cod]

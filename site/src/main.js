@@ -12,6 +12,7 @@ const params = new URLSearchParams(window.location.search);
 const ORBIT_ROUTE = "orbit";
 const LEGACY_ORBIT_ROUTE = "phasebound";
 const ORBIT_RL_ROUTE = "orbit-rl";
+const MINI_PLATFORMER_RL_ROUTE = "mini-platformer-rl";
 const SHELF_ROUTE = "shelf";
 const TOWER_DEFENSE_ROUTE = "neon-bastion";
 const COMET_ROUTE = "comet";
@@ -53,6 +54,7 @@ if (params.get("game")) {
 
 function currentPlaytimeGameId() {
   const route = params.get("game");
+  if (route === SHELF_ROUTE && params.get("play") === "platform" && params.get("agent") === "1") return "";
   if (route === "orbit" || route === "phasebound") return "phasebound";
   if ([TOWER_DEFENSE_ROUTE, COMET_ROUTE, SPACE_WARS_ROUTE].includes(route)) return route;
   if (route === SHELF_ROUTE) return params.get("play") || "";
@@ -743,6 +745,10 @@ async function renderComet() {
 
 async function renderGame() {
   if (params.get("game") === SHELF_ROUTE) return renderGameShelf({ app, base });
+  if (params.get("game") === MINI_PLATFORMER_RL_ROUTE) {
+    const { renderMiniPlatformerWhitepaper } = await import("./mini-platformer-rl-page.js");
+    return renderMiniPlatformerWhitepaper({ app, base });
+  }
   if (params.get("game") === TOWER_DEFENSE_ROUTE) return renderTowerDefense();
   if (params.get("game") === ORBIT_RL_ROUTE) return renderRLWriteup();
   if (params.get("game") === COMET_ROUTE) return renderComet();

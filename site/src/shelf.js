@@ -67,6 +67,7 @@ export async function renderGameShelf({ app, base }) {
           <div><p class="game-index">${selected.number} / ${selected.kind}</p><h1>${selected.name}</h1></div>
           <p class="game-blurb">${selected.description}</p>
         </div>
+        ${selected.id === "dodger" ? `<nav class="shelf-game-tools" aria-label="Space Dodger options"><a href="${params.get("agent") === "1" ? `${base}?game=shelf&amp;play=dodger` : `${base}?game=shelf&amp;play=dodger&amp;agent=1`}">${params.get("agent") === "1" ? "Fly it yourself →" : "Watch the trained pilot →"}</a><a href="${base}?game=space-dodger-rl">Read the policy paper</a></nav>` : ""}
         ${selected.id === "platform" ? `<nav class="shelf-game-tools" aria-label="Mini Platformer options"><a href="${base}?game=shelf&amp;play=platform&amp;agent=1">Watch the trained pilot →</a><a href="${base}?game=mini-platformer-rl">Read the policy paper</a></nav>` : ""}
         <div id="shelf-native-host" aria-label="${selected.name} game"><div id="app"></div></div>
       </main>
@@ -78,9 +79,9 @@ export async function renderGameShelf({ app, base }) {
   renderShelfHome({ app, base });
 }
 
-const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css"];
+const SHELF_STYLES = ["style.css", "rewards.css", "golf.css", "competitions.css", "adventures.css", "embed.css", "dodger-rl.css"];
 const SHELF_SCRIPTS = ["word-list.js", "nyt-wordle-list.js", "rewards.js", "leaderboards.js", "reaction-countdown.js", "competitions.js", "golf.js", "adventures.js", "app.js"];
-const SHELF_ASSET_VERSION = "mini-platformer-rl-1";
+const SHELF_ASSET_VERSION = "agent-suite-1";
 const NATIVE_SHELF_OVERRIDES = `
   body.shelf-native-mode { --native-bg: #111211; --native-ink: #f3f5eb; --native-muted: #a5aa9c; --native-line: rgba(243, 245, 235, .2); background: var(--native-bg); color: var(--native-ink); font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; }
   body.shelf-native-mode > #hvn-shell-app { width: 100%; }
@@ -481,15 +482,7 @@ const NATIVE_SHELF_OVERRIDES = `
 `;
 
 async function loadNativeShelfRuntime({ base, gameId = null }) {
-  for (const file of SHELF_STYLES) {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = `${base}shelf/${file}`;
-    link.dataset.shelfStyle = file;
-    document.head.appendChild(link);
-  }
-
-  applyNativeShelfOverrides();
+  await loadNativeShelfStyles(base);
 
   for (const file of SHELF_SCRIPTS) {
     if (file === "nyt-wordle-list.js" && gameId !== "word") continue;
@@ -504,6 +497,18 @@ async function loadNativeShelfRuntime({ base, gameId = null }) {
   }
 }
 
+async function loadNativeShelfStyles(base) {
+  for (const file of SHELF_STYLES) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `${base}shelf/${file}${file === "dodger-rl.css" ? `?v=${SHELF_ASSET_VERSION}` : ""}`;
+    link.dataset.shelfStyle = file;
+    document.head.appendChild(link);
+  }
+
+  applyNativeShelfOverrides();
+}
+
 function applyNativeShelfOverrides() {
   if (document.querySelector('style[data-shelf-style="native-overrides"]')) return;
   const overrides = document.createElement("style");
@@ -515,6 +520,14 @@ function applyNativeShelfOverrides() {
 async function mountNativeShelfGame({ base, gameId }) {
   if (gameId === "platform") {
     window.MiniPlatformerRL = await import("../../games/mini-platformer/browser.mjs");
+  }
+  const query = new URLSearchParams(window.location.search);
+  const agentMode = gameId === "dodger" && query.get("agent") === "1";
+  if (agentMode) {
+    await loadNativeShelfStyles(base);
+    const { mountSpaceDodgerAgent } = await import("../../games/space-dodger/browser.mjs");
+    const requestedSeed = Number(query.get("seed"));
+    return mountSpaceDodgerAgent(document.querySelector("#shelf-native-host"), { seed: requestedSeed, base });
   }
   if (["2048", "driftlock", "dockside", "invaders", "hex-stack", "minesweeper", "block-drop", "tidepool", "chess", "handshake", "maze-chase", "asteroids", "mahjong", "klondike", "spookyball"].includes(gameId)) {
     applyNativeShelfOverrides();
@@ -590,7 +603,7 @@ async function mountNativeShelfGame({ base, gameId }) {
 
   if (typeof window.play !== "function") throw new Error("Shelf game engine did not expose play()");
   if (gameId === "word" && window.wordleListPromise) await window.wordleListPromise;
-  window.play(gameId);
+  window.play(agentMode ? "dodger-agent" : gameId);
   const plainCopy = {
     checkers: [["Capture every opposing piece. Pick how tactical the computer should be.", "Take all of the other pieces. Choose a bot."]],
     trade: [["You'll play as ", "You are "], [" set to ", " · "]],

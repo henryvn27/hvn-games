@@ -1,0 +1,265 @@
+{
+  "name": "mars-pilot-cem-v1",
+  "version": 1,
+  "weights": {
+    "repair": 3.448979,
+    "upgrade": 2.449146,
+    "danger": 4.682214,
+    "hullRisk": 1.976992,
+    "aim": 0.897057,
+    "lane": 0.430398,
+    "edge": 2.66808,
+    "smooth": 0.311837
+  },
+  "training": {
+    "algorithm": "cross-entropy method (CEM) policy search over interpretable tactical weights",
+    "seed": 60260925,
+    "trainingSeedStart": 60360925,
+    "trainingSeedStride": 7919,
+    "iterations": 16,
+    "population": 24,
+    "episodesPerCandidate": 64,
+    "maxEpisodeSeconds": 120,
+    "actionHoldSteps": 5,
+    "fixedStepSeconds": 0.03333333333333333,
+    "heldOutSeedStart": 70260925,
+    "heldOutSeedStride": 7919,
+    "heldOutEpisodes": 240,
+    "pairing": "baseline and trained episodes use identical held-out seeds",
+    "pairedBootstrapReplicates": 5000,
+    "pairedComparison": {
+      "survivalSeconds": {
+        "meanDifference": 8.303,
+        "confidence95": [
+          4.837,
+          12.223
+        ]
+      },
+      "score": {
+        "meanDifference": -107.083,
+        "confidence95": [
+          -361.083,
+          172.792
+        ]
+      },
+      "return": {
+        "meanDifference": 19.72,
+        "confidence95": [
+          11.227,
+          29.143
+        ]
+      },
+      "damageTaken": {
+        "meanDifference": -1.225,
+        "confidence95": [
+          -1.387,
+          -1.058
+        ]
+      },
+      "repairPickups": {
+        "meanDifference": -0.838,
+        "confidence95": [
+          -1.008,
+          -0.671
+        ]
+      },
+      "upgradePickups": {
+        "meanDifference": 1.954,
+        "confidence95": [
+          1.5,
+          2.408
+        ]
+      }
+    },
+    "bestTrainingReturn": 238.443,
+    "trainingBaseline": {
+      "episodes": 64,
+      "timeLimitRate": 0.8438,
+      "meanSurvivalSeconds": 104.347,
+      "meanScore": 5886.719,
+      "meanWaveReached": 6.109,
+      "meanEnemyKills": 44.219,
+      "meanDamageTaken": 2.156,
+      "meanRepairPickups": 1.563,
+      "meanUpgradePickups": 7.672,
+      "meanBossesDefeated": 0.844,
+      "meanWavesCleared": 5.141,
+      "meanHullRemaining": 2.406,
+      "meanReturn": 198.987
+    },
+    "trainingSelected": {
+      "episodes": 64,
+      "timeLimitRate": 1,
+      "meanSurvivalSeconds": 120,
+      "meanScore": 6444.844,
+      "meanWaveReached": 6.906,
+      "meanEnemyKills": 42.281,
+      "meanDamageTaken": 1.359,
+      "meanRepairPickups": 1.344,
+      "meanUpgradePickups": 10.922,
+      "meanBossesDefeated": 1,
+      "meanWavesCleared": 6,
+      "meanHullRemaining": 2.984,
+      "meanReturn": 238.443
+    },
+    "baseline": {
+      "episodes": 240,
+      "timeLimitRate": 0.9042,
+      "meanSurvivalSeconds": 110.929,
+      "meanScore": 6476.042,
+      "meanWaveReached": 6.487,
+      "meanEnemyKills": 48.704,
+      "meanDamageTaken": 2.346,
+      "meanRepairPickups": 1.913,
+      "meanUpgradePickups": 8.688,
+      "meanBossesDefeated": 0.908,
+      "meanWavesCleared": 5.508,
+      "meanHullRemaining": 2.567,
+      "meanReturn": 215.993
+    },
+    "trained": {
+      "episodes": 240,
+      "timeLimitRate": 0.9917,
+      "meanSurvivalSeconds": 119.232,
+      "meanScore": 6368.958,
+      "meanWaveReached": 6.9,
+      "meanEnemyKills": 42.121,
+      "meanDamageTaken": 1.121,
+      "meanRepairPickups": 1.075,
+      "meanUpgradePickups": 10.642,
+      "meanBossesDefeated": 0.992,
+      "meanWavesCleared": 5.942,
+      "meanHullRemaining": 2.954,
+      "meanReturn": 235.713
+    },
+    "trainingHistory": [
+      {
+        "iteration": 1,
+        "bestReturn": 229.811,
+        "generationMean": 197.209,
+        "generationBest": 229.811
+      },
+      {
+        "iteration": 2,
+        "bestReturn": 234.954,
+        "generationMean": 213.214,
+        "generationBest": 234.954
+      },
+      {
+        "iteration": 3,
+        "bestReturn": 234.954,
+        "generationMean": 229.393,
+        "generationBest": 234.123
+      },
+      {
+        "iteration": 4,
+        "bestReturn": 235.006,
+        "generationMean": 231.762,
+        "generationBest": 235.006
+      },
+      {
+        "iteration": 5,
+        "bestReturn": 235.006,
+        "generationMean": 231.899,
+        "generationBest": 234.74
+      },
+      {
+        "iteration": 6,
+        "bestReturn": 236.429,
+        "generationMean": 230.711,
+        "generationBest": 236.429
+      },
+      {
+        "iteration": 7,
+        "bestReturn": 236.429,
+        "generationMean": 232.794,
+        "generationBest": 236.208
+      },
+      {
+        "iteration": 8,
+        "bestReturn": 236.429,
+        "generationMean": 228.994,
+        "generationBest": 235.767
+      },
+      {
+        "iteration": 9,
+        "bestReturn": 236.429,
+        "generationMean": 230.113,
+        "generationBest": 235.878
+      },
+      {
+        "iteration": 10,
+        "bestReturn": 236.429,
+        "generationMean": 228.266,
+        "generationBest": 236.419
+      },
+      {
+        "iteration": 11,
+        "bestReturn": 236.51,
+        "generationMean": 229.485,
+        "generationBest": 236.51
+      },
+      {
+        "iteration": 12,
+        "bestReturn": 236.51,
+        "generationMean": 233.175,
+        "generationBest": 236.42
+      },
+      {
+        "iteration": 13,
+        "bestReturn": 236.68,
+        "generationMean": 231.061,
+        "generationBest": 236.68
+      },
+      {
+        "iteration": 14,
+        "bestReturn": 236.899,
+        "generationMean": 230.34,
+        "generationBest": 236.899
+      },
+      {
+        "iteration": 15,
+        "bestReturn": 236.899,
+        "generationMean": 233.329,
+        "generationBest": 236.584
+      },
+      {
+        "iteration": 16,
+        "bestReturn": 238.443,
+        "generationMean": 234,
+        "generationBest": 238.443
+      }
+    ],
+    "observation": [
+      "hull and weapon level",
+      "enemy and boss positions/velocities",
+      "incoming projectile trajectories",
+      "repair and upgrade pickup positions",
+      "wave, score, and elapsed time"
+    ],
+    "actions": [
+      "hold",
+      "W",
+      "A",
+      "S",
+      "D",
+      "W+A",
+      "W+D",
+      "S+A",
+      "S+D"
+    ],
+    "actionSemantics": "WASD direction held for five 30 Hz simulation steps; the game auto-fires",
+    "reward": {
+      "survival": "+1.0 per second survived",
+      "score": "+1.0 per 360 score points",
+      "repair": "+7 per repair cell collected",
+      "upgrade": "+1.4 per weapon upgrade",
+      "wave": "+11 per cleared wave",
+      "boss": "+18 per boss defeated",
+      "damage": "-6 per hull hit",
+      "hullDepletion": "-14 at episode termination"
+    },
+    "eliteFraction": 0.2,
+    "eliteCandidatesPerGeneration": 4
+  }
+}

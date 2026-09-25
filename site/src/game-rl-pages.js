@@ -216,14 +216,14 @@ function mountGolfLab() {
   const start = () => { run = createGolfRun(); angle = 0; power = 50; decision = null; motion = null; visualBall = null; nextShotTimer = 0; setMode(true); updateTrace(); };
   const setMode = (enabled) => { piloting = enabled; nodes.status.textContent = enabled ? "AUTOPILOT" : "HUMAN CONTROL"; nodes.mode.textContent = enabled ? "Take control" : "Return to pilot"; if (enabled) nextShotTimer = performance.now() + 450; else nextShotTimer = 0; };
   const activeCourse = () => GOLF_COURSES[run.holeIndex];
-  const shoot = (shot) => {
+  const shoot = (shot, startedAt = performance.now()) => {
     if (motion || run.completed) return;
     const courseIndex = run.holeIndex;
     const startBall = { ...run.ball };
     const result = rollGolfShot(courseIndex, startBall, shot.angle, shot.power);
     visualBall = { ...startBall };
     const path = result.path?.length ? result.path : [[result.x, result.y]];
-    motion = { path, index: 0, shot, startedAt: performance.now() };
+    motion = { path, index: 0, shot, startedAt };
     decision = piloting ? shot : { angle: shot.angle, power: shot.power, target: `${activeCourse().name} · cup`, reason: "The player selected the angle and power." };
   };
   const updateTrace = () => {
@@ -251,9 +251,9 @@ function mountGolfLab() {
   };
   const tick = (now) => {
     if (disposed) return;
-    if (!run.completed && piloting && !motion && now >= nextShotTimer) { decision = policy.decide(run); angle = decision.angle; power = decision.power; shoot(decision); }
+    if (!run.completed && piloting && !motion && now >= nextShotTimer) { decision = policy.decide(run); angle = decision.angle; power = decision.power; shoot(decision, now); }
     if (motion) {
-      const index = Math.min(motion.path.length - 1, Math.floor((now - motion.startedAt) / 28));
+      const index = Math.max(0, Math.min(motion.path.length - 1, Math.floor((now - motion.startedAt) / 28)));
       motion.index = index; visualBall = { x: motion.path[index][0], y: motion.path[index][1] };
       if (index >= motion.path.length - 1) {
         applyGolfShot(run, motion.shot);

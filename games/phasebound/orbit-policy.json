@@ -1,21 +1,50 @@
 {
-  "name": "orbit-steer-v1",
-  "version": 1,
+  "name": "orbit-human-controls-v3",
+  "version": 3,
   "weights": {
-    "match": 3.951863,
-    "near": 1.819196,
-    "risk": -2.666118,
-    "life": 0.104319,
-    "avoid": 3.024311
+    "match": 2.597266,
+    "near": 1.20915,
+    "risk": -3.054509,
+    "life": 2.968002,
+    "avoid": 2.218662,
+    "wrong": 3.429489
   },
   "training": {
     "algorithm": "cross-entropy policy search",
-    "seed": 20260919,
-    "iterations": 18,
-    "population": 20,
+    "seed": 20260925,
+    "iterations": 24,
+    "population": 24,
     "episodes_per_candidate": 4,
-    "best_surrogate_return": 33.8823,
-    "observation": "player, packet positions/colors, hazard positions, energy, lives, elapsed time",
-    "action": "continuous steering plus color toggle and dash"
+    "steps_per_episode": 1000,
+    "best_surrogate_return": 90.1173,
+    "holdout_seed_start": 21260928,
+    "holdout_episode_count": 12,
+    "evaluation": {
+      "baseline": {
+        "score": 7635.0,
+        "matching_pickups": 19.583,
+        "extra_lives": 1.083,
+        "survival_seconds": 40.0,
+        "energy": 85.517,
+        "wrong_color_hits": 0.0,
+        "collision_deaths": 0.0,
+        "energy_deaths": 0.0,
+        "return": 48.496
+      },
+      "trained": {
+        "score": 7313.5,
+        "matching_pickups": 18.833,
+        "extra_lives": 1.667,
+        "survival_seconds": 37.153,
+        "energy": 77.363,
+        "wrong_color_hits": 0.0,
+        "collision_deaths": 0.083,
+        "energy_deaths": 0.0,
+        "return": 48.386
+      }
+    },
+    "observation": "player position and velocity, packet positions and colors, orbiting hazards, extra-life pickup, energy, lives, phase, cooldowns, elapsed time",
+    "action": "quantized WASD direction, Space phase switch, Shift dash",
+    "simulator_rules": "matching and wrong-color pickups, 450 ms phase-switch cooldown with wrong-phase target gating, score-driven phases, extra-life thresholds and safe spawn, orbiting hazards, collision lives, energy and dash cooldowns, movement inertia, safe-spawn grace; fixed costs for wrong pickups and deaths, with clearance penalties around wrong-color packets"
   }
 }

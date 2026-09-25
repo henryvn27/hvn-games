@@ -1,0 +1,142 @@
+{
+  "name": "snake-route-cem-v1",
+  "version": 1,
+  "weights": {
+    "food": 1.100759,
+    "exits": 1.176748,
+    "runway": 0.255797,
+    "straight": -0.165793,
+    "apple": 3.370952,
+    "path": 1.296745
+  },
+  "training": {
+    "algorithm": "cross-entropy method policy search over a local route-scoring controller",
+    "seed": 20260925,
+    "iterations": 18,
+    "population": 22,
+    "episodesPerCandidate": 12,
+    "maxSteps": 900,
+    "heldOutEpisodes": 48,
+    "board": "20 × 20 classic grid",
+    "observation": "ordered body cells, current heading, and apple cell",
+    "action": "one of the three non-reversing cardinal turns per grid step",
+    "objective": "food collected, survival duration, and complete-board bonus; collision ends the episode",
+    "baseline": {
+      "episodes": 48,
+      "meanScore": 52.292,
+      "meanSurvivalSteps": 822.58,
+      "meanBodyLength": 55.292,
+      "boardClearRate": 0,
+      "collisionRate": 0.375,
+      "meanReturn": 121.035
+    },
+    "trained": {
+      "episodes": 48,
+      "meanScore": 54.792,
+      "meanSurvivalSteps": 814.35,
+      "meanBodyLength": 57.792,
+      "boardClearRate": 0,
+      "collisionRate": 0.4167,
+      "meanReturn": 125.87
+    },
+    "pairedScore": {
+      "meanDifference": 2.5,
+      "confidence95": [
+        -0.729,
+        5.708
+      ]
+    },
+    "history": [
+      {
+        "generation": 1,
+        "bestReturn": 133.435,
+        "generationBest": 133.435
+      },
+      {
+        "generation": 2,
+        "bestReturn": 134.177,
+        "generationBest": 134.177
+      },
+      {
+        "generation": 3,
+        "bestReturn": 137.333,
+        "generationBest": 137.333
+      },
+      {
+        "generation": 4,
+        "bestReturn": 137.333,
+        "generationBest": 135.322
+      },
+      {
+        "generation": 5,
+        "bestReturn": 137.333,
+        "generationBest": 136
+      },
+      {
+        "generation": 6,
+        "bestReturn": 137.333,
+        "generationBest": 136.333
+      },
+      {
+        "generation": 7,
+        "bestReturn": 137.333,
+        "generationBest": 136.032
+      },
+      {
+        "generation": 8,
+        "bestReturn": 137.333,
+        "generationBest": 137.333
+      },
+      {
+        "generation": 9,
+        "bestReturn": 137.333,
+        "generationBest": 137.333
+      },
+      {
+        "generation": 10,
+        "bestReturn": 137.333,
+        "generationBest": 137.333
+      },
+      {
+        "generation": 11,
+        "bestReturn": 137.333,
+        "generationBest": 137.333
+      },
+      {
+        "generation": 12,
+        "bestReturn": 137.333,
+        "generationBest": 137.333
+      },
+      {
+        "generation": 13,
+        "bestReturn": 137.333,
+        "generationBest": 137.333
+      },
+      {
+        "generation": 14,
+        "bestReturn": 137.333,
+        "generationBest": 137.333
+      },
+      {
+        "generation": 15,
+        "bestReturn": 137.333,
+        "generationBest": 137.333
+      },
+      {
+        "generation": 16,
+        "bestReturn": 137.5,
+        "generationBest": 137.5
+      },
+      {
+        "generation": 17,
+        "bestReturn": 137.5,
+        "generationBest": 137.5
+      },
+      {
+        "generation": 18,
+        "bestReturn": 137.5,
+        "generationBest": 137.167
+      }
+    ]
+  }
+}

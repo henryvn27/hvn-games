@@ -1,0 +1,139 @@
+{
+  "name": "pocket-greens-shot-cem-v1",
+  "version": 1,
+  "weights": {
+    "sink": 13.485941,
+    "progress": 1.686053,
+    "stroke": 0.1,
+    "water": 18.380007,
+    "overshoot": 1.07022,
+    "sand": 0.102682
+  },
+  "training": {
+    "algorithm": "cross-entropy method search over a short-horizon shot-evaluation controller",
+    "seed": 20260925,
+    "iterations": 14,
+    "population": 20,
+    "episodesPerCandidate": 4,
+    "heldOutCourses": 2,
+    "trainingHoles": [
+      "The Welcome Mat",
+      "Around the Bend",
+      "Sandy Shortcut",
+      "Water’s Edge"
+    ],
+    "heldOutHoles": [
+      "The Garden Gates",
+      "The Clubhouse"
+    ],
+    "observation": "current ball lie, cup position, course walls, sand, and water geometry",
+    "action": "angle and launch power for one putt; reconsider after the ball settles",
+    "objective": "sink holes in fewer strokes while penalizing water returns and excess distance",
+    "baseline": {
+      "episodes": 1,
+      "holesEvaluated": 2,
+      "meanStrokesPerHole": 6,
+      "meanHolesSunk": 1,
+      "meanWaterPenalties": 0,
+      "courseCompletionRate": 1,
+      "meanReturn": 23
+    },
+    "trained": {
+      "episodes": 1,
+      "holesEvaluated": 2,
+      "meanStrokesPerHole": 6,
+      "meanHolesSunk": 1,
+      "meanWaterPenalties": 0,
+      "courseCompletionRate": 1,
+      "meanReturn": 23
+    },
+    "heldOutCourseResults": [
+      {
+        "course": "The Garden Gates",
+        "strokes": 10,
+        "sunk": false,
+        "referenceStrokes": 10,
+        "strokeDifference": 0
+      },
+      {
+        "course": "The Clubhouse",
+        "strokes": 2,
+        "sunk": true,
+        "referenceStrokes": 2,
+        "strokeDifference": 0
+      }
+    ],
+    "history": [
+      {
+        "generation": 1,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 2,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 3,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 4,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 5,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 6,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 7,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 8,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 9,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 10,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 11,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 12,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 13,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      },
+      {
+        "generation": 14,
+        "bestReturn": 79.75,
+        "generationBest": 79.75
+      }
+    ]
+  }
+}

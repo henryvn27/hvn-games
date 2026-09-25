@@ -162,6 +162,15 @@ export function startPhasebound(options = {}) {
       this.input.keyboard.on("keydown-SHIFT", () => this.dash());
       this.input.keyboard.on("keydown-P", () => this.togglePause());
       this.input.keyboard.on("keydown-Q", () => this.toggleSlowMode());
+      this.input.keyboard.on("keydown", (event) => {
+        if (!this.autoplay) return;
+        const key = String(event.key || "").toLowerCase();
+        if (!["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright", " ", "shift"].includes(key)) return;
+        this.autoplay = false;
+        this.autoplayDirection.set(0, 0);
+        options.onManualTakeover?.();
+        this.publish();
+      });
       this.input.keyboard.on("keydown-R", () => {
         if (this.mode === "result" || this.mode === "menu") this.startRun();
       });
@@ -292,7 +301,11 @@ export function startPhasebound(options = {}) {
       this.clearPackets();
       this.clearBursts();
       this.mode = "active";
+      this.autoplay = Boolean(options.autoplay);
       this.result = null;
+      this.endReason = null;
+      this.lastAgentDecision = null;
+      this.lastToggleAt = -1;
       this.phase = "cyan";
       this.phaseNumber = 1;
       this.phaseLabel = PHASE_LABELS[0];
@@ -343,6 +356,7 @@ export function startPhasebound(options = {}) {
       this.clearBursts();
       this.mode = "tutorial";
       this.result = null;
+      this.endReason = null;
       this.phase = "cyan";
       this.phaseNumber = 1;
       this.phaseLabel = PHASE_LABELS[0];
@@ -388,6 +402,7 @@ export function startPhasebound(options = {}) {
     togglePhase() {
       if (this.mode !== "active" && this.mode !== "tutorial") return;
       this.phase = this.phase === "cyan" ? "amber" : "cyan";
+      this.lastToggleAt = this.elapsed;
       options.onInput?.("phase");
       this.burst(this.player.x, this.player.y, COLORS[this.phase], 8);
       this.drawPlayer();
@@ -476,7 +491,7 @@ export function startPhasebound(options = {}) {
         this.publishClock = 0;
         this.publish();
       }
-      if (this.energy <= 0) this.endRun("lost");
+      if (this.energy <= 0) this.endRun("lost", "energy");
     },
 
     updateSlowMode(realDt, scoreBefore) {
@@ -534,10 +549,13 @@ export function startPhasebound(options = {}) {
       if (this.autoplayClock > 0) return;
       const action = this.policy.act(this.getPolicyObservation());
       this.autoplayClock = 0.05;
-      this.autoplayDirection.x = Phaser.Math.Clamp(Number(action.dx) || 0, -1, 1);
-      this.autoplayDirection.y = Phaser.Math.Clamp(Number(action.dy) || 0, -1, 1);
-      if (action.toggle) this.togglePhase();
-      if (action.dash) this.dash();
+      const keys = new Set(action.keys || []);
+      this.autoplayDirection.x = (keys.has("D") ? 1 : 0) - (keys.has("A") ? 1 : 0);
+      this.autoplayDirection.y = (keys.has("S") ? 1 : 0) - (keys.has("W") ? 1 : 0);
+      this.lastAgentDecision = { ...action, at: this.elapsed };
+      options.onDecision?.(this.lastAgentDecision);
+      if (action.space || action.toggle) this.togglePhase();
+      if (action.shift || action.dash) this.dash();
     },
 
     getPolicyObservation() {
@@ -549,6 +567,8 @@ export function startPhasebound(options = {}) {
         energy: this.energy,
         lives: this.lives,
         elapsed: this.elapsed,
+        lastToggle: this.lastToggleAt,
+        dashCooldown: this.dashCooldown,
         packets: this.packets.map((packet) => ({ x: packet.x, y: packet.y, phase: packet.phase })),
         hazards: this.hazards.map((hazard) => ({ x: hazard.x, y: hazard.y, size: hazard.size })),
         lifePickup: this.lifePickup ? { x: this.lifePickup.x, y: this.lifePickup.y } : null,
@@ -649,7 +669,7 @@ export function startPhasebound(options = {}) {
             this.publish();
           } else {
             this.energy = 0;
-            this.endRun("lost");
+            this.endRun("lost", "collision");
           }
           break;
         }
@@ -818,10 +838,11 @@ export function startPhasebound(options = {}) {
       this.removeLifePickup();
     },
 
-    endRun(result) {
+    endRun(result, reason = result) {
       if (this.mode !== "active") return;
       this.mode = "result";
       this.result = result;
+      this.endReason = reason;
       this.slowMode = false;
       this.phaseWarning = false;
       this.phaseTransition = null;
@@ -831,7 +852,7 @@ export function startPhasebound(options = {}) {
     },
 
     publish() {
-      options.onState?.({ mode: this.mode, result: this.result, phase: this.phase, phaseNumber: this.phaseNumber, phaseLabel: this.phaseLabel, phaseWarning: this.phaseWarning, phaseTurning: Boolean(this.phaseTransition), score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed, slowMode: this.slowMode, slowModeRate: this.normalScoreRate, autoplay: this.autoplay, policy: this.policy?.name || null });
+      options.onState?.({ mode: this.mode, result: this.result, endReason: this.endReason || null, phase: this.phase, phaseNumber: this.phaseNumber, phaseLabel: this.phaseLabel, phaseWarning: this.phaseWarning, phaseTurning: Boolean(this.phaseTransition), score: this.score, streak: this.streak, packets: this.packetsCollected, lives: this.lives, heat: this.heat, energy: this.energy, dashCooldown: this.dashCooldown, elapsed: this.elapsed, slowMode: this.slowMode, slowModeRate: this.normalScoreRate, autoplay: this.autoplay, policy: this.policy?.name || null, decision: this.lastAgentDecision });
     },
   });
 
@@ -850,6 +871,14 @@ export function startPhasebound(options = {}) {
   const getScene = () => game.scene.getScene("HotDot");
   return {
     start: () => getScene()?.startRun(),
+    takeControl: () => {
+      const scene = getScene();
+      if (!scene) return;
+      scene.autoplay = false;
+      scene.autoplayDirection.set(0, 0);
+      options.onManualTakeover?.();
+      scene.publish();
+    },
     startTutorial: () => getScene()?.startTutorial(),
     resume: () => getScene()?.resumeRun(),
     togglePhase: () => getScene()?.togglePhase(),
